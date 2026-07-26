@@ -55,13 +55,17 @@ const fetchFeaturedSection = async () => {
 
   const fetchProducts = async () => {
   try {
-    const response = await fetch(`${API_BASE}/admin/products`)
+    const response = await fetch(`${API_BASE}/products`)
 
     const data = await response.json();
 
     console.log("DATA:", data);
 
-    setProducts(data.products);
+    if (data.success) {
+  setProducts(data.products);
+} else {
+  setProducts([]);
+}
   } catch (error) {
     console.log("FETCH ERROR:", error);
   }

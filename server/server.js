@@ -16,6 +16,7 @@ const addressRoutes =
 const upload = multer({
   storage,
 });
+const productRoutes = require("./routes/productroutes");
 // const reelRoutes =
 //   require("./routes/reelRoutes");
 const userRoutes = require("./routes/userroutes");
@@ -39,6 +40,7 @@ app.use(
     credentials: true,
   })
 );
+const productRoutes = require("./routes/productroutes");
 app.use(express.json());
 app.use("/api/auth", require("./routes/auth"));
 app.use("/api/admin", adminRoutes);

@@ -37,7 +37,7 @@ const {
   const fetchProduct = async () => {
     try {
       const response = await fetch(
-        `${API_BASE}/admin/products/${id}`
+        `${API_BASE}/products/${id}`
       );
 
       const data = await response.json();
