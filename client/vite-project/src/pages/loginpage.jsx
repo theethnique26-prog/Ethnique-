@@ -40,7 +40,8 @@ const Login = () => {
         throw new Error("Invalid server response");
       }
 
-      console.log("API RESPONSE:", data); // ✅ debug
+      console.log("Status:", res.status);
+console.log("Response:", data);
 
       if (!res.ok) {
         // backend sent error (like 400 or 500)
