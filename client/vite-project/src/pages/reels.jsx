@@ -10,7 +10,7 @@ function Reels() {
 
   const fetchReels = async () => {
     const res = await fetch(
-      "https://ethnique.onrender.com/api/reels"
+      "https://ethnique-bmae.onrender.com/api/reels"
     );
 
     const data = await res.json();

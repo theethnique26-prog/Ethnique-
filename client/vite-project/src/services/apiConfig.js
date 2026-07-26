@@ -1,1 +1,1 @@
-export const API_BASE = "https://ethnique.onrender.com/api";
+export const API_BASE = "https://ethnique-bmae.onrender.com/api";

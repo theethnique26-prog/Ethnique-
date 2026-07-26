@@ -30,7 +30,7 @@ const addAddress = async () => {
       localStorage.getItem("token");
 
     const res = await fetch(
-      "https://ethnique.onrender.com/api/address",
+      "https://ethnique-bmae.onrender.com/api/address",
       {
         method: "POST",
 
@@ -98,7 +98,7 @@ setAddressForm({
     console.log("TOKEN:", token);
 
     const res = await fetch(
-      "https://ethnique.onrender.com/api/profile/update",
+      "https://ethnique-bmae.onrender.com/api/profile/update",
       {
         method: "PUT",
         headers: {
@@ -149,7 +149,7 @@ const fetchAddresses =
 
       const res =
         await fetch(
-          "https://ethnique.onrender.com/api/address",
+          "https://ethnique-bmae.onrender.com/api/address",
           {
             headers: {
               Authorization:

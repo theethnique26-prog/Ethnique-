@@ -43,12 +43,12 @@ setProducts(data.products || []);
   const saveProduct = async () => {
     try {
       let url =
-        "https://ethnique.onrender.com/api/admin/products";
+        "https://ethnique-bmae.onrender.com/api/admin/products";
 
       let method = "POST";
 
       if (editingId) {
-        url = `https://ethnique.onrender.com/api/admin/products/${editingId}`;
+        url = `https://ethnique-bmae.onrender.com/api/admin/products/${editingId}`;
         method = "PUT";
       }
 

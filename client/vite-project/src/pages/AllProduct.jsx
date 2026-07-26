@@ -36,7 +36,7 @@ function AllProducts() {
   const fetchProducts = async () => {
     try {
       const response = await fetch(
-        "https://ethnique.onrender.com/api/admin/products"
+        "https://ethnique-bmae.onrender.com/api/admin/products"
       );
 
       const data = await response.json();

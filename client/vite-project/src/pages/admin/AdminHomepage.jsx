@@ -5,7 +5,7 @@ function Homepage() {
     useState("");
 
   await fetch(
-  "https://ethnique.onrender.com/api/homepage",
+  "https://ethnique-bmae.onrender.com/api/homepage",
   {
     method: "POST",
     headers: {

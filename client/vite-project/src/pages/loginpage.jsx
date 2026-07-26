@@ -16,8 +16,8 @@ const Login = () => {
     e.preventDefault();
 
     const url = isLogin
-      ? "https://ethnique.onrender.com/api/auth/login"
-      : "https://ethnique.onrender.com/api/auth/signup";
+      ? "https://ethnique-bmae.onrender.com/api/auth/login"
+      : "https://ethnique-bmae.onrender.com/api/auth/signup";
 
     const body = isLogin
       ? { email, password }

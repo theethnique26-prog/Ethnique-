@@ -23,7 +23,7 @@ function AdminLogin() {
 
   try {
     const response = await fetch(
-      "https://ethnique.onrender.com/api/auth/login",
+      "https://ethnique-bmae.onrender.com/api/auth/login",
       {
         method: "POST",
         headers: {
