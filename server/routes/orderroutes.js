@@ -14,17 +14,42 @@ router.get("/", adminAuth, async (req, res) => {
       .populate("items.product", "name images")
       .sort({ createdAt: -1 });
 
+    const stats = {
+      totalOrders: orders.length,
+
+      pending: orders.filter(
+        (o) => o.orderStatus === "Pending"
+      ).length,
+
+      shipped: orders.filter(
+        (o) => o.orderStatus === "Shipped"
+      ).length,
+
+      delivered: orders.filter(
+        (o) => o.orderStatus === "Delivered"
+      ).length,
+
+      revenue: orders.reduce(
+        (sum, order) => sum + order.totalAmount,
+        0
+      ),
+    };
+
     res.json({
       success: true,
+      stats,
       orders,
     });
+
   } catch (error) {
+
     console.log(error);
 
     res.status(500).json({
       success: false,
       message: error.message,
     });
+
   }
 });
 
