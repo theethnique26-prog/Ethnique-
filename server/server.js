@@ -40,7 +40,7 @@ app.use(
     credentials: true,
   })
 );
-const productRoutes = require("./routes/productroutes");
+
 app.use(express.json());
 app.use("/api/auth", require("./routes/auth"));
 app.use("/api/admin", adminRoutes);
@@ -52,6 +52,7 @@ app.use(
 );
 app.use(
   "/api/address", addressRoutes); 
+app.use("/api/products", productRoutes);
 // app.use(
 //   "/api/reels",
 //   reelRoutes
