@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
+import { API_BASE } from "../../services/apiConfig.js";
 
 function AdminLogin() {
   const navigate = useNavigate();
@@ -23,7 +24,7 @@ function AdminLogin() {
 
   try {
     const response = await fetch(
-      "https://ethnique-bmae.onrender.com/api/auth/login",
+      `${API_BASE}/auth/login`,
       {
         method: "POST",
         headers: {

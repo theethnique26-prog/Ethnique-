@@ -1,6 +1,7 @@
 import { User, Mail, MapPin, Gift } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
+import { API_BASE } from "../services/apiConfig.js";
 
 const Profile = () => {
   const { user } = useAuth();
@@ -30,7 +31,7 @@ const addAddress = async () => {
       localStorage.getItem("token");
 
     const res = await fetch(
-      "https://ethnique-bmae.onrender.com/api/address",
+      `${API_BASE}/address`,
       {
         method: "POST",
 
@@ -98,7 +99,7 @@ setAddressForm({
     console.log("TOKEN:", token);
 
     const res = await fetch(
-      "https://ethnique-bmae.onrender.com/api/profile/update",
+      `${API_BASE}/profile/update`,
       {
         method: "PUT",
         headers: {
@@ -149,7 +150,7 @@ const fetchAddresses =
 
       const res =
         await fetch(
-          "https://ethnique-bmae.onrender.com/api/address",
+          `${API_BASE}/address`,
           {
             headers: {
               Authorization:

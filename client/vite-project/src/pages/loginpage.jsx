@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { API_BASE } from "../services/apiConfig.js";
 
 const Login = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -16,8 +17,8 @@ const Login = () => {
     e.preventDefault();
 
     const url = isLogin
-      ? "https://ethnique-bmae.onrender.com/api/auth/login"
-      : "https://ethnique-bmae.onrender.com/api/auth/signup";
+      ? `${API_BASE}/auth/login`
+      : `${API_BASE}/auth/signup`;
 
     const body = isLogin
       ? { email, password }

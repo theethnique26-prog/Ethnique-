@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Heart, ShoppingCart } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { API_BASE } from "../services/apiConfig.js";
 import {
   useContext
 } from "react";
@@ -36,7 +37,7 @@ function AllProducts() {
   const fetchProducts = async () => {
     try {
       const response = await fetch(
-        "https://ethnique-bmae.onrender.com/api/admin/products"
+        `${API_BASE}/admin/products`
       );
 
       const data = await response.json();

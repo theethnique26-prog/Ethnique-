@@ -10,6 +10,7 @@ import { CartContext } from "../context/CartContext";
 import {
   CountryContext,
 } from "../context/CoutryContext";
+import { API_BASE } from "../services/apiConfig.js";
 
 
 
@@ -34,9 +35,7 @@ const { addToCart } =
 const fetchFeaturedSection = async () => {
   try {
     const response =
-      await fetch(
-        "https://ethnique-bmae.onrender.com/api/homepage"
-      );
+      await fetch(`${API_BASE}/homepage`)
 
     const data =
       await response.json();
@@ -56,9 +55,7 @@ const fetchFeaturedSection = async () => {
 
   const fetchProducts = async () => {
   try {
-    const response = await fetch(
-      "https://ethnique-bmae.onrender.com/api/admin/products"
-    );
+    const response = await fetch(`${API_BASE}/admin/products`)
 
     const data = await response.json();
 

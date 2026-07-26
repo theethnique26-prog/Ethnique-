@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Play } from "lucide-react";
+import { API_BASE } from "../services/apiConfig.js";
 
 function Reels() {
   const [reels, setReels] = useState([]);
@@ -10,7 +11,7 @@ function Reels() {
 
   const fetchReels = async () => {
     const res = await fetch(
-      "https://ethnique-bmae.onrender.com/api/reels"
+      `${API_BASE}/reels`
     );
 
     const data = await res.json();

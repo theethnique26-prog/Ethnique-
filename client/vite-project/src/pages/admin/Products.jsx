@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import adminApi from "../../services/adminApi";
+import { API_BASE } from "../../services/apiConfig.js";
 function Products() {
   const [products, setProducts] = useState([]);
 
@@ -43,12 +44,12 @@ setProducts(data.products || []);
   const saveProduct = async () => {
     try {
       let url =
-        "https://ethnique-bmae.onrender.com/api/admin/products";
+        `${API_BASE}/admin/products`;
 
       let method = "POST";
 
       if (editingId) {
-        url = `https://ethnique-bmae.onrender.com/api/admin/products/${editingId}`;
+        url = `${API_BASE}/admin/products/${editingId}`;
         method = "PUT";
       }
 

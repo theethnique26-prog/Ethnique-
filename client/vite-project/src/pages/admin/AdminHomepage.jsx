@@ -1,11 +1,12 @@
 import { useState } from "react";
 import adminApi from "../../services/adminApi";
+import { API_BASE } from "../../services/apiConfig.js";
 function Homepage() {
   const [videoUrl, setVideoUrl] =
     useState("");
 
-  await fetch(
-  "https://ethnique-bmae.onrender.com/api/homepage",
+    await fetch(
+    `${API_BASE}/homepage`,
   {
     method: "POST",
     headers: {

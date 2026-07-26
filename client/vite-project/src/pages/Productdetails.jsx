@@ -3,7 +3,7 @@ import { useParams } from "react-router-dom";
 import {
   useContext,
 } from "react";
-
+import { API_BASE } from "../services/apiConfig.js";
 import {
   CartContext,
 } from "../context/CartContext";
@@ -37,7 +37,7 @@ const {
   const fetchProduct = async () => {
     try {
       const response = await fetch(
-        `https://ethnique-bmae.onrender.com/api/admin/products/${id}`
+        `${API_BASE}/admin/products/${id}`
       );
 
       const data = await response.json();
