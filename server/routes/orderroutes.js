@@ -63,11 +63,17 @@ router.get("/:id", adminAuth, async (req, res) => {
 // =====================================
 router.post("/", async (req, res) => {
   try {
-    const order = await Order.create(req.body);
+    const order = new Order(req.body);
+
+    await order.save();
+
+    const populatedOrder = await Order.findById(order._id)
+      .populate("customer", "name email")
+      .populate("items.product");
 
     res.status(201).json({
       success: true,
-      order,
+      order: populatedOrder,
     });
   } catch (error) {
     console.log(error);
@@ -87,11 +93,12 @@ router.put("/:id/status", adminAuth, async (req, res) => {
     const { orderStatus } = req.body;
 
     const order = await Order.findByIdAndUpdate(
-      req.params.id,
-      { orderStatus },
-      { new: true }
-    );
-
+  req.params.id,
+  { orderStatus },
+  { new: true }
+)
+.populate("customer", "name email")
+.populate("items.product");
     if (!order) {
       return res.status(404).json({
         success: false,
