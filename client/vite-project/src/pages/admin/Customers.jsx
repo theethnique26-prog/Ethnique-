@@ -6,6 +6,8 @@ function Customers() {
   const [filtered, setFiltered] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [selectedCustomer, setSelectedCustomer] = useState(null);
+const [customerOrders, setCustomerOrders] = useState([]);
 
   useEffect(() => {
     fetchCustomers();
@@ -43,6 +45,18 @@ function Customers() {
     );
   }
 
+const handleView = async (id) => {
+  try {
+    const data = await customerApi.get(`/customers/${id}`, true);
+
+    if (data.success) {
+      setSelectedCustomer(data.customer);
+      setCustomerOrders(data.orders);
+    }
+  } catch (err) {
+    console.log(err);
+  }
+};
   return (
     <div className="p-8">
 
@@ -147,10 +161,11 @@ function Customers() {
                   <td className="p-4">
 
                     <button
-                      className="px-4 py-2 bg-[#6D1830] text-white rounded-lg hover:bg-[#571225]"
-                    >
-                      View
-                    </button>
+  onClick={() => handleView(customer._id)}
+  className="px-4 py-2 bg-[#6D1830] text-white rounded-lg hover:bg-[#571225]"
+>
+  View
+</button>
 
                   </td>
 
@@ -165,7 +180,100 @@ function Customers() {
         </table>
 
       </div>
+{selectedCustomer && (
+  <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
 
+    <div className="bg-white rounded-2xl w-[900px] max-h-[90vh] overflow-y-auto p-8">
+
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-2xl font-bold">
+          Customer Details
+        </h2>
+
+        <button
+          onClick={() => setSelectedCustomer(null)}
+          className="text-3xl"
+        >
+          ×
+        </button>
+      </div>
+
+      <div className="grid grid-cols-2 gap-8 mb-8">
+
+        <div>
+          <p><strong>Name:</strong> {selectedCustomer.name}</p>
+          <p><strong>Email:</strong> {selectedCustomer.email}</p>
+          <p><strong>Loyalty Points:</strong> {selectedCustomer.loyaltyPoints}</p>
+        </div>
+
+        <div>
+          <p><strong>Addresses:</strong> {selectedCustomer.addresses?.length}</p>
+          <p><strong>Joined:</strong> {new Date(selectedCustomer.createdAt).toLocaleDateString()}</p>
+        </div>
+
+      </div>
+
+      <h3 className="text-xl font-semibold mb-4">
+        Orders
+      </h3>
+
+      {customerOrders.length === 0 ? (
+
+        <p>No orders found.</p>
+
+      ) : (
+
+        <table className="w-full">
+
+          <thead className="bg-gray-100">
+
+            <tr>
+              <th className="text-left p-3">Order ID</th>
+              <th className="text-left p-3">Status</th>
+              <th className="text-left p-3">Payment</th>
+              <th className="text-left p-3">Total</th>
+            </tr>
+
+          </thead>
+
+          <tbody>
+
+            {customerOrders.map((order) => (
+
+              <tr
+                key={order._id}
+                className="border-t"
+              >
+                <td className="p-3">
+                  {order._id.slice(-6)}
+                </td>
+
+                <td className="p-3">
+                  {order.orderStatus}
+                </td>
+
+                <td className="p-3">
+                  {order.paymentStatus}
+                </td>
+
+                <td className="p-3">
+                  ₹{order.totalAmount}
+                </td>
+
+              </tr>
+
+            ))}
+
+          </tbody>
+
+        </table>
+
+      )}
+
+    </div>
+
+  </div>
+)}
     </div>
   );
 }
