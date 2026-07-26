@@ -97,9 +97,8 @@ router.get("/check-token", adminAuth, (req, res) => {
   res.json({
     success: true,
     admin: {
-      id: req.admin._id,
-      name: req.admin.name,
       email: req.admin.email,
+      role: req.admin.role,
     },
   });
 });

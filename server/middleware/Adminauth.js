@@ -1,14 +1,13 @@
 const jwt = require("jsonwebtoken");
-const User = require("../models/User");
 
-const adminAuth = async (req, res, next) => {
+const adminAuth = (req, res, next) => {
   try {
     const authHeader = req.header("Authorization");
 
     if (!authHeader) {
       return res.status(401).json({
         success: false,
-        message: "No token",
+        message: "No token provided",
       });
     }
 
@@ -21,23 +20,27 @@ const adminAuth = async (req, res, next) => {
       process.env.JWT_SECRET
     );
 
-    const admin = await User.findById(decoded.id);
-
-    if (!admin || admin.role !== "admin") {
+    // Verify this is the admin token
+    if (
+      decoded.role !== "admin" ||
+      decoded.email !== process.env.ADMIN_EMAIL
+    ) {
       return res.status(403).json({
         success: false,
         message: "Unauthorized",
       });
     }
 
-    req.admin = admin;
+    req.admin = {
+      email: decoded.email,
+      role: decoded.role,
+    };
 
     next();
-
   } catch (err) {
-    res.status(401).json({
+    return res.status(401).json({
       success: false,
-      message: "Invalid Token",
+      message: "Invalid token",
     });
   }
 };
