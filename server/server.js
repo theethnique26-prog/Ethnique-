@@ -9,7 +9,8 @@ const homepageRoutes =
   require("./routes/homepageRoutes");
 const profileRoutes =
   require("./routes/profileRoutes");
-
+const orderRoutes = require("./routes/orderRoutes");
+const customerRoutes = require("./routes/customerRoutes");
 const storage = multer.memoryStorage();
 const addressRoutes =
   require("./routes/addressRoutes");
@@ -53,6 +54,11 @@ app.use(
 app.use(
   "/api/address", addressRoutes); 
 app.use("/api/products", productRoutes);
+app.use("/api/orders", orderRoutes);
+app.use(
+  "/api/customers",
+  customerRoutes
+);
 // app.use(
 //   "/api/reels",
 //   reelRoutes
