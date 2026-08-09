@@ -17,12 +17,14 @@ const addressRoutes =
 const upload = multer({
   storage,
 });
+const reportsRoutes = require("./routes/reports");
 const productRoutes = require("./routes/productroutes");
 // const reelRoutes =
 //   require("./routes/reelRoutes");
 const userRoutes = require("./routes/userroutes");
 const app = express();
 const connectDB = require("./config/db");
+const bannerRoutes = require("./routes/banners");
 connectDB();  
 
 app.use(
@@ -59,6 +61,8 @@ app.use(
   "/api/customers",
   customerRoutes
 );
+app.use("/api/banners", bannerRoutes);
+app.use("/api/reports", reportsRoutes);
 // app.use(
 //   "/api/reels",
 //   reelRoutes

@@ -2,11 +2,14 @@ import { User, Mail, MapPin, Gift } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
 import { API_BASE } from "../services/apiConfig.js";
+import orderApi from "../services/orderApi";
 
 const Profile = () => {
   const { user } = useAuth();
   const [addresses, setAddresses] =
   useState([]);
+  const [orders, setOrders] = useState([]);
+  const [ordersLoading, setOrdersLoading] = useState(true);
 
 const [showAddressModal,
   setShowAddressModal] =
@@ -134,9 +137,23 @@ setAddressForm({
     alert(err.message);
   }
 };
+const fetchMyOrders = async () => {
+  try {
+    setOrdersLoading(true);
+
+    const data = await orderApi.getMyOrders();
+
+    setOrders(data.orders || []);
+  } catch (err) {
+    console.log("MY ORDERS ERROR:", err);
+  } finally {
+    setOrdersLoading(false);
+  }
+};
 
 useEffect(() => {
   fetchAddresses();
+  fetchMyOrders();
 }, []);
 
 
@@ -174,6 +191,84 @@ const fetchAddresses =
       console.log(err);
     }
   };
+const ShippingTracker = ({ status }) => {
+  const steps = [
+    "Pending",
+    "Confirmed",
+    "Packed",
+    "Shipped",
+    "Delivered",
+  ];
+
+  const currentStep = steps.indexOf(status);
+
+  return (
+    <div className="mt-5">
+
+      <div className="flex items-center justify-between">
+
+        {steps.map((step, index) => {
+          const completed = index <= currentStep;
+
+          return (
+            <div
+              key={step}
+              className="flex-1 flex flex-col items-center"
+            >
+
+              <div
+                className={`
+                  w-8 h-8
+                  rounded-full
+                  flex items-center justify-center
+                  text-sm font-semibold
+                  ${
+                    completed
+                      ? "bg-[#6D1830] text-white"
+                      : "bg-gray-200 text-gray-500"
+                  }
+                `}
+              >
+                {index + 1}
+              </div>
+
+              <p
+                className={`
+                  text-xs mt-2
+                  ${
+                    completed
+                      ? "text-[#6D1830] font-semibold"
+                      : "text-gray-400"
+                  }
+                `}
+              >
+                {step}
+              </p>
+
+            </div>
+          );
+        })}
+
+      </div>
+
+      <div className="mt-3 h-2 bg-gray-200 rounded-full overflow-hidden">
+
+        <div
+          className="h-full bg-[#6D1830] transition-all duration-500"
+          style={{
+            width:
+              currentStep < 0
+                ? "0%"
+                : `${(currentStep / 4) * 100}%`,
+          }}
+        />
+
+      </div>
+
+    </div>
+  );
+};
+  
   return (
     <div className="min-h-screen bg-[#F8F5F2] py-12 px-4">
 
@@ -312,17 +407,200 @@ const fetchAddresses =
         {/* Order History */}
         <div className="bg-white rounded-3xl shadow-sm p-8 mt-8">
 
-          <h2 className="text-2xl font-serif text-[#6D1830] mb-4">
-            Order History
-          </h2>
+  <h2 className="text-2xl font-serif text-[#6D1830] mb-6">
+    Order History
+  </h2>
 
-          <p className="text-gray-500">
-            You haven't placed any orders yet.
-          </p>
+  {ordersLoading ? (
 
-          
+    <p className="text-gray-500">
+      Loading your orders...
+    </p>
+
+  ) : orders.length === 0 ? (
+
+    <p className="text-gray-500">
+      You haven't placed any orders yet.
+    </p>
+
+  ) : (
+
+    <div className="space-y-6">
+
+      {orders.map((order) => (
+
+        <div
+          key={order._id}
+          className="
+            border
+            border-[#ECE6DE]
+            rounded-2xl
+            p-6
+          "
+        >
+
+          {/* Order Header */}
+
+          <div className="flex justify-between items-start">
+
+            <div>
+
+              <p className="text-sm text-gray-500">
+                Order ID
+              </p>
+
+              <p className="font-semibold">
+                #{order._id.slice(-8).toUpperCase()}
+              </p>
+
+              <p className="text-sm text-gray-500 mt-1">
+                {new Date(
+                  order.createdAt
+                ).toLocaleDateString()}
+              </p>
+
+            </div>
+
+            <div className="text-right">
+
+              <p className="font-semibold">
+                ₹{order.totalAmount}
+              </p>
+
+              <span className="
+                inline-block
+                mt-2
+                px-3
+                py-1
+                rounded-full
+                text-sm
+                bg-[#F8F5F2]
+                text-[#6D1830]
+              ">
+                {order.orderStatus}
+              </span>
+
+            </div>
+
+          </div>
+
+
+          {/* Products */}
+
+          <div className="mt-5 space-y-3">
+
+            {order.items.map((item, index) => (
+
+              <div
+                key={index}
+                className="
+                  flex
+                  items-center
+                  gap-4
+                  border-t
+                  pt-4
+                "
+              >
+
+                <img
+                  src={item.image}
+                  alt={item.name}
+                  className="
+                    w-16
+                    h-16
+                    rounded-xl
+                    object-cover
+                  "
+                />
+
+                <div className="flex-1">
+
+                  <p className="font-medium">
+                    {item.name}
+                  </p>
+
+                  <p className="text-sm text-gray-500">
+                    Quantity: {item.quantity}
+                  </p>
+
+                </div>
+
+                <p className="font-semibold">
+                  ₹{item.price * item.quantity}
+                </p>
+
+              </div>
+
+            ))}
+
+          </div>
+
+
+          {/* Shipping Tracker */}
+
+          <div className="mt-6 border-t pt-5">
+
+            <h3 className="font-semibold">
+              Shipping Status
+            </h3>
+
+            {order.orderStatus === "Cancelled" ? (
+
+              <div className="
+                mt-4
+                bg-red-50
+                text-red-600
+                px-4
+                py-3
+                rounded-xl
+              ">
+                This order has been cancelled.
+              </div>
+
+            ) : (
+
+              <ShippingTracker
+                status={order.orderStatus}
+              />
+
+            )}
+
+          </div>
+
+
+          {/* Delivery Address */}
+
+          <div className="mt-6 border-t pt-5">
+
+            <h3 className="font-semibold mb-2">
+              Delivery Address
+            </h3>
+
+            <p className="text-sm text-gray-600">
+              {order.shippingAddress?.fullName}
+            </p>
+
+            <p className="text-sm text-gray-600">
+              {order.shippingAddress?.addressLine1}
+            </p>
+
+            <p className="text-sm text-gray-600">
+              {order.shippingAddress?.city},{" "}
+              {order.shippingAddress?.state}{" "}
+              {order.shippingAddress?.pincode}
+            </p>
+
+          </div>
 
         </div>
+
+      ))}
+
+    </div>
+
+  )}
+
+</div>
 
         <div
   className="

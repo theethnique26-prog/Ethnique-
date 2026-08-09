@@ -29,10 +29,13 @@ import ShippingPage from "./pages/ShippingPage.jsx";
 import ReturnsPage from "./pages/ReturnsPage.jsx";
 import LoyaltyPage from "./pages/loyalty.jsx";
 import Profile from "./pages/profile.jsx";
+import Homepage from "./pages/admin/AdminHomepage.jsx";
+import Banners from "./pages/admin/Banners.jsx";
 
 // Admin Layout
 import AdminLayout from "./layouts/AdminLayout.jsx";
 import AdminReels from "../src/pages/admin/AdminReels.jsx";
+import Reports from "./pages/admin/Reports.jsx";
 
 function AppContent() {
   const location = useLocation();
@@ -85,67 +88,84 @@ function AppContent() {
 />
 
   {/* Admin Routes */}
+ <Route
+  path="/admin"
+  element={<AdminLayout />}
+>
   <Route
-    path="/admin"
-    element={<AdminLayout />}
-  >
-    <Route
-      path="dashboard"
-      element={
-        <ProtectedRoute>
-          <Dashboard />
-        </ProtectedRoute>
-      }
-    />
+    path="dashboard"
+    element={
+      <ProtectedRoute>
+        <Dashboard />
+      </ProtectedRoute>
+    }
+  />
 
-    <Route
-      path="products"
-      element={
-        <ProtectedRoute>
-          <Products />
-        </ProtectedRoute>
-      }
-    />
+  <Route
+    path="products"
+    element={
+      <ProtectedRoute>
+        <Products />
+      </ProtectedRoute>
+    }
+  />
 
-    <Route
-      path="orders"
-      element={
-        <ProtectedRoute>
-          <Orders />
-        </ProtectedRoute>
-      }
-    />
+  <Route
+    path="orders"
+    element={
+      <ProtectedRoute>
+        <Orders />
+      </ProtectedRoute>
+    }
+  />
 
-    <Route
-      path="customers"
-      element={
-        <ProtectedRoute>
-          <Customers />
-        </ProtectedRoute>
-      }
-    />
-    <Route
-  path="/admin/reels"
-  element={
-    <ProtectedRoute>
-      <AdminReels />
-    </ProtectedRoute>
-  }
-/>
+  <Route
+    path="customers"
+    element={
+      <ProtectedRoute>
+        <Customers />
+      </ProtectedRoute>
+    }
+  />
 
-  </Route>
-    <Route path="/about" element={<AboutPage />} />
+  <Route
+    path="homepage"
+    element={
+      <ProtectedRoute>
+        <Homepage />
+      </ProtectedRoute>
+    }
+  />
 
-<Route path="/contact" element={<ContactPage />} />
+  <Route
+    path="reels"
+    element={
+      <ProtectedRoute>
+        <AdminReels />
+      </ProtectedRoute>
+    }
+  />
 
-<Route path="/shipping" element={<ShippingPage />} />
-
-<Route path="/returns" element={<ReturnsPage />} />
-
-<Route path="/loyalty" element={<LoyaltyPage />} />
+  <Route
+    path="banners"
+    element={
+      <ProtectedRoute>
+        <Banners />
+      </ProtectedRoute>
+    }
+  />
+  <Route path="reports" element={<Reports />} />
+</Route>
 </Routes>
 
 {!isAdminRoute && <Footer />}
+
+      {/* Toast Notifications */}
+      <Toaster
+        position="top-right"
+        reverseOrder={false}
+        />
+
     </>
   );
 }

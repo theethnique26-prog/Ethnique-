@@ -60,21 +60,21 @@ function AdminSidebar() {
       icon: Image,
       path: "/admin/banners",
     },
-    {
-      name: "Reviews",
-      icon: Star,
-      path: "/admin/reviews",
-    },
-    {
-      name: "Reports",
-      icon: BarChart3,
-      path: "/admin/reports",
-    },
-    {
-      name: "Settings",
-      icon: Settings,
-      path: "/admin/settings",
-    },
+    // {
+    //   name: "Reviews",
+    //   icon: Star,
+    //   path: "/admin/reviews",
+    // },
+    // {
+    //   name: "Reports",
+    //   icon: BarChart3,
+    //   path: "/admin/reports",
+    // },
+    // {
+    //   name: "Settings",
+    //   icon: Settings,
+    //   path: "/admin/settings",
+    // },
   ];
 
   return (

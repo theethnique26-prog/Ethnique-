@@ -3,6 +3,7 @@ const router = express.Router();
 
 const Order = require("../models/Order");
 const adminAuth = require("../middleware/Adminauth");
+const authMiddleware = require("../middleware/authMiddleware");
 
 // =====================================
 // GET ALL ORDERS
@@ -52,6 +53,31 @@ router.get("/", adminAuth, async (req, res) => {
 
   }
 });
+// =====================================
+// GET MY ORDERS - CUSTOMER
+// =====================================
+router.get("/my-orders", authMiddleware, async (req, res) => {
+  try {
+    const orders = await Order.find({
+      customer: req.user._id,
+    })
+      .populate("items.product", "name images")
+      .sort({ createdAt: -1 });
+
+    res.json({
+      success: true,
+      orders,
+    });
+
+  } catch (error) {
+    console.log(error);
+
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+});
 
 // =====================================
 // GET SINGLE ORDER
@@ -86,7 +112,7 @@ router.get("/:id", adminAuth, async (req, res) => {
 // =====================================
 // CREATE ORDER
 // =====================================
-router.post("/", async (req, res) => {
+router.post("/",authMiddleware, async (req, res) => {
   try {
     const order = new Order(req.body);
 

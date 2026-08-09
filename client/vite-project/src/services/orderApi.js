@@ -25,6 +25,16 @@ const orderApi = {
 
     return handleResponse(response);
   },
+  async getMyOrders() {
+  const response = await fetch(
+    `${BASE_URL}/my-orders`,
+    {
+      headers: getHeaders(),
+    }
+  );
+
+  return handleResponse(response);
+},
 
   async getOrder(id) {
     const response = await fetch(`${BASE_URL}/${id}`, {
