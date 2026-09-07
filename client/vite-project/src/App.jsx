@@ -7,7 +7,7 @@ import {
 
 import Home from "./pages/homepage.jsx";
 import Login from "./pages/loginpage.jsx";
-import Reels from "./pages/reels.jsx";
+import Reels from "./pages/Reels.jsx";
 import AllProducts from "./pages/AllProduct.jsx";
 import Navbar from "../src/components/navbar.jsx";
 import ProtectedRoute from "../src/pages/admin/Protectedroute.jsx"; 
@@ -19,6 +19,7 @@ import Products from "./pages/admin/Products.jsx";
 import Orders from "./pages/admin/Orders.jsx";
 import Customers from "./pages/admin/Customers.jsx";
 import Cart from "./pages/Cart";
+import Checkout from "./pages/Checkout.jsx";
 import LoyaltyFloating from "../src/components/Loaylatyfloating.jsx";
 import Wishlist from "./pages/Wishlist.jsx";
 import { Toaster } from "react-hot-toast";
@@ -70,6 +71,10 @@ function AppContent() {
 <Route
   path="/cart"
   element={<Cart />}
+/>
+<Route
+  path="/checkout"
+  element={<Checkout />}
 />
 <Route
   path="/wishlist"

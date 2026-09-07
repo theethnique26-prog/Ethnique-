@@ -21,6 +21,7 @@
     "mongodb": "^6.21.0",
     "mongoose": "^8.23.1",
     "multer": "^2.2.0",
+    "razorpay": "^2.9.8",
     "streamifier": "^0.1.1"
   },
   "devDependencies": {
