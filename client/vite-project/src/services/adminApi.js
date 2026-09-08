@@ -2,13 +2,18 @@ import { API_BASE } from "./apiConfig";
 
 const BASE_URL = `${API_BASE}/admin`;
 
-const getHeaders = () => ({
-Authorization: `Bearer ${localStorage.getItem("token")}`,
-  "Content-Type": "application/json",
-});
+const getHeaders = () => {
+  const token = localStorage.getItem("token") || localStorage.getItem("adminToken");
+  return {
+    Authorization: token ? `Bearer ${token}` : "",
+    "Content-Type": "application/json",
+  };
+};
 
 const handleResponse = async (response) => {
-  if (response.status === 401) {
+  if (response.status === 401 || response.status === 403) {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
     localStorage.removeItem("adminToken");
     localStorage.removeItem("admin");
 

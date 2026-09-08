@@ -2,11 +2,11 @@ import { Navigate } from "react-router-dom";
 
 function ProtectedRoute({ children }) {
   const token =
-    localStorage.getItem("adminToken");
+    localStorage.getItem("token") || localStorage.getItem("adminToken");
 
   if (!token) {
     return (
-      <Navigate to="/admin/login" />
+      <Navigate to="/admin/login" replace />
     );
   }
 

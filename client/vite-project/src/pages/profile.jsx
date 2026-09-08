@@ -1,11 +1,11 @@
-import { User, Mail, MapPin, Gift } from "lucide-react";
+import { User, Mail, MapPin, Gift, LogOut } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
 import { API_BASE } from "../services/apiConfig.js";
 import orderApi from "../services/orderApi";
 
 const Profile = () => {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const [addresses, setAddresses] =
   useState([]);
   const [orders, setOrders] = useState([]);
@@ -306,23 +306,43 @@ const ShippingTracker = ({ status }) => {
                 {user?.email}
               </p>
 
-              <button
-                onClick={() =>
-                setEditing(true)
-                }
-                className="
-                  mt-4
-                  px-5
-                  py-2
-                  rounded-xl
-                  bg-[#6D1830]
-                  text-white
-                  hover:bg-[#571225]
-                  transition
-                "
-              >
-                Edit Profile
-              </button>
+              <div className="flex flex-wrap gap-3 mt-4">
+                <button
+                  onClick={() => setEditing(true)}
+                  className="
+                    px-5
+                    py-2
+                    rounded-xl
+                    bg-[#6D1830]
+                    text-white
+                    hover:bg-[#571225]
+                    transition
+                  "
+                >
+                  Edit Profile
+                </button>
+
+                <button
+                  onClick={logout}
+                  className="
+                    px-5
+                    py-2
+                    rounded-xl
+                    border
+                    border-red-200
+                    bg-red-50
+                    text-red-700
+                    hover:bg-red-100
+                    transition
+                    flex
+                    items-center
+                    gap-2
+                  "
+                >
+                  <LogOut size={16} />
+                  Logout
+                </button>
+              </div>
 
 
 

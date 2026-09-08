@@ -20,10 +20,13 @@ const adminAuth = (req, res, next) => {
       process.env.JWT_SECRET
     );
 
+    const adminEmail = process.env.ADMIN_EMAIL ? process.env.ADMIN_EMAIL.trim().toLowerCase() : "";
+    const tokenEmail = decoded.email ? decoded.email.trim().toLowerCase() : "";
+
     // Verify this is the admin token
     if (
       decoded.role !== "admin" ||
-      decoded.email !== process.env.ADMIN_EMAIL
+      (adminEmail && tokenEmail !== adminEmail)
     ) {
       return res.status(403).json({
         success: false,
@@ -32,6 +35,7 @@ const adminAuth = (req, res, next) => {
     }
 
     req.admin = {
+      id: decoded.id,
       email: decoded.email,
       role: decoded.role,
     };
@@ -40,7 +44,7 @@ const adminAuth = (req, res, next) => {
   } catch (err) {
     return res.status(401).json({
       success: false,
-      message: "Invalid token",
+      message: "Invalid or expired token",
     });
   }
 };

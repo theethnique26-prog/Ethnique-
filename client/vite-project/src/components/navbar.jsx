@@ -159,18 +159,55 @@ const Navbar = () => {
 </div>
 
 {user ? (
-  <Link to="/profile">
-    <User
-      size={22}
-      className="
-        cursor-pointer
-        transition-all
-        duration-300
-        hover:text-[#8C2F4D]
-        hover:scale-110
-      "
-    />
-  </Link>
+  <div className="relative group">
+    <Link to="/profile" className="flex items-center gap-1.5 py-1">
+      <User
+        size={22}
+        className="
+          cursor-pointer
+          transition-all
+          duration-300
+          hover:text-[#8C2F4D]
+          hover:scale-110
+        "
+      />
+      <span className="hidden xl:inline text-xs font-medium text-gray-700 max-w-[80px] truncate">
+        {user.name?.split(" ")[0]}
+      </span>
+    </Link>
+    {/* Dropdown on hover */}
+    <div className="absolute right-0 top-full mt-1 w-48 bg-white rounded-2xl shadow-xl border border-gray-100 p-2 hidden group-hover:block z-50">
+      <div className="px-3 py-2 border-b border-gray-100">
+        <p className="text-xs font-semibold text-gray-900 truncate">{user.name}</p>
+        <p className="text-[10px] text-gray-500 truncate">{user.email}</p>
+        {user.role === "admin" && (
+          <span className="inline-block mt-1 text-[10px] bg-red-100 text-red-700 px-2 py-0.5 rounded-full font-medium">
+            Admin
+          </span>
+        )}
+      </div>
+      <Link
+        to="/profile"
+        className="block px-3 py-2 text-xs text-gray-700 hover:bg-gray-50 rounded-xl transition"
+      >
+        My Profile
+      </Link>
+      {user.role === "admin" && (
+        <Link
+          to="/admin/dashboard"
+          className="block px-3 py-2 text-xs text-[#6D1830] font-medium hover:bg-[#6D1830]/5 rounded-xl transition"
+        >
+          Admin Dashboard
+        </Link>
+      )}
+      <button
+        onClick={logout}
+        className="w-full text-left px-3 py-2 text-xs text-red-600 hover:bg-red-50 rounded-xl transition font-medium"
+      >
+        Logout
+      </button>
+    </div>
+  </div>
 ) : (
   <Link to="/login">
     <User

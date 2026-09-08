@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { API_BASE } from "../../services/apiConfig";
 
 function Reports() {
   const [reports, setReports] = useState(null);
@@ -11,10 +12,10 @@ function Reports() {
 
   const fetchReports = async () => {
     try {
-      const token = localStorage.getItem("adminToken");
+      const token = localStorage.getItem("token") || localStorage.getItem("adminToken");
 
       const response = await fetch(
-        "http://localhost:5000/api/reports",
+        `${API_BASE}/reports`,
         {
           headers: {
             Authorization: `Bearer ${token}`,

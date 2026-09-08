@@ -12,10 +12,71 @@ router.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
 
+    if (!email || !password) {
+      return res.status(400).json({
+        success: false,
+        message: "Email and password are required",
+      });
+    }
+
+    const normalizedEmail = email.trim().toLowerCase();
+    const adminEmail = process.env.ADMIN_EMAIL ? process.env.ADMIN_EMAIL.trim().toLowerCase() : "";
+
+    // Check against .env admin credentials
+    if (
+      adminEmail &&
+      normalizedEmail === adminEmail &&
+      password === process.env.ADMIN_PASSWORD
+    ) {
+      let admin = await User.findOne({ email: normalizedEmail });
+      if (!admin) {
+        const hashedPassword = await bcrypt.hash(process.env.ADMIN_PASSWORD, 10);
+        admin = await User.create({
+          name: process.env.ADMIN_NAME || "Admin",
+          email: normalizedEmail,
+          password: hashedPassword,
+          role: "admin",
+        });
+      } else if (admin.role !== "admin") {
+        admin.role = "admin";
+        await admin.save();
+      }
+
+      const token = jwt.sign(
+        {
+          id: admin._id,
+          email: admin.email,
+          role: "admin",
+        },
+        process.env.JWT_SECRET,
+        {
+          expiresIn: "7d",
+        }
+      );
+
+      return res.status(200).json({
+        success: true,
+        token,
+        admin: {
+          id: admin._id,
+          name: admin.name,
+          email: admin.email,
+          role: "admin",
+        },
+        user: {
+          _id: admin._id,
+          name: admin.name,
+          email: admin.email,
+          role: "admin",
+        },
+      });
+    }
+
+    // Check against DB user with admin role
     const admin = await User.findOne({
-  email,
-  role: "admin",
-});
+      email: normalizedEmail,
+      role: "admin",
+    });
 
     if (!admin) {
       return res.status(400).json({
@@ -39,6 +100,8 @@ router.post("/login", async (req, res) => {
     const token = jwt.sign(
       {
         id: admin._id,
+        email: admin.email,
+        role: "admin",
       },
       process.env.JWT_SECRET,
       {
@@ -46,13 +109,20 @@ router.post("/login", async (req, res) => {
       }
     );
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       token,
       admin: {
         id: admin._id,
         name: admin.name,
         email: admin.email,
+        role: "admin",
+      },
+      user: {
+        _id: admin._id,
+        name: admin.name,
+        email: admin.email,
+        role: "admin",
       },
     });
   } catch (error) {
