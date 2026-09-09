@@ -3,6 +3,7 @@ const router = express.Router();
 const Razorpay = require("razorpay");
 const crypto = require("crypto");
 const Order = require("../models/Order");
+const User = require("../models/User");
 const authMiddleware = require("../middleware/authMiddleware");
 
 // Helper to get razorpay instance safely
@@ -83,6 +84,8 @@ router.post("/verify-payment", authMiddleware, async (req, res) => {
       subtotal,
       shippingCharge = 0,
       discount = 0,
+      couponCode = "",
+      pointsRedeemed = 0,
       totalAmount,
     } = req.body;
 
@@ -115,6 +118,12 @@ router.post("/verify-payment", authMiddleware, async (req, res) => {
       });
     }
 
+    // Calculate Clan Points earned (1 pt per ₹10, or 1.5 pts for 500+ pts elite)
+    const user = await User.findById(req.user._id);
+    const earnRate = user && user.loyaltyPoints >= 500 ? 0.15 : 0.1;
+    const paidBasis = Math.max(0, (subtotal || totalAmount) - (discount || 0));
+    const pointsEarned = Math.max(0, Math.floor(paidBasis * earnRate));
+
     // Create and save the order in MongoDB
     const order = new Order({
       customer: req.user._id,
@@ -123,6 +132,9 @@ router.post("/verify-payment", authMiddleware, async (req, res) => {
       subtotal: subtotal || totalAmount,
       shippingCharge,
       discount,
+      couponCode: couponCode || "",
+      pointsEarned,
+      pointsRedeemed: Number(pointsRedeemed) || 0,
       totalAmount,
       paymentMethod: "Razorpay",
       paymentStatus: "Paid",
@@ -132,6 +144,18 @@ router.post("/verify-payment", authMiddleware, async (req, res) => {
 
     await order.save();
 
+    // Update user clan points & orders list
+    if (user) {
+      if (Number(pointsRedeemed) > 0) {
+        user.loyaltyPoints = Math.max(0, (user.loyaltyPoints || 0) - Number(pointsRedeemed));
+      }
+      user.loyaltyPoints = (user.loyaltyPoints || 0) + pointsEarned;
+      if (!user.orders.includes(order._id)) {
+        user.orders.push(order._id);
+      }
+      await user.save();
+    }
+
     const populatedOrder = await Order.findById(order._id)
       .populate("customer", "name email")
       .populate("items.product", "name images priceINR");
@@ -140,6 +164,8 @@ router.post("/verify-payment", authMiddleware, async (req, res) => {
       success: true,
       message: "Payment verified and order placed successfully",
       order: populatedOrder,
+      pointsEarned,
+      newPointsBalance: user ? user.loyaltyPoints : 0,
     });
   } catch (error) {
     console.error("VERIFY PAYMENT ERROR:", error);
@@ -161,8 +187,16 @@ router.post("/cod-order", authMiddleware, async (req, res) => {
       subtotal,
       shippingCharge = 0,
       discount = 0,
+      couponCode = "",
+      pointsRedeemed = 0,
       totalAmount,
     } = req.body;
+
+    // Calculate Clan Points earned
+    const user = await User.findById(req.user._id);
+    const earnRate = user && user.loyaltyPoints >= 500 ? 0.15 : 0.1;
+    const paidBasis = Math.max(0, (subtotal || totalAmount) - (discount || 0));
+    const pointsEarned = Math.max(0, Math.floor(paidBasis * earnRate));
 
     const order = new Order({
       customer: req.user._id,
@@ -171,6 +205,9 @@ router.post("/cod-order", authMiddleware, async (req, res) => {
       subtotal: subtotal || totalAmount,
       shippingCharge,
       discount,
+      couponCode: couponCode || "",
+      pointsEarned,
+      pointsRedeemed: Number(pointsRedeemed) || 0,
       totalAmount,
       paymentMethod: "COD",
       paymentStatus: "Pending",
@@ -180,6 +217,18 @@ router.post("/cod-order", authMiddleware, async (req, res) => {
 
     await order.save();
 
+    // Update user clan points & orders list
+    if (user) {
+      if (Number(pointsRedeemed) > 0) {
+        user.loyaltyPoints = Math.max(0, (user.loyaltyPoints || 0) - Number(pointsRedeemed));
+      }
+      user.loyaltyPoints = (user.loyaltyPoints || 0) + pointsEarned;
+      if (!user.orders.includes(order._id)) {
+        user.orders.push(order._id);
+      }
+      await user.save();
+    }
+
     const populatedOrder = await Order.findById(order._id)
       .populate("customer", "name email")
       .populate("items.product", "name images priceINR");
@@ -188,6 +237,8 @@ router.post("/cod-order", authMiddleware, async (req, res) => {
       success: true,
       message: "Order placed successfully with Cash on Delivery",
       order: populatedOrder,
+      pointsEarned,
+      newPointsBalance: user ? user.loyaltyPoints : 0,
     });
   } catch (error) {
     console.error("COD ORDER ERROR:", error);

@@ -61,10 +61,13 @@ app.use(
   customerRoutes
 );
 app.use("/api/banners", bannerRoutes);
+app.use("/api/admin/banners", bannerRoutes);
 app.use("/api/reports", reportsRoutes);
 app.use("/api/reels", reelRoutes);
 app.use("/api/admin/reels", reelRoutes);
 app.use("/api/payment", require("./routes/paymentRoutes"));
+app.use("/api/coupons", require("./routes/couponRoutes"));
+app.use("/api/loyalty", require("./routes/loyaltyRoutes"));
 
 
 
@@ -118,6 +121,60 @@ app.post(
     }
   }
 );
+app.post(
+  "/api/upload/image",
+  upload.any(),
+  async (req, res) => {
+    try {
+      const files = req.files && req.files.length > 0 ? req.files : (req.file ? [req.file] : []);
+      if (files.length === 0) {
+        return res.status(400).json({
+          success: false,
+          message: "No image file provided",
+        });
+      }
+
+      const uploadOne = (file) => {
+        return new Promise((resolve, reject) => {
+          const stream = cloudinary.uploader.upload_stream(
+            {
+              resource_type: "image",
+              folder: "ethnique-images",
+            },
+            (error, result) => {
+              if (result) {
+                resolve(result);
+              } else {
+                reject(error);
+              }
+            }
+          );
+
+          streamifier.createReadStream(file.buffer).pipe(stream);
+        });
+      };
+
+      const results = await Promise.all(files.map(uploadOne));
+      const urls = results.map((r) => r.secure_url);
+
+      res.json({
+        success: true,
+        imageUrl: urls[0],
+        url: urls[0],
+        imageUrls: urls,
+        urls: urls,
+      });
+    } catch (error) {
+      console.error("Image upload failed:", error);
+      res.status(500).json({
+        success: false,
+        message: "Image upload failed",
+        error: error.message,
+      });
+    }
+  }
+);
+
 app.get("/test", (req, res) => {
   res.json({
     success: true

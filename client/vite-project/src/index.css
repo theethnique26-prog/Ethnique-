@@ -1,10 +1,47 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* =========================================================
+   GLOBAL RESPONSIVE & MOBILE POLISH (iOS, Android, Tablets, Laptops)
+   ========================================================= */
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  scroll-behavior: smooth;
+  width: 100%;
+  overflow-x: hidden;
+}
+
+body {
+  width: 100%;
+  max-width: 100vw;
+  overflow-x: hidden;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Touch-friendly scrolling for mobile/tablet carousels & drawers */
+.touch-scroll {
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+}
+
+/* Hide scrollbar while preserving touch swipe */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
 @layer utilities {
   @keyframes fadeIn {
     0% {
       opacity: 0;
-      transform: translateY(-10px);
+      transform: translateY(-8px);
     }
     100% {
       opacity: 1;
@@ -12,23 +49,51 @@
     }
   }
 
-  @keyframes slideDown {
-    0% {
-      opacity: 0;
+  @keyframes floatSlow {
+    0%, 100% {
+      transform: translateY(0);
+    }
+    50% {
       transform: translateY(-10px);
     }
+  }
+
+  @keyframes shimmerGold {
+    0% {
+      background-position: -200% 0;
+    }
     100% {
-      opacity: 1;
-      transform: translateY(0);
+      background-position: 200% 0;
+    }
+  }
+
+  @keyframes pulseGlow {
+    0%, 100% {
+      opacity: 0.6;
+      transform: scale(1);
+    }
+    50% {
+      opacity: 0.9;
+      transform: scale(1.05);
     }
   }
 
   .animate-fadeIn {
-    animation: fadeIn 0.6s ease-in-out;
+    animation: fadeIn 0.4s ease-out forwards;
   }
 
-  .animate-slideDown {
-    animation: slideDown 0.4s ease-in-out;
+  .animate-floatSlow {
+    animation: floatSlow 6s ease-in-out infinite;
+  }
+
+  .animate-pulseGlow {
+    animation: pulseGlow 4s ease-in-out infinite;
+  }
+
+  .animate-shimmerGold {
+    background: linear-gradient(90deg, rgba(212,180,131,0) 0%, rgba(212,180,131,0.4) 50%, rgba(212,180,131,0) 100%);
+    background-size: 200% 100%;
+    animation: shimmerGold 3s infinite;
   }
 }
 
@@ -43,6 +108,6 @@
   }
 
   .animate-scroll {
-    animation: scroll 25s linear infinite;
+    animation: scroll 28s linear infinite;
   }
 }

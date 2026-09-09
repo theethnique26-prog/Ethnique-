@@ -1,13 +1,194 @@
+@import "./traditional-backdrop.css";
+
 :root {
   --primary: #6D1830;
-  --secondary: #8C2F4D;
+  --primary-light: #8C2F4D;
+  --primary-dark: #4A0E1F;
   --accent: #D4B483;
-  --background: #FAF7F2;
-  --card: #F3EEE7;
-  --text: #2B2B2B;
+  --accent-gold: #C8A261;
+  --background: #FAF6F0;
+  --background-secondary: #F3EBDD;
+  --card: #FFFFFF;
+  --card-subtle: #F9F5EE;
+  --border: #E8DFD3;
+  --text: #2B2523;
+  --text-muted: #6B6058;
+  --gold-glow: rgba(212, 180, 131, 0.3);
+  --header-bg: rgba(250, 246, 240, 0.9);
+}
+
+html.dark {
+  --primary: #E5C583;
+  --primary-light: #F3D39B;
+  --primary-dark: #8C2F4D;
+  --accent: #E5C583;
+  --accent-gold: #D4AF37;
+  --background: #0D080F;
+  --background-secondary: #160E1A;
+  --card: #18101C;
+  --card-subtle: #221727;
+  --border: #2E1F33;
+  --text: #F7F2EC;
+  --text-muted: #B5A8B8;
+  --gold-glow: rgba(229, 197, 131, 0.25);
+  --header-bg: rgba(13, 8, 15, 0.92);
 }
 
 body {
   background-color: var(--background);
   color: var(--text);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  transition: background-color 0.4s ease, color 0.4s ease;
+  overflow-x: hidden;
+}
+
+h1, h2, h3, .font-serif {
+  font-family: 'Playfair Display', Georgia, serif;
+}
+
+/* Indian Royal Jaali (Lattice) Subtle Watermark */
+.bg-royal-jaali {
+  background-image: radial-gradient(#D4B483 0.75px, transparent 0.75px), radial-gradient(#D4B483 0.75px, #FAF6F0 0.75px);
+  background-size: 30px 30px;
+  background-position: 0 0, 15px 15px;
+  background-opacity: 0.08;
+}
+
+html.dark .bg-royal-jaali {
+  background-image: radial-gradient(rgba(229, 197, 131, 0.15) 0.8px, transparent 0.8px), radial-gradient(rgba(229, 197, 131, 0.15) 0.8px, #0D080F 0.8px);
+  background-size: 30px 30px;
+  background-position: 0 0, 15px 15px;
+}
+
+/* Palace Archway (Jharokha Mehrab) Silhouette */
+.royal-arch {
+  border-top-left-radius: 150px;
+  border-top-right-radius: 150px;
+  border-bottom-left-radius: 24px;
+  border-bottom-right-radius: 24px;
+}
+
+@media (min-width: 1024px) {
+  .royal-arch-center {
+    border-top-left-radius: 180px;
+    border-top-right-radius: 180px;
+    border-bottom-left-radius: 28px;
+    border-bottom-right-radius: 28px;
+  }
+}
+
+/* Gilded Metallic Border Effect */
+.gold-shimmer-border {
+  border: 1px solid rgba(212, 180, 131, 0.5);
+  box-shadow: 0 0 15px rgba(212, 180, 131, 0.15);
+}
+
+html.dark .gold-shimmer-border {
+  border: 1px solid rgba(229, 197, 131, 0.4);
+  box-shadow: 0 0 20px rgba(229, 197, 131, 0.18);
+}
+
+/* Custom subtle scrollbar */
+::-webkit-scrollbar {
+  width: 7px;
+  height: 7px;
+}
+::-webkit-scrollbar-track {
+  background: var(--background);
+}
+::-webkit-scrollbar-thumb {
+  background: #D4B483;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #B8860B;
+}
+
+/* ============================================================
+   ADMIN CONSOLE THEME ADAPTABILITY (LIGHT & VELVET NOIR DARK)
+   ============================================================ */
+
+.admin-main h1, .admin-main h2, .admin-main h3 {
+  color: #2B2523;
+}
+
+html.dark .admin-main {
+  color: #FAF5EF;
+}
+
+html.dark .admin-main h1,
+html.dark .admin-main h2,
+html.dark .admin-main h3 {
+  color: #FAF5EF;
+}
+
+/* Admin white cards become deep velvet luxury cards */
+html.dark .admin-main .bg-white {
+  background-color: #18101C !important;
+  border-color: #2C1F32 !important;
+}
+
+/* Sub-panels and light gray/ivory table backgrounds */
+html.dark .admin-main .bg-\[\#faf8f7\],
+html.dark .admin-main .bg-\[\#FAF8F5\],
+html.dark .admin-main .bg-\[\#FAF6F0\],
+html.dark .admin-main .bg-gray-50,
+html.dark .admin-main .bg-gray-100 {
+  background-color: #140C18 !important;
+  border-color: #2C1F32 !important;
+}
+
+/* Admin text high contrast in dark mode */
+html.dark .admin-main .text-gray-900,
+html.dark .admin-main .text-gray-800,
+html.dark .admin-main .text-\[\#2C2C2C\],
+html.dark .admin-main .text-\[\#2B2523\] {
+  color: #FAF5EF !important;
+}
+
+html.dark .admin-main .text-gray-700,
+html.dark .admin-main .text-gray-600 {
+  color: #D6CAD4 !important;
+}
+
+html.dark .admin-main .text-gray-500,
+html.dark .admin-main .text-gray-400 {
+  color: #A094A3 !important;
+}
+
+/* Borders in dark mode */
+html.dark .admin-main .border-gray-100,
+html.dark .admin-main .border-gray-200,
+html.dark .admin-main .border-\[\#E8E2DC\] {
+  border-color: #2C1F32 !important;
+}
+
+/* Tables in dark mode */
+html.dark .admin-main thead,
+html.dark .admin-main thead tr {
+  background-color: #120A16 !important;
+  border-color: #2C1F32 !important;
+  color: #FAF5EF !important;
+}
+
+html.dark .admin-main tbody tr:hover {
+  background-color: #201324 !important;
+}
+
+html.dark .admin-main tbody tr {
+  border-color: #251829 !important;
+}
+
+/* Inputs, dropdowns, and textareas in dark mode */
+html.dark .admin-main input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+html.dark .admin-main select,
+html.dark .admin-main textarea {
+  background-color: #120B15 !important;
+  color: #FAF5EF !important;
+  border-color: #2C1F32 !important;
+}
+
+html.dark .admin-main input::placeholder,
+html.dark .admin-main textarea::placeholder {
+  color: #7E7082 !important;
 }

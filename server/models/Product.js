@@ -44,6 +44,11 @@ const productSchema = new mongoose.Schema(
       default: 0,
     },
 
+    inStock: {
+      type: Boolean,
+      default: true,
+    },
+
     images: [
       {
         type: String,

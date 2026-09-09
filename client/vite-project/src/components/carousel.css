@@ -1,163 +1,103 @@
-.portrait-frame:hover{
+/* Royal Jharokha (Palace Arch) Hero Styles */
 
-    transform:translateY(-10px);
-
-    box-shadow:
-      0 25px 60px rgba(0,0,0,.18);
-
+.jharokha-frame {
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.6s ease, border-color 0.4s ease;
 }
 
-.fashion-image{
-    width:100%;
-    height:100%;
-    object-fit:cover;
-
-
-}
-.fashion-card{
-    width:290px;
-    height:470px;
-    overflow:hidden;
-    border-radius:30px;
-    background:white;
-    box-shadow:0 30px 60px rgba(0,0,0,.12);
+/* Palace Archway Silhouette (Mehrab / Jharokha) */
+.jharokha-arch {
+  border-top-left-radius: 140px;
+  border-top-right-radius: 140px;
+  border-bottom-left-radius: 26px;
+  border-bottom-right-radius: 26px;
 }
 
-.center-card{
-    width:340px;
-    height:560px;
+@media (min-width: 1024px) {
+  .jharokha-arch-center {
+    border-top-left-radius: 170px;
+    border-top-right-radius: 170px;
+    border-bottom-left-radius: 30px;
+    border-bottom-right-radius: 30px;
+  }
 }
 
-.fashion-card:hover{
-
-    transform:translateY(-12px);
+/* Light mode luxury depth */
+.jharokha-frame {
+  background: #FFFDF9;
+  box-shadow: 0 20px 50px rgba(109, 24, 48, 0.12), 0 4px 20px rgba(0, 0, 0, 0.05);
 }
 
-.left-card:hover{
-
-    transform:translateY(25px);
+/* Dark mode royal velvet depth */
+:is(.dark .jharokha-frame) {
+  background: #170E1A;
+  box-shadow: 0 25px 65px rgba(0, 0, 0, 0.8), 0 0 30px rgba(229, 197, 131, 0.12);
 }
 
-.right-card:hover{
-
-    transform:translateY(25px);
-}
-
-.fashion-card:hover .fashion-image{
-
-    transform:scale(1.03);
-}
-
-
-/* .image-container {
+.image-container {
   position: relative;
   width: 100%;
   height: 100%;
   overflow: hidden;
-} */
-
-.image-container{
-
-position:relative;
-width:100%;
-height:100%;
-
-overflow:hidden;
-
-border-radius:30px;
-
 }
 
-.fade-image{
-
-position:absolute;
-
-inset:0;
-
-width:100%;
-height:100%;
-
-object-fit:cover;
-
-opacity:0;
-
-transform:scale(1);
-
-transition:
-opacity 1.5s ease-in-out,
-transform 7s ease;
-
+.fade-image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transform: scale(1);
+  transition: opacity 1.4s ease-in-out, transform 6s cubic-bezier(0.25, 1, 0.5, 1);
 }
-
-/* .fade-image.active{
-f
-opacity:1;
-
-transform:scale(1.06);
-
-} */
 
 .fade-image.active {
   opacity: 1;
-  transform: scale(1.05); /* slow premium zoom */
+  transform: scale(1.05);
 }
 
-@keyframes float{
-
-0%{
-transform:translateY(0px);
-}
-
-50%{
-transform:translateY(-12px);
-}
-
-100%{
-transform:translateY(0px);
-}
-
-}
-
-.left-card{
-    animation: floatLeft 10s ease-in-out infinite;
-}
-
-.center-card{
-    animation: floatCenter 10s ease-in-out infinite;
-}
-
-.right-card{
-    animation: floatRight 10s ease-in-out infinite;
+/* Subtle gentle floating animation for desktop */
+@media (min-width: 1024px) {
+  .left-arch {
+    animation: floatLeft 8s ease-in-out infinite;
+  }
+  .center-arch {
+    animation: floatCenter 8s ease-in-out infinite;
+  }
+  .right-arch {
+    animation: floatRight 8s ease-in-out infinite;
+  }
 }
 
 @keyframes floatLeft {
-  0%,100%{
-    transform: translateY(35px);
+  0%, 100% {
+    transform: translateY(15px);
   }
-
-  50%{
-    transform: translateY(5px);
+  50% {
+    transform: translateY(-8px);
   }
 }
 
 @keyframes floatCenter {
-  0%,100%{
-    transform: translateY(0);
+  0%, 100% {
+    transform: translateY(-8px);
   }
-
-  50%{
-    transform: translateY(-25px);
+  50% {
+    transform: translateY(-28px);
   }
 }
 
 @keyframes floatRight {
-  0%,100%{
-    transform: translateY(35px);
+  0%, 100% {
+    transform: translateY(15px);
   }
-
-  50%{
-    transform: translateY(5px);
+  50% {
+    transform: translateY(-8px);
   }
 }
 
-
+.jharokha-frame:hover {
+  transform: translateY(-10px) scale(1.02) !important;
+}

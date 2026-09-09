@@ -40,6 +40,11 @@ const userSchema = new mongoose.Schema(
       default: 0,
     },
 
+    lastBonusClaimDate: {
+      type: Date,
+      default: null,
+    },
+
     profileImage: {
       type: String,
       default: "",

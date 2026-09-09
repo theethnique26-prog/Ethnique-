@@ -2,10 +2,13 @@ import { API_BASE } from "./apiConfig";
 
 const BASE_URL = `${API_BASE}/orders`;
 
-const getHeaders = () => ({
-  Authorization: `Bearer ${localStorage.getItem("token")}`,
-  "Content-Type": "application/json",
-});
+const getHeaders = () => {
+  const token = localStorage.getItem("token") || localStorage.getItem("adminToken");
+  return {
+    Authorization: token ? `Bearer ${token}` : "",
+    "Content-Type": "application/json",
+  };
+};
 
 const handleResponse = async (response) => {
   const data = await response.json();

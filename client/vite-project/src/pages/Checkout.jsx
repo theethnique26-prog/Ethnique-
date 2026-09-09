@@ -1,9 +1,22 @@
 import { useState, useEffect, useContext } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { CartContext } from "../context/CartContext";
 import { useAuth } from "../context/AuthContext";
+import { useLoyalty } from "../context/LoyaltyContext";
 import { API_BASE } from "../services/apiConfig";
-import { CreditCard, Truck, ShieldCheck, ArrowLeft, CheckCircle2 } from "lucide-react";
+import {
+  CreditCard,
+  Truck,
+  ShieldCheck,
+  ArrowLeft,
+  CheckCircle2,
+  Tag,
+  Gift,
+  Sparkles,
+  X,
+  Crown,
+  ChevronRight,
+} from "lucide-react";
 import toast from "react-hot-toast";
 
 const loadRazorpayScript = () => {
@@ -23,11 +36,22 @@ const loadRazorpayScript = () => {
 function Checkout() {
   const { cart, clearCart } = useContext(CartContext);
   const { user } = useAuth();
+  const { points, tier, refreshLoyalty } = useLoyalty();
   const navigate = useNavigate();
 
   const [paymentMethod, setPaymentMethod] = useState("Razorpay");
   const [loading, setLoading] = useState(false);
   const [savedAddresses, setSavedAddresses] = useState([]);
+
+  // Coupon state
+  const [couponInput, setCouponInput] = useState("");
+  const [appliedCoupon, setAppliedCoupon] = useState(null);
+  const [couponValidating, setCouponValidating] = useState(false);
+  const [availableCoupons, setAvailableCoupons] = useState([]);
+  const [showCouponsModal, setShowCouponsModal] = useState(false);
+
+  // Clan Points Redemption state
+  const [redeemClanPoints, setRedeemClanPoints] = useState(false);
 
   const [formData, setFormData] = useState({
     fullName: user?.name || "",
@@ -40,9 +64,39 @@ function Checkout() {
     country: "India",
   });
 
-  const total = cart.reduce(
+  const subtotal = cart.reduce(
     (sum, item) => sum + item.priceINR * item.quantity,
     0
+  );
+
+  // Calculate Clan Points redemption discount (10 pts = ₹5, max 50% of subtotal)
+  const maxAllowedPoints = Math.min(
+    points || 0,
+    Math.floor((subtotal * 0.5) / 0.5)
+  );
+  const pointsToUse = redeemClanPoints ? maxAllowedPoints : 0;
+  const clanPointsDiscount = Math.round(pointsToUse * 0.5);
+
+  // Calculate Coupon discount
+  const couponDiscount = appliedCoupon ? appliedCoupon.discountAmount : 0;
+
+  // Free shipping check (min subtotal 999 or FREESHIP coupon or Elite tier)
+  const isFreeShipping =
+    subtotal >= 999 ||
+    appliedCoupon?.freeShipping ||
+    tier?.freeShippingAlways ||
+    false;
+  const shippingCharge = isFreeShipping ? 0 : 99;
+
+  // Total discounts and final total
+  const totalDiscount = couponDiscount + clanPointsDiscount;
+  const finalTotal = Math.max(0, subtotal - totalDiscount + shippingCharge);
+
+  // Clan points earned on this order
+  const earnRate = (points || 0) >= 500 ? 0.15 : 0.1;
+  const pointsEarned = Math.max(
+    0,
+    Math.floor((subtotal - totalDiscount) * earnRate)
   );
 
   useEffect(() => {
@@ -58,9 +112,24 @@ function Checkout() {
       return;
     }
 
-    // Fetch user's saved addresses
     fetchAddresses();
+    fetchCoupons();
   }, [user, cart]);
+
+  // Fetch available coupons from backend
+  const fetchCoupons = async () => {
+    try {
+      const res = await fetch(`${API_BASE}/coupons`);
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success && Array.isArray(data.coupons)) {
+          setAvailableCoupons(data.coupons);
+        }
+      }
+    } catch (err) {
+      console.log("Could not load coupons:", err);
+    }
+  };
 
   const fetchAddresses = async () => {
     try {
@@ -111,6 +180,57 @@ function Checkout() {
     return true;
   };
 
+  // =====================================
+  // APPLY COUPON HANDLER
+  // =====================================
+  const handleApplyCoupon = async (codeToApply) => {
+    const code = (codeToApply || couponInput).trim().toUpperCase();
+    if (!code) {
+      toast.error("Please enter a coupon code");
+      return;
+    }
+
+    setCouponValidating(true);
+    try {
+      const res = await fetch(`${API_BASE}/coupons/validate`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+        body: JSON.stringify({
+          code,
+          subtotal,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (res.ok && data.success && data.valid) {
+        setAppliedCoupon(data.coupon);
+        setCouponInput(data.coupon.code);
+        setShowCouponsModal(false);
+        toast.success(data.coupon.message, {
+          icon: "🎟️",
+          duration: 3500,
+        });
+      } else {
+        toast.error(data.message || "Invalid coupon code");
+      }
+    } catch (err) {
+      console.error("Coupon validation error:", err);
+      toast.error("Network error while validating coupon");
+    } finally {
+      setCouponValidating(false);
+    }
+  };
+
+  const handleRemoveCoupon = () => {
+    setAppliedCoupon(null);
+    setCouponInput("");
+    toast("Coupon removed");
+  };
+
   const formattedItems = cart.map((item) => ({
     product: item._id,
     name: item.name,
@@ -135,14 +255,14 @@ function Checkout() {
     }
 
     try {
-      // 1. Create order on backend
+      // 1. Create order on backend with calculated finalTotal
       const res = await fetch(`${API_BASE}/payment/create-order`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
-        body: JSON.stringify({ amount: total }),
+        body: JSON.stringify({ amount: finalTotal }),
       });
 
       const data = await res.json();
@@ -157,7 +277,7 @@ function Checkout() {
         amount: data.order.amount,
         currency: data.order.currency || "INR",
         name: "Ethnique by Jayant",
-        description: `Order Payment of ₹${total}`,
+        description: `Order Payment of ₹${finalTotal}`,
         order_id: data.order.id,
         prefill: {
           name: formData.fullName,
@@ -169,7 +289,7 @@ function Checkout() {
         },
         handler: async function (response) {
           try {
-            // 3. Verify payment on backend
+            // 3. Verify payment on backend with coupon & points tracking
             const verifyRes = await fetch(`${API_BASE}/payment/verify-payment`, {
               method: "POST",
               headers: {
@@ -182,8 +302,12 @@ function Checkout() {
                 razorpay_signature: response.razorpay_signature,
                 items: formattedItems,
                 shippingAddress: formData,
-                subtotal: total,
-                totalAmount: total,
+                subtotal,
+                shippingCharge,
+                discount: totalDiscount,
+                couponCode: appliedCoupon?.code || "",
+                pointsRedeemed: pointsToUse,
+                totalAmount: finalTotal,
               }),
             });
 
@@ -191,7 +315,10 @@ function Checkout() {
 
             if (verifyRes.ok && verifyData.success) {
               clearCart();
-              toast.success("Payment successful! Order placed.");
+              if (refreshLoyalty) refreshLoyalty();
+              toast.success(
+                `Payment successful! You earned +${pointsEarned} Clan Points!`
+              );
               navigate("/profile");
             } else {
               toast.error(verifyData.message || "Payment verification failed");
@@ -222,65 +349,22 @@ function Checkout() {
     }
   };
 
-  // =====================================
-  // CASH ON DELIVERY (COD) FLOW
-  // =====================================
-  const handleCODPayment = async () => {
-    if (!validateAddress()) return;
-
-    setLoading(true);
-    try {
-      const res = await fetch(`${API_BASE}/payment/cod-order`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-        body: JSON.stringify({
-          items: formattedItems,
-          shippingAddress: formData,
-          subtotal: total,
-          totalAmount: total,
-        }),
-      });
-
-      const data = await res.json();
-
-      if (res.ok && data.success) {
-        clearCart();
-        toast.success("Order placed successfully with Cash on Delivery!");
-        navigate("/profile");
-      } else {
-        toast.error(data.message || "Failed to place COD order");
-      }
-    } catch (err) {
-      console.error("COD error:", err);
-      toast.error("Failed to place order. Please try again.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const handlePlaceOrder = () => {
-    if (paymentMethod === "Razorpay") {
-      handleRazorpayPayment();
-    } else {
-      handleCODPayment();
-    }
+    handleRazorpayPayment();
   };
 
   return (
-    <div className="bg-[#FAF7F5] min-h-screen py-10 px-4 md:px-8">
+    <div className="bg-[#FAF7F5] dark:bg-[#120B15] min-h-screen py-10 px-4 md:px-8 transition-colors duration-400">
       <div className="max-w-6xl mx-auto">
         {/* Top Back Link */}
         <button
           onClick={() => navigate("/cart")}
-          className="inline-flex items-center gap-2 text-sm text-gray-600 hover:text-[#8B1E3F] mb-8 font-medium transition"
+          className="inline-flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 hover:text-[#8B1E3F] dark:hover:text-[#E5C583] mb-8 font-medium transition"
         >
           <ArrowLeft size={16} /> Back to Shopping Cart
         </button>
 
-        <h1 className="text-3xl md:text-4xl font-serif text-[#2C1810] mb-8">
+        <h1 className="text-3xl md:text-4xl font-serif text-[#2C1810] dark:text-[#FAF5EF] mb-8">
           Secure Checkout
         </h1>
 
@@ -288,12 +372,12 @@ function Checkout() {
           {/* Left Column: Shipping & Payment Method */}
           <div className="lg:col-span-7 space-y-6">
             {/* Shipping Address Card */}
-            <div className="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-gray-100">
+            <div className="bg-white dark:bg-[#18101C] rounded-3xl p-6 md:p-8 shadow-sm border border-gray-100 dark:border-[#2C1F32]">
               <div className="flex items-center gap-3 mb-6">
-                <div className="w-9 h-9 rounded-full bg-[#8B1E3F]/10 text-[#8B1E3F] flex items-center justify-center font-semibold text-sm">
+                <div className="w-9 h-9 rounded-full bg-[#8B1E3F]/10 dark:bg-[#E5C583]/10 text-[#8B1E3F] dark:text-[#E5C583] flex items-center justify-center font-semibold text-sm">
                   1
                 </div>
-                <h2 className="text-xl font-semibold text-gray-900">
+                <h2 className="text-xl font-semibold text-gray-900 dark:text-[#FAF5EF]">
                   Shipping Address
                 </h2>
               </div>
@@ -301,7 +385,7 @@ function Checkout() {
               {/* Saved Address Selector */}
               {savedAddresses.length > 1 && (
                 <div className="mb-5">
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-2">
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-2">
                     Use a saved address
                   </label>
                   <select
@@ -322,7 +406,7 @@ function Checkout() {
                         });
                       }
                     }}
-                    className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#8B1E3F]"
+                    className="w-full border border-gray-200 dark:border-[#38283E] bg-white dark:bg-[#201426] text-gray-900 dark:text-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#8B1E3F]"
                   >
                     {savedAddresses.map((addr) => (
                       <option key={addr._id} value={addr._id}>
@@ -335,7 +419,7 @@ function Checkout() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-medium text-gray-700 mb-1">
+                  <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
                     Full Name *
                   </label>
                   <input
@@ -344,12 +428,12 @@ function Checkout() {
                     value={formData.fullName}
                     onChange={handleInputChange}
                     placeholder="Recipient's name"
-                    className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#8B1E3F]"
+                    className="w-full border border-gray-200 dark:border-[#38283E] bg-white dark:bg-[#201426] text-gray-900 dark:text-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#8B1E3F]"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium text-gray-700 mb-1">
+                  <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
                     Phone Number *
                   </label>
                   <input
@@ -358,12 +442,12 @@ function Checkout() {
                     value={formData.phone}
                     onChange={handleInputChange}
                     placeholder="10-digit mobile number"
-                    className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#8B1E3F]"
+                    className="w-full border border-gray-200 dark:border-[#38283E] bg-white dark:bg-[#201426] text-gray-900 dark:text-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#8B1E3F]"
                   />
                 </div>
 
                 <div className="md:col-span-2">
-                  <label className="block text-xs font-medium text-gray-700 mb-1">
+                  <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
                     Street Address / Flat / Building *
                   </label>
                   <input
@@ -372,12 +456,12 @@ function Checkout() {
                     value={formData.addressLine1}
                     onChange={handleInputChange}
                     placeholder="House number, street, landmark"
-                    className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#8B1E3F]"
+                    className="w-full border border-gray-200 dark:border-[#38283E] bg-white dark:bg-[#201426] text-gray-900 dark:text-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#8B1E3F]"
                   />
                 </div>
 
                 <div className="md:col-span-2">
-                  <label className="block text-xs font-medium text-gray-700 mb-1">
+                  <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
                     Apartment, suite, etc. (optional)
                   </label>
                   <input
@@ -386,12 +470,12 @@ function Checkout() {
                     value={formData.addressLine2}
                     onChange={handleInputChange}
                     placeholder="Apartment or area"
-                    className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#8B1E3F]"
+                    className="w-full border border-gray-200 dark:border-[#38283E] bg-white dark:bg-[#201426] text-gray-900 dark:text-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#8B1E3F]"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium text-gray-700 mb-1">
+                  <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
                     City *
                   </label>
                   <input
@@ -400,12 +484,12 @@ function Checkout() {
                     value={formData.city}
                     onChange={handleInputChange}
                     placeholder="City"
-                    className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#8B1E3F]"
+                    className="w-full border border-gray-200 dark:border-[#38283E] bg-white dark:bg-[#201426] text-gray-900 dark:text-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#8B1E3F]"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium text-gray-700 mb-1">
+                  <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
                     State *
                   </label>
                   <input
@@ -414,12 +498,12 @@ function Checkout() {
                     value={formData.state}
                     onChange={handleInputChange}
                     placeholder="State"
-                    className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#8B1E3F]"
+                    className="w-full border border-gray-200 dark:border-[#38283E] bg-white dark:bg-[#201426] text-gray-900 dark:text-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#8B1E3F]"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium text-gray-700 mb-1">
+                  <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
                     Postal Code / PIN *
                   </label>
                   <input
@@ -428,12 +512,12 @@ function Checkout() {
                     value={formData.pincode}
                     onChange={handleInputChange}
                     placeholder="6-digit PIN code"
-                    className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#8B1E3F]"
+                    className="w-full border border-gray-200 dark:border-[#38283E] bg-white dark:bg-[#201426] text-gray-900 dark:text-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#8B1E3F]"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium text-gray-700 mb-1">
+                  <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
                     Country
                   </label>
                   <input
@@ -441,116 +525,80 @@ function Checkout() {
                     name="country"
                     value={formData.country}
                     disabled
-                    className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-500"
+                    className="w-full bg-gray-50 dark:bg-[#1a111e] border border-gray-200 dark:border-[#38283E] rounded-xl px-4 py-3 text-sm text-gray-500 dark:text-gray-400"
                   />
                 </div>
               </div>
             </div>
 
             {/* Payment Method Card */}
-            <div className="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-gray-100">
+            <div className="bg-white dark:bg-[#18101C] rounded-3xl p-6 md:p-8 shadow-sm border border-gray-100 dark:border-[#2C1F32]">
               <div className="flex items-center gap-3 mb-6">
-                <div className="w-9 h-9 rounded-full bg-[#8B1E3F]/10 text-[#8B1E3F] flex items-center justify-center font-semibold text-sm">
+                <div className="w-9 h-9 rounded-full bg-[#8B1E3F]/10 dark:bg-[#E5C583]/10 text-[#8B1E3F] dark:text-[#E5C583] flex items-center justify-center font-semibold text-sm">
                   2
                 </div>
-                <h2 className="text-xl font-semibold text-gray-900">
+                <h2 className="text-xl font-semibold text-gray-900 dark:text-[#FAF5EF]">
                   Payment Method
                 </h2>
               </div>
 
               <div className="space-y-3">
-                {/* Razorpay Option */}
-                <label
-                  onClick={() => setPaymentMethod("Razorpay")}
-                  className={`flex items-start gap-4 p-4 rounded-2xl border cursor-pointer transition-all ${
-                    paymentMethod === "Razorpay"
-                      ? "border-[#8B1E3F] bg-[#8B1E3F]/5 ring-1 ring-[#8B1E3F]"
-                      : "border-gray-200 hover:border-gray-300"
-                  }`}
+                {/* Razorpay Online Payment Option */}
+                <div
+                  className="flex items-start gap-4 p-5 rounded-2xl border border-[#8B1E3F] dark:border-[#E5C583] bg-[#8B1E3F]/5 dark:bg-[#E5C583]/10 ring-1 ring-[#8B1E3F] dark:ring-[#E5C583] transition-all"
                 >
-                  <input
-                    type="radio"
-                    name="paymentMethod"
-                    checked={paymentMethod === "Razorpay"}
-                    onChange={() => setPaymentMethod("Razorpay")}
-                    className="mt-1 text-[#8B1E3F] focus:ring-[#8B1E3F]"
-                  />
+                  <div className="w-5 h-5 rounded-full bg-[#8B1E3F] dark:bg-[#E5C583] flex items-center justify-center text-white dark:text-black mt-0.5 shrink-0">
+                    <div className="w-2 h-2 rounded-full bg-white dark:bg-black" />
+                  </div>
                   <div className="flex-1">
                     <div className="flex items-center justify-between">
-                      <span className="font-semibold text-gray-900 flex items-center gap-2">
-                        <CreditCard size={18} className="text-[#8B1E3F]" />
-                        Razorpay Secure Gateway
+                      <span className="font-semibold text-gray-900 dark:text-[#FAF5EF] flex items-center gap-2">
+                        <CreditCard size={18} className="text-[#8B1E3F] dark:text-[#E5C583]" />
+                        Razorpay 100% Secure Online Payment
                       </span>
-                      <span className="text-xs bg-green-100 text-green-700 font-medium px-2 py-0.5 rounded-full">
-                        Recommended
+                      <span className="text-xs bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 font-medium px-2 py-0.5 rounded-full">
+                        Prepaid Only
                       </span>
                     </div>
-                    <p className="text-xs text-gray-500 mt-1">
-                      Cards (Visa, Mastercard, RuPay), UPI (Google Pay, PhonePe, Paytm), NetBanking & Wallets.
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1.5 leading-relaxed">
+                      Instant &amp; Insured payment via UPI (Google Pay, PhonePe, Paytm, BHIM), Credit/Debit Cards (Visa, Mastercard, RuPay), NetBanking &amp; Wallets.
                     </p>
                   </div>
-                </label>
-
-                {/* COD Option */}
-                <label
-                  onClick={() => setPaymentMethod("COD")}
-                  className={`flex items-start gap-4 p-4 rounded-2xl border cursor-pointer transition-all ${
-                    paymentMethod === "COD"
-                      ? "border-[#8B1E3F] bg-[#8B1E3F]/5 ring-1 ring-[#8B1E3F]"
-                      : "border-gray-200 hover:border-gray-300"
-                  }`}
-                >
-                  <input
-                    type="radio"
-                    name="paymentMethod"
-                    checked={paymentMethod === "COD"}
-                    onChange={() => setPaymentMethod("COD")}
-                    className="mt-1 text-[#8B1E3F] focus:ring-[#8B1E3F]"
-                  />
-                  <div className="flex-1">
-                    <span className="font-semibold text-gray-900 flex items-center gap-2">
-                      <Truck size={18} className="text-gray-700" />
-                      Cash on Delivery (COD)
-                    </span>
-                    <p className="text-xs text-gray-500 mt-1">
-                      Pay in cash upon doorstep delivery of your order.
-                    </p>
-                  </div>
-                </label>
+                </div>
               </div>
 
               {/* Security Banner */}
-              <div className="mt-6 flex items-center gap-3 text-xs text-gray-500 bg-gray-50 p-3 rounded-xl border border-gray-100">
-                <ShieldCheck size={20} className="text-green-600 flex-shrink-0" />
+              <div className="mt-6 flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-[#201426] p-3 rounded-xl border border-gray-100 dark:border-[#38283E]">
+                <ShieldCheck size={20} className="text-green-600 dark:text-green-400 flex-shrink-0" />
                 <span>256-bit SSL encrypted. Your payment details are protected with bank-grade security.</span>
               </div>
             </div>
           </div>
 
-          {/* Right Column: Order Items Summary */}
-          <div className="lg:col-span-5">
-            <div className="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-gray-100 sticky top-24">
-              <h2 className="text-xl font-semibold text-gray-900 mb-6">
+          {/* Right Column: Order Summary, Coupons & Clan Points */}
+          <div className="lg:col-span-5 space-y-6">
+            <div className="bg-white dark:bg-[#18101C] rounded-3xl p-6 md:p-8 shadow-sm border border-gray-100 dark:border-[#2C1F32]">
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-[#FAF5EF] mb-5">
                 Order Summary ({cart.length} {cart.length === 1 ? "item" : "items"})
               </h2>
 
               {/* Items List */}
-              <div className="space-y-4 max-h-[320px] overflow-y-auto pr-2 divide-y divide-gray-100">
+              <div className="space-y-3.5 max-h-[260px] overflow-y-auto pr-1 divide-y divide-gray-100 dark:divide-[#2C1F32]">
                 {cart.map((item) => (
-                  <div key={item._id} className="pt-4 first:pt-0 flex gap-4 items-center">
+                  <div key={item._id} className="pt-3.5 first:pt-0 flex gap-3.5 items-center">
                     <img
                       src={item.images?.[0]}
                       alt={item.name}
-                      className="w-16 h-20 object-cover rounded-xl border border-gray-100 flex-shrink-0"
+                      className="w-14 h-18 object-cover rounded-xl border border-gray-100 dark:border-[#38283E] flex-shrink-0"
                     />
                     <div className="flex-1 min-w-0">
-                      <h4 className="font-medium text-sm text-gray-900 truncate">
+                      <h4 className="font-medium text-sm text-gray-900 dark:text-[#FAF5EF] truncate">
                         {item.name}
                       </h4>
-                      <p className="text-xs text-gray-500 mt-0.5">
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
                         Qty: {item.quantity}
                       </p>
-                      <p className="text-sm font-semibold text-[#8B1E3F] mt-1">
+                      <p className="text-sm font-semibold text-[#8B1E3F] dark:text-[#E5C583] mt-1">
                         ₹{item.priceINR * item.quantity}
                       </p>
                     </div>
@@ -558,18 +606,155 @@ function Checkout() {
                 ))}
               </div>
 
-              <div className="border-t border-gray-100 mt-6 pt-5 space-y-3 text-sm">
-                <div className="flex justify-between text-gray-600">
+              {/* ================================================= */}
+              {/* COUPON & PROMO CODE SECTION */}
+              {/* ================================================= */}
+              <div className="mt-6 pt-5 border-t border-gray-100 dark:border-[#2C1F32]">
+                <div className="flex justify-between items-center mb-2">
+                  <label className="text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300 flex items-center gap-1.5">
+                    <Tag size={14} className="text-[#8B1E3F] dark:text-[#E5C583]" />
+                    <span>Apply Coupon</span>
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => setShowCouponsModal(true)}
+                    className="text-xs font-semibold text-[#8B1E3F] dark:text-[#E5C583] hover:underline"
+                  >
+                    View All Coupons
+                  </button>
+                </div>
+
+                {appliedCoupon ? (
+                  <div className="flex items-center justify-between p-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800">
+                    <div className="flex items-center gap-2">
+                      <Tag size={16} className="text-emerald-600 dark:text-emerald-400" />
+                      <div>
+                        <span className="font-mono font-bold text-xs text-emerald-800 dark:text-emerald-300">
+                          {appliedCoupon.code}
+                        </span>
+                        <p className="text-[11px] text-emerald-600 dark:text-emerald-400">
+                          {appliedCoupon.freeShipping
+                            ? "Free Express Shipping unlocked"
+                            : `₹${appliedCoupon.discountAmount} discount applied`}
+                        </p>
+                      </div>
+                    </div>
+                    <button
+                      onClick={handleRemoveCoupon}
+                      className="p-1 rounded-full text-gray-400 hover:text-red-500 hover:bg-white dark:hover:bg-[#201426] transition"
+                      title="Remove Coupon"
+                    >
+                      <X size={15} />
+                    </button>
+                  </div>
+                ) : (
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={couponInput}
+                      onChange={(e) => setCouponInput(e.target.value.toUpperCase())}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+                          handleApplyCoupon();
+                        }
+                      }}
+                      placeholder="e.g. JAYANT10, GLAMCLAN15"
+                      className="flex-1 border border-gray-200 dark:border-[#38283E] bg-gray-50 dark:bg-[#201426] text-gray-900 dark:text-gray-100 uppercase font-mono tracking-wider px-3.5 py-2.5 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-[#8B1E3F]"
+                    />
+                    <button
+                      type="button"
+                      disabled={couponValidating || !couponInput.trim()}
+                      onClick={() => handleApplyCoupon()}
+                      className="px-4 py-2.5 rounded-xl bg-[#8B1E3F] hover:bg-[#721833] text-white text-xs font-semibold uppercase tracking-wider transition disabled:opacity-50"
+                    >
+                      {couponValidating ? "Checking..." : "Apply"}
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              {/* ================================================= */}
+              {/* CLAN POINTS REDEMPTION BOX */}
+              {/* ================================================= */}
+              <div className="mt-4 pt-4 border-t border-gray-100 dark:border-[#2C1F32]">
+                <div className="p-3.5 rounded-2xl bg-gradient-to-r from-amber-500/10 via-amber-400/5 to-transparent border border-amber-300/40 dark:border-amber-600/30 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-full bg-amber-500/20 text-amber-700 dark:text-amber-400 flex items-center justify-center flex-shrink-0">
+                      <Gift size={16} />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-xs font-semibold text-gray-900 dark:text-[#FAF5EF]">
+                          Redeem Clan Points
+                        </span>
+                        <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-amber-500/20 text-amber-800 dark:text-amber-300 font-mono font-medium">
+                          {points || 0} pts available
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-gray-500 dark:text-gray-400 mt-0.5">
+                        {points > 0
+                          ? `Use ${maxAllowedPoints} pts for instant ₹${Math.round(maxAllowedPoints * 0.5)} OFF`
+                          : "Earn 1 pt per ₹10 spent on this purchase"}
+                      </p>
+                    </div>
+                  </div>
+
+                  {points > 0 && (
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={redeemClanPoints}
+                        onChange={(e) => setRedeemClanPoints(e.target.checked)}
+                        className="sr-only peer"
+                      />
+                      <div className="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-amber-600"></div>
+                    </label>
+                  )}
+                </div>
+              </div>
+
+              {/* ================================================= */}
+              {/* ITEMIZED PRICE BREAKDOWN */}
+              {/* ================================================= */}
+              <div className="border-t border-gray-100 dark:border-[#2C1F32] mt-5 pt-4 space-y-2.5 text-sm">
+                <div className="flex justify-between text-gray-600 dark:text-gray-400">
                   <span>Subtotal</span>
-                  <span className="font-medium">₹{total}</span>
+                  <span className="font-medium text-gray-900 dark:text-[#FAF5EF]">₹{subtotal.toLocaleString("en-IN")}</span>
                 </div>
-                <div className="flex justify-between text-gray-600">
-                  <span>Shipping</span>
-                  <span className="text-green-600 font-medium">FREE</span>
+
+                {appliedCoupon && couponDiscount > 0 && (
+                  <div className="flex justify-between text-emerald-600 dark:text-emerald-400 font-medium">
+                    <span>Coupon Discount ({appliedCoupon.code})</span>
+                    <span>-₹{couponDiscount.toLocaleString("en-IN")}</span>
+                  </div>
+                )}
+
+                {redeemClanPoints && clanPointsDiscount > 0 && (
+                  <div className="flex justify-between text-amber-600 dark:text-amber-400 font-medium">
+                    <span>Clan Points Discount ({pointsToUse} pts)</span>
+                    <span>-₹{clanPointsDiscount.toLocaleString("en-IN")}</span>
+                  </div>
+                )}
+
+                <div className="flex justify-between text-gray-600 dark:text-gray-400">
+                  <span>Insured Express Shipping</span>
+                  <span className={shippingCharge === 0 ? "text-emerald-600 dark:text-emerald-400 font-semibold" : "font-medium"}>
+                    {shippingCharge === 0 ? "FREE" : `₹${shippingCharge}`}
+                  </span>
                 </div>
-                <div className="border-t border-gray-100 pt-3 flex justify-between text-lg font-semibold text-gray-900">
+
+                <div className="border-t border-gray-100 dark:border-[#2C1F32] pt-3.5 flex justify-between text-lg font-semibold text-gray-900 dark:text-[#FAF5EF]">
                   <span>Total Amount</span>
-                  <span className="text-[#8B1E3F]">₹{total}</span>
+                  <span className="text-[#8B1E3F] dark:text-[#E5C583]">₹{finalTotal.toLocaleString("en-IN")}</span>
+                </div>
+
+                {/* Points to earn badge */}
+                <div className="pt-2">
+                  <div className="bg-[#8B1E3F]/5 dark:bg-[#E5C583]/10 border border-[#8B1E3F]/15 dark:border-[#E5C583]/20 rounded-xl p-2.5 text-center text-xs text-[#8B1E3F] dark:text-[#E5C583] flex items-center justify-center gap-1.5 font-medium">
+                    <Sparkles size={14} />
+                    <span>You will earn +{pointsEarned} Clan Points with this order</span>
+                  </div>
                 </div>
               </div>
 
@@ -603,20 +788,135 @@ function Checkout() {
                     Processing Order...
                   </>
                 ) : paymentMethod === "Razorpay" ? (
-                  `Pay ₹${total} via Razorpay`
+                  `Pay ₹${finalTotal.toLocaleString("en-IN")} via Razorpay`
                 ) : (
-                  `Place Order (COD) • ₹${total}`
+                  `Place Order (COD) • ₹${finalTotal.toLocaleString("en-IN")}`
                 )}
               </button>
 
               <div className="mt-4 flex items-center justify-center gap-2 text-xs text-gray-400">
-                <CheckCircle2 size={14} className="text-green-600" />
-                <span>100% Genuine Handloom Guarantee</span>
+                <CheckCircle2 size={14} className="text-emerald-600" />
+                <span>100% Genuine Quality Guarantee • Jayant Saree Center</span>
               </div>
             </div>
           </div>
         </div>
       </div>
+
+      {/* ================================================= */}
+      {/* VIEW ALL COUPONS MODAL / DRAWER */}
+      {/* ================================================= */}
+      {showCouponsModal && (
+        <div
+          className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4"
+          onClick={() => setShowCouponsModal(false)}
+        >
+          <div
+            className="bg-white dark:bg-[#18101C] rounded-3xl max-w-lg w-full max-h-[85vh] overflow-hidden border border-[#D4B483]/50 shadow-2xl flex flex-col animate-fadeIn"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Modal Header */}
+            <div className="p-6 border-b border-gray-100 dark:border-[#2C1F32] flex justify-between items-center bg-[#FAF6F0] dark:bg-[#201426]">
+              <div>
+                <div className="flex items-center gap-1.5 text-xs font-semibold text-[#8B1E3F] dark:text-[#E5C583] uppercase tracking-wider">
+                  <Tag size={14} />
+                  <span>Member Coupon Hub</span>
+                </div>
+                <h3 className="text-lg font-serif font-bold text-gray-900 dark:text-white mt-1">
+                  Active Member Coupons
+                </h3>
+              </div>
+              <button
+                onClick={() => setShowCouponsModal(false)}
+                className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-800 text-gray-500"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            {/* Coupons List */}
+            <div className="p-6 overflow-y-auto space-y-3.5 divide-y divide-gray-100 dark:divide-[#2C1F32]">
+              {availableCoupons.length === 0 ? (
+                <p className="text-sm text-gray-500 text-center py-6">
+                  Loading active coupons...
+                </p>
+              ) : (
+                availableCoupons.map((c) => {
+                  const eligible = subtotal >= c.minOrderAmount;
+                  const isCurrent = appliedCoupon?.code === c.code;
+
+                  return (
+                    <div
+                      key={c._id || c.code}
+                      className="pt-3.5 first:pt-0 flex flex-col gap-2"
+                    >
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <span className="font-mono font-bold text-sm text-[#8B1E3F] dark:text-[#E5C583] bg-[#8B1E3F]/10 dark:bg-[#E5C583]/10 px-2.5 py-0.5 rounded-md border border-[#8B1E3F]/20 dark:border-[#E5C583]/30">
+                              {c.code}
+                            </span>
+                            <span className="text-[10px] uppercase tracking-wider font-semibold px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-700 dark:text-amber-400">
+                              {c.badge || "Special"}
+                            </span>
+                          </div>
+                          <p className="text-xs font-medium text-gray-800 dark:text-gray-200 mt-1.5">
+                            {c.title}
+                          </p>
+                          <p className="text-[11px] text-gray-500 dark:text-gray-400 mt-0.5">
+                            {c.description}
+                          </p>
+                          <p className="text-[11px] text-gray-400 dark:text-gray-500 mt-0.5 font-mono">
+                            Min. order: ₹{c.minOrderAmount.toLocaleString("en-IN")}
+                          </p>
+                        </div>
+
+                        <button
+                          type="button"
+                          disabled={!eligible || isCurrent}
+                          onClick={() => handleApplyCoupon(c.code)}
+                          className={`px-3 py-1.5 rounded-xl text-xs font-semibold tracking-wider uppercase transition ${
+                            isCurrent
+                              ? "bg-emerald-600 text-white cursor-default"
+                              : eligible
+                              ? "bg-[#8B1E3F] hover:bg-[#721833] text-white shadow-sm"
+                              : "bg-gray-100 dark:bg-gray-800 text-gray-400 cursor-not-allowed"
+                          }`}
+                        >
+                          {isCurrent ? "Applied" : eligible ? "Apply" : "Locked"}
+                        </button>
+                      </div>
+
+                      {!eligible && (
+                        <p className="text-[10px] text-amber-600 dark:text-amber-400 font-medium">
+                          Add ₹{(c.minOrderAmount - subtotal).toLocaleString("en-IN")} more to your cart to unlock this coupon.
+                        </p>
+                      )}
+                    </div>
+                  );
+                })
+              )}
+            </div>
+
+            {/* Modal Footer */}
+            <div className="p-4 bg-gray-50 dark:bg-[#201426] border-t border-gray-100 dark:border-[#2C1F32] flex justify-between items-center text-xs text-gray-500">
+              <Link
+                to="/loyalty"
+                className="text-[#8B1E3F] dark:text-[#E5C583] hover:underline flex items-center gap-1 font-medium"
+              >
+                <span>Privilege Rewards Rules</span>
+                <ChevronRight size={13} />
+              </Link>
+              <button
+                onClick={() => setShowCouponsModal(false)}
+                className="px-4 py-1.5 rounded-full border border-gray-300 dark:border-gray-700 hover:bg-gray-100 text-xs font-semibold"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

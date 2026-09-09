@@ -53,6 +53,7 @@ router.post("/signup", async (req, res) => {
         name: user.name,
         email: user.email,
         role: user.role,
+        loyaltyPoints: user.loyaltyPoints || 0,
       },
     });
   } catch (err) {
@@ -124,6 +125,7 @@ router.post("/login", async (req, res) => {
           name: adminUser.name,
           email: adminUser.email,
           role: "admin",
+          loyaltyPoints: adminUser.loyaltyPoints || 0,
         },
       });
     }
@@ -167,6 +169,7 @@ router.post("/login", async (req, res) => {
         name: user.name,
         email: user.email,
         role: user.role,
+        loyaltyPoints: user.loyaltyPoints || 0,
       },
     });
   } catch (err) {
@@ -187,6 +190,7 @@ router.get("/me", authMiddleware, (req, res) => {
       name: req.user.name,
       email: req.user.email,
       role: req.user.role,
+      loyaltyPoints: req.user.loyaltyPoints || 0,
     },
   });
 });

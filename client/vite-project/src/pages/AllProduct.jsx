@@ -1,314 +1,617 @@
-import { useEffect, useState } from "react";
-import { Heart, ShoppingCart } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import React, { useEffect, useState, useContext, useMemo } from "react";
+import {
+  Heart,
+  ShoppingCart,
+  Search,
+  X,
+  Sparkles,
+  Eye,
+  Check,
+  Award,
+  Truck,
+  Scissors,
+  Layers,
+  SlidersHorizontal,
+  ArrowUpDown,
+} from "lucide-react";
+import { useNavigate, useSearchParams, Link } from "react-router-dom";
 import { API_BASE } from "../services/apiConfig.js";
-import {
-  useContext
-} from "react";
-
-import {
-  WishlistContext
-} from "../context/Wishlistcontext";
-import {
-  CartContext
-} from "../context/CartContext";
+import { WishlistContext } from "../context/Wishlistcontext";
+import { CartContext } from "../context/CartContext";
+import { CountryContext } from "../context/CoutryContext";
 import toast from "react-hot-toast";
 
 function AllProducts() {
-    const [products, setProducts] = useState([]);
-    const [search, setSearch] = useState("");
-    const navigate = useNavigate();
-    const { addToCart } =
-      useContext(CartContext);
-  const { addToWishlist } =
-  useContext(WishlistContext);
-  const formatPrice = (price) => {
-  return new Intl.NumberFormat("en-IN", {
-    style: "currency",
-    currency: "INR",
-    maximumFractionDigits: 0,
-  }).format(price);
-};
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("All");
+  const [sortBy, setSortBy] = useState("featured");
+  const [quickViewProduct, setQuickViewProduct] = useState(null);
+  const [addedAnimId, setAddedAnimId] = useState(null);
+
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const { addToCart } = useContext(CartContext);
+  const { addToWishlist, wishlist } = useContext(WishlistContext);
+  const { formatPrice } = useContext(CountryContext);
 
   useEffect(() => {
     fetchProducts();
-  }, []);
+    // Support category query param like /products?cat=cotton
+    const catParam = searchParams.get("cat");
+    if (catParam) {
+      if (catParam.toLowerCase() === "cotton") setSelectedCategory("Cotton");
+      if (catParam.toLowerCase() === "silk") setSelectedCategory("Silk");
+      if (catParam.toLowerCase() === "bridal") setSelectedCategory("Bridal");
+    }
+  }, [searchParams]);
 
   const fetchProducts = async () => {
     try {
-      const response = await fetch(
-        `${API_BASE}/products`
-      );
-
+      setLoading(true);
+      const response = await fetch(`${API_BASE}/products`);
       const data = await response.json();
-
-      setProducts(data.products);
+      if (data.success) {
+        setProducts(data.products || []);
+      } else {
+        setProducts([]);
+      }
     } catch (error) {
-      console.log(error);
+      console.log("Fetch products error:", error);
+      toast.error("Failed to load catalog");
+    } finally {
+      setLoading(false);
     }
   };
 
-  const filteredProducts = products.filter((product) =>
-    product.name
-      ?.toLowerCase()
-      .includes(search.toLowerCase())
-  );
+  const isProductInWishlist = (productId) => {
+    return Array.isArray(wishlist) && wishlist.some((item) => (item._id || item.id) === productId);
+  };
 
-
-  
-  return (
-    <div className="max-w-7xl mx-auto px-6 py-10">
-
-      {/* Hero Section */}
-<div className="relative h-[300px] rounded-3xl overflow-hidden mb-10">
-
-  <img
-    src="https://images.unsplash.com/photo-1610030469983-98e550d6193c"
-    alt=""
-    className="w-full h-full object-cover"
-  />
-
-  <div className="absolute inset-0 bg-black/40" />
-
-  <div className="absolute inset-0 flex flex-col justify-center items-center text-white">
-
-    <p className="uppercase tracking-[5px] mb-2">
-      Ethnique By Jayant
-    </p>
-
-    <h1 className="text-5xl font-bold">
-      Cotton Sarees
-    </h1>
-
-    <p className="mt-4 text-lg">
-      Handcrafted Elegance For Every Occasion
-    </p>
-
-  </div>
-
-</div>
-
-<div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
-
-  <div className="bg-white p-5 rounded-xl shadow-sm text-center">
-    <h3 className="text-2xl font-bold">
-      {products.length}+
-    </h3>
-    <p className="text-gray-500">
-      Designs
-    </p>
-  </div>
-
-  <div className="bg-white p-5 rounded-xl shadow-sm text-center">
-    <h3 className="text-2xl font-bold">
-      100%
-    </h3>
-    <p className="text-gray-500">
-      Cotton
-    </p>
-  </div>
-
-  <div className="bg-white p-5 rounded-xl shadow-sm text-center">
-    <h3 className="text-2xl font-bold">
-      Handmade
-    </h3>
-    <p className="text-gray-500">
-      Craftsmanship
-    </p>
-  </div>
-
-  <div className="bg-white p-5 rounded-xl shadow-sm text-center">
-    <h3 className="text-2xl font-bold">
-      Free
-    </h3>
-    <p className="text-gray-500">
-      Shipping
-    </p>
-  </div>
-
-</div>
-
-      {/* Search */}
-      <div className="mb-8">
-
-  <input
-    type="text"
-    placeholder="Search sarees..."
-    value={search}
-    onChange={(e) =>
-      setSearch(e.target.value)
-    }
-    className="
-      w-full
-      border
-      border-gray-200
-      bg-white
-      rounded-full
-      px-6
-      py-4
-      shadow-sm
-      focus:ring-2
-      focus:ring-amber-700
-      outline-none
-    "
-  />
-
-</div>
-<div className="flex gap-3 overflow-x-auto mb-10">
-
-  {[
-    "All",
-    "Handloom",
-    "Printed",
-    "Office Wear",
-    "Festive",
-    "Premium Cotton"
-  ].map((item) => (
-
-    <button
-      key={item}
-      className="
-        px-5
-        py-2
-        rounded-full
-        border
-        hover:bg-black
-        hover:text-white
-        transition
-      "
-    >
-      {item}
-    </button>
-
-  ))}
-
-</div>
-<div className="flex justify-between items-center mb-8">
-
-  <h2 className="font-medium text-gray-600">
-    Showing {filteredProducts.length} Products
-  </h2>
-
-</div>
-      {/* Product Grid */}
-      <div
-  className="
-    grid
-    grid-cols-1
-    sm:grid-cols-2
-    lg:grid-cols-3
-    xl:grid-cols-4
-    gap-8
-  "
->
-        {filteredProducts.map((product) => (
-          <div
-  key={product._id}
-  onClick={() =>
-    navigate(
-      `/products/${product._id}`
-    )
-  }
-   className="
-    relative
-    group
-    cursor-pointer
-    bg-white
-    rounded-2xl
-    overflow-hidden
-    border
-    border-gray-100
-    hover:shadow-2xl
-    transition-all
-    duration-500
-  "
->
-            <div className="overflow-hidden">
-
-  <img
-    src={product.images?.[0]}
-    alt={product.name}
-    className="
-      w-full
-      h-[500px]
-      object-cover
-      transition-transform
-      duration-700
-      group-hover:scale-110
-    "
-  />
-
-</div>
-
-            <div className="p-4">
-
-              <h3 className="font-semibold">
-                {product.name}
-              </h3>
-
-              <p className="text-sm text-gray-500 mt-2">
-                {product.highlight}
-              </p>
-
-              <div className="flex justify-between items-center mt-4">
-
-                <span className="font-bold text-lg">
-                  {formatPrice(product.priceINR)}
-                </span>
-
-                <div className="flex gap-3">
-{/* Wishlist */}
-                  <button
-  className="
-    absolute
-    top-4
-    right-4
-    bg-white
-    p-2
-    rounded-full
-    shadow-md
-  "
-
-  onClick={(e) => {
+  const handleWishlistToggle = (e, product) => {
+    e.preventDefault();
     e.stopPropagation();
-
     addToWishlist(product);
+    const inWish = isProductInWishlist(product._id);
+    toast.success(inWish ? "Removed from Wishlist" : "Added to Wishlist");
+  };
 
-    toast.success(
-      "Added to Wishlist"
-    );
-  }}
->
-  <Heart size={20} />
-</button>
-{/* cart */}
-                  <button
-  onClick={(e) => {
+  const handleAddToCart = (e, product) => {
+    e.preventDefault();
     e.stopPropagation();
-
+    if (product.inStock === false || (product.stock !== undefined && Number(product.stock) <= 0)) {
+      toast.error("Sorry, this saree is currently out of stock!");
+      return;
+    }
     addToCart(product);
+    setAddedAnimId(product._id);
+    toast.success(`${product.name} added to cart!`);
+    setTimeout(() => setAddedAnimId(null), 1600);
+  };
 
-    toast.success(
-      "Added to Cart"
-    );
-  }}
->
-  <ShoppingCart size={20} />
-</button>
+  // Filter and Sort Products
+  const filteredAndSortedProducts = useMemo(() => {
+    let result = products.filter((product) => {
+      const name = (product.name || "").toLowerCase();
+      const highlight = (product.highlight || "").toLowerCase();
+      const category = (product.category || "").toLowerCase();
+      const searchLower = search.toLowerCase();
 
-                </div>
-              </div>
+      // Search matching
+      const matchesSearch =
+        name.includes(searchLower) ||
+        highlight.includes(searchLower) ||
+        category.includes(searchLower);
 
-            </div>
+      if (!matchesSearch) return false;
+
+      // Category matching
+      if (selectedCategory === "All") return true;
+      if (selectedCategory === "Bridal")
+        return name.includes("bridal") || name.includes("wedding") || category.includes("bridal") || highlight.includes("bridal") || name.includes("zari");
+      if (selectedCategory === "Printed")
+        return name.includes("printed") || highlight.includes("printed") || category.includes("print");
+      if (selectedCategory === "Festive")
+        return name.includes("festive") || name.includes("zari") || name.includes("silk") || category.includes("festive");
+      if (selectedCategory === "Cotton")
+        return name.includes("cotton") || category.includes("cotton");
+      if (selectedCategory === "Silk")
+        return name.includes("silk") || category.includes("silk");
+
+      return true;
+    });
+
+    // Sorting
+    if (sortBy === "price-low") {
+      result.sort((a, b) => (a.priceINR || 0) - (b.priceINR || 0));
+    } else if (sortBy === "price-high") {
+      result.sort((a, b) => (b.priceINR || 0) - (a.priceINR || 0));
+    } else if (sortBy === "name") {
+      result.sort((a, b) => (a.name || "").localeCompare(b.name || ""));
+    }
+
+    return result;
+  }, [products, search, selectedCategory, sortBy]);
+
+  const categories = [
+    "All",
+    "Cotton",
+    "Silk",
+    "Bridal",
+    "Festive",
+    "Printed",
+  ];
+
+  return (
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 transition-colors duration-400">
+
+      {/* --- Section 1: Haute Couture Saree Atelier Banner --- */}
+      <div
+        className="
+          relative
+          h-[260px] sm:h-[320px] lg:h-[360px]
+          rounded-[32px]
+          overflow-hidden
+          mb-10 sm:mb-12
+          border-2 border-[#D4B483]/60 dark:border-[#E5C583]/40
+          shadow-[0_20px_50px_rgba(109,24,48,0.15)] dark:shadow-[0_25px_60px_rgba(0,0,0,0.8)]
+          group
+        "
+      >
+        <img
+          src="https://images.unsplash.com/photo-1610030469983-98e550d6193c"
+          alt="Ethnique Designer Sarees by Jayant Saree Center"
+          className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105"
+        />
+
+        {/* Editorial Vignette Overlays */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/45 to-black/30 group-hover:from-black/90 transition-colors duration-500" />
+
+        {/* Content */}
+        <div className="absolute inset-0 flex flex-col justify-center items-center text-center text-white px-6">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-[#D4B483]/60 bg-black/40 backdrop-blur-md text-[#FAF6F0] text-[10px] sm:text-xs font-semibold tracking-[3px] uppercase mb-3.5 shadow-md">
+            <Sparkles size={12} className="text-[#E5C583]" />
+            <span>JAYANT SAREE CENTER • ETHNIQUE</span>
+            <Sparkles size={12} className="text-[#E5C583]" />
           </div>
-        ))}
+
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-serif font-bold text-white drop-shadow-md tracking-tight">
+            Designer Saree Collection
+          </h1>
+
+          <p className="mt-3 text-xs sm:text-sm lg:text-base text-gray-200 font-light max-w-lg leading-relaxed">
+            Curated festive, wedding, and everyday drapes from the trusted house of Jayant Saree Center.
+          </p>
+        </div>
       </div>
 
-      {filteredProducts.length === 0 && (
-        <div className="text-center py-20">
-          No sarees found.
+      {/* --- Section 2: Glassmorphic Heritage Stats Cards --- */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 mb-10 sm:mb-12">
+        <div className="p-5 rounded-2xl bg-white/75 dark:bg-[#18101C]/75 backdrop-blur-md border border-[#E8DFD3] dark:border-[#2C1F32] shadow-sm hover:border-[#D4B483] dark:hover:border-[#E5C583] hover:-translate-y-1 transition-all duration-300 text-center">
+          <div className="w-10 h-10 mx-auto rounded-full bg-[#6D1830]/10 dark:bg-[#E5C583]/15 text-[#6D1830] dark:text-[#E5C583] flex items-center justify-center mb-2.5">
+            <Layers size={20} />
+          </div>
+          <h3 className="text-xl sm:text-2xl font-bold font-serif text-[#2B2523] dark:text-[#F7F2EC]">
+            {products.length > 0 ? `${products.length}+` : "24+"}
+          </h3>
+          <p className="text-xs text-gray-500 dark:text-gray-400 font-light mt-0.5 uppercase tracking-wider">
+            Curated Designs
+          </p>
+        </div>
+
+        <div className="p-5 rounded-2xl bg-white/75 dark:bg-[#18101C]/75 backdrop-blur-md border border-[#E8DFD3] dark:border-[#2C1F32] shadow-sm hover:border-[#D4B483] dark:hover:border-[#E5C583] hover:-translate-y-1 transition-all duration-300 text-center">
+          <div className="w-10 h-10 mx-auto rounded-full bg-[#6D1830]/10 dark:bg-[#E5C583]/15 text-[#6D1830] dark:text-[#E5C583] flex items-center justify-center mb-2.5">
+            <Award size={20} />
+          </div>
+          <h3 className="text-xl sm:text-2xl font-bold font-serif text-[#2B2523] dark:text-[#F7F2EC]">
+            100% Genuine
+          </h3>
+          <p className="text-xs text-gray-500 dark:text-gray-400 font-light mt-0.5 uppercase tracking-wider">
+            Finest Quality Fabrics
+          </p>
+        </div>
+
+        <div className="p-5 rounded-2xl bg-white/75 dark:bg-[#18101C]/75 backdrop-blur-md border border-[#E8DFD3] dark:border-[#2C1F32] shadow-sm hover:border-[#D4B483] dark:hover:border-[#E5C583] hover:-translate-y-1 transition-all duration-300 text-center">
+          <div className="w-10 h-10 mx-auto rounded-full bg-[#6D1830]/10 dark:bg-[#E5C583]/15 text-[#6D1830] dark:text-[#E5C583] flex items-center justify-center mb-2.5">
+            <Scissors size={20} />
+          </div>
+          <h3 className="text-xl sm:text-2xl font-bold font-serif text-[#2B2523] dark:text-[#F7F2EC]">
+            Fall & Pico
+          </h3>
+          <p className="text-xs text-gray-500 dark:text-gray-400 font-light mt-0.5 uppercase tracking-wider">
+            Ready-to-Drape Pre-Stitched
+          </p>
+        </div>
+
+        <div className="p-5 rounded-2xl bg-white/75 dark:bg-[#18101C]/75 backdrop-blur-md border border-[#E8DFD3] dark:border-[#2C1F32] shadow-sm hover:border-[#D4B483] dark:hover:border-[#E5C583] hover:-translate-y-1 transition-all duration-300 text-center">
+          <div className="w-10 h-10 mx-auto rounded-full bg-[#6D1830]/10 dark:bg-[#E5C583]/15 text-[#6D1830] dark:text-[#E5C583] flex items-center justify-center mb-2.5">
+            <Truck size={20} />
+          </div>
+          <h3 className="text-xl sm:text-2xl font-bold font-serif text-[#2B2523] dark:text-[#F7F2EC]">
+            Complimentary
+          </h3>
+          <p className="text-xs text-gray-500 dark:text-gray-400 font-light mt-0.5 uppercase tracking-wider">
+            Pan-India Insured Delivery
+          </p>
+        </div>
+      </div>
+
+      {/* --- Section 3: Smart Search & Sorting Controls --- */}
+      <div className="bg-white/80 dark:bg-[#18101C]/80 backdrop-blur-md rounded-3xl p-5 sm:p-6 border border-[#E8DFD3] dark:border-[#2C1F32] shadow-sm mb-8">
+        <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
+
+          {/* Search Input with Clear Button */}
+          <div className="relative w-full md:max-w-md">
+            <Search
+              size={18}
+              className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500"
+            />
+            <input
+              type="text"
+              placeholder="Search by saree weave, color, or motif..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="
+                w-full
+                bg-[#FAF6F0] dark:bg-[#201426]
+                text-[#2B2523] dark:text-[#F7F2EC]
+                placeholder-gray-400 dark:placeholder-gray-500
+                border border-[#E8DFD3] dark:border-[#33223B]
+                focus:border-[#D4B483] dark:focus:border-[#E5C583]
+                rounded-full
+                pl-11 pr-10 py-3 text-xs sm:text-sm
+                shadow-inner outline-none transition
+              "
+            />
+            {search && (
+              <button
+                onClick={() => setSearch("")}
+                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
+              >
+                <X size={16} />
+              </button>
+            )}
+          </div>
+
+          {/* Sort Dropdown */}
+          <div className="flex items-center gap-3 w-full md:w-auto justify-end">
+            <div className="flex items-center gap-1.5 text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+              <ArrowUpDown size={14} className="text-[#D4B483]" />
+              <span>Sort:</span>
+            </div>
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value)}
+              className="
+                bg-[#FAF6F0] dark:bg-[#201426]
+                text-[#2B2523] dark:text-[#F7F2EC]
+                border border-[#E8DFD3] dark:border-[#33223B]
+                focus:border-[#D4B483] dark:focus:border-[#E5C583]
+                rounded-full px-4 py-2.5 text-xs font-medium
+                outline-none cursor-pointer shadow-sm
+              "
+            >
+              <option value="featured">Featured Weaves</option>
+              <option value="price-low">Price: Low to High</option>
+              <option value="price-high">Price: High to Low</option>
+              <option value="name">Name: A to Z</option>
+            </select>
+          </div>
+
+        </div>
+
+        {/* Category Filter Pills (100% Functional) */}
+        <div className="flex items-center gap-2 sm:gap-2.5 overflow-x-auto pt-4 mt-4 border-t border-[#E8DFD3]/80 dark:border-[#2C1F32]">
+          {categories.map((cat) => (
+            <button
+              key={cat}
+              onClick={() => setSelectedCategory(cat)}
+              className={`
+                px-4 sm:px-5 py-2 rounded-full text-xs font-medium tracking-wider uppercase whitespace-nowrap transition-all duration-300
+                ${
+                  selectedCategory === cat
+                    ? "bg-[#6D1830] dark:bg-[#E5C583] text-white dark:text-black shadow-md scale-[1.03]"
+                    : "bg-[#FAF6F0] dark:bg-[#201426] text-gray-700 dark:text-gray-300 border border-[#E8DFD3] dark:border-[#33223B] hover:border-[#D4B483]"
+                }
+              `}
+            >
+              {cat}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* --- Section 4: Live Results Count --- */}
+      <div className="flex justify-between items-center mb-6 px-1">
+        <h2 className="font-serif text-sm sm:text-base font-medium text-gray-700 dark:text-gray-300">
+          Showing <span className="font-bold text-[#6D1830] dark:text-[#E5C583]">{filteredAndSortedProducts.length}</span> Designer Drapes
+        </h2>
+        {(selectedCategory !== "All" || search) && (
+          <button
+            onClick={() => {
+              setSelectedCategory("All");
+              setSearch("");
+            }}
+            className="text-xs text-[#8C2F4D] dark:text-[#E5C583] underline hover:no-underline font-medium"
+          >
+            Reset Filters
+          </button>
+        )}
+      </div>
+
+      {/* --- Section 5: Haute-Couture Saree Product Cards Grid --- */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 sm:gap-8 items-start">
+        {filteredAndSortedProducts.map((product) => {
+          const inWishlist = isProductInWishlist(product._id);
+          const isAdded = addedAnimId === product._id;
+          const isOutOfStock = product.inStock === false || (product.stock !== undefined && Number(product.stock) <= 0);
+
+          return (
+            <div
+              key={product._id}
+              className={`
+                group relative
+                bg-white dark:bg-[#18101C]
+                rounded-t-[36px] rounded-b-[22px]
+                overflow-hidden
+                border ${isOutOfStock ? "border-red-200 dark:border-red-950/60 opacity-90" : "border-[#E8DFD3] dark:border-[#2C1F32]"}
+                hover:border-[#D4B483] dark:hover:border-[#E5C583]
+                shadow-[0_4px_20px_rgba(0,0,0,0.03)] dark:shadow-[0_4px_20px_rgba(0,0,0,0.5)]
+                hover:shadow-[0_20px_45px_rgba(109,24,48,0.14)] dark:hover:shadow-[0_20px_45px_rgba(0,0,0,0.8)]
+                hover:-translate-y-2
+                transition-all duration-500 flex flex-col justify-between
+              `}
+            >
+              <div
+                onClick={() => navigate(`/products/${product._id}`)}
+                className="cursor-pointer"
+              >
+                {/* Image Container with Arched Top & Secondary Hover Reveal */}
+                <div className="relative h-[420px] sm:h-[460px] overflow-hidden bg-[#FAF6F0] dark:bg-[#1D1322] rounded-t-[34px]">
+                  {/* Primary Image */}
+                  <img
+                    src={product.images?.[0]}
+                    alt={product.name}
+                    className={`
+                      absolute inset-0 w-full h-full object-cover
+                      transition-all duration-700
+                      group-hover:opacity-0 group-hover:scale-105
+                      ${isOutOfStock ? "grayscale-[35%]" : ""}
+                    `}
+                  />
+
+                  {/* Secondary Image on Hover */}
+                  <img
+                    src={product.images?.[1] || product.images?.[0]}
+                    alt={`${product.name} alternate view`}
+                    className={`
+                      absolute inset-0 w-full h-full object-cover
+                      opacity-0 transition-all duration-700
+                      group-hover:opacity-100 group-hover:scale-105
+                      ${isOutOfStock ? "grayscale-[35%]" : ""}
+                    `}
+                  />
+
+                  {/* Craft / Out of Stock Tag Badge */}
+                  <div className="absolute top-4 left-4 z-10">
+                    {isOutOfStock ? (
+                      <span className="bg-red-600 text-white text-[10px] font-bold tracking-wider uppercase px-3 py-1 rounded-full shadow-md flex items-center gap-1.5">
+                        <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+                        Sold Out
+                      </span>
+                    ) : (
+                      <span className="bg-white/95 dark:bg-[#18101C]/95 backdrop-blur-md border border-[#D4B483]/60 dark:border-[#E5C583]/50 text-[#6D1830] dark:text-[#E5C583] text-[10px] font-semibold tracking-wider uppercase px-3 py-1 rounded-full shadow-sm">
+                        Designer
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Wishlist Button */}
+                  <button
+                    onClick={(e) => handleWishlistToggle(e, product)}
+                    aria-label="Add to Wishlist"
+                    className={`
+                      absolute top-4 right-4 z-10
+                      p-2.5 rounded-full backdrop-blur-md transition-all duration-300 shadow-md
+                      ${
+                        inWishlist
+                          ? "bg-[#8C2F4D] text-white scale-110"
+                          : "bg-white/85 dark:bg-[#18101C]/85 text-gray-700 dark:text-gray-200 hover:bg-white hover:text-[#8C2F4D] dark:hover:text-[#E5C583] hover:scale-110"
+                      }
+                    `}
+                  >
+                    <Heart size={16} className={inWishlist ? "fill-white" : ""} />
+                  </button>
+
+                  {/* Quick View Hover Button */}
+                  <button
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      setQuickViewProduct(product);
+                    }}
+                    className="
+                      absolute bottom-4 left-1/2 -translate-x-1/2
+                      bg-white/95 dark:bg-[#1A111E]/95 backdrop-blur-md
+                      text-[#2B2523] dark:text-[#F7F2EC]
+                      border border-[#D4B483]
+                      px-4 py-2 rounded-full text-xs font-medium tracking-wider uppercase
+                      shadow-xl opacity-0 group-hover:opacity-100
+                      transition-all duration-300 hover:scale-105 flex items-center gap-1.5
+                    "
+                  >
+                    <Eye size={13} />
+                    <span>Quick View</span>
+                  </button>
+                </div>
+
+                {/* Card Details */}
+                <div className="p-5 flex flex-col flex-1">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[11px] font-medium tracking-[2px] uppercase text-[#8C2F4D] dark:text-[#E5C583]">
+                      Heritage Drape
+                    </span>
+                    {isOutOfStock && (
+                      <span className="text-[10px] font-bold text-red-600 dark:text-red-400 uppercase tracking-wider">
+                        Out of Stock
+                      </span>
+                    )}
+                  </div>
+
+                  <h3 className="font-serif text-lg text-[#2B2523] dark:text-[#F7F2EC] mt-1 font-semibold group-hover:text-[#8C2F4D] dark:group-hover:text-[#E5C583] transition-colors truncate">
+                    {product.name}
+                  </h3>
+
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 line-clamp-1 font-light">
+                    {product.highlight || "Breathable fabric with traditional weaving patterns."}
+                  </p>
+
+                  <div className="flex justify-between items-center mt-4 pt-3 border-t border-[#F0EAE1] dark:border-[#261D2B]">
+                    <span className="font-serif text-xl font-bold text-[#2B2523] dark:text-[#F7F2EC]">
+                      {formatPrice ? formatPrice(product.priceINR) : `₹${product.priceINR}`}
+                    </span>
+
+                    {isOutOfStock ? (
+                      <button
+                        type="button"
+                        disabled
+                        className="px-3.5 py-1.5 rounded-full text-xs font-semibold tracking-wide bg-gray-100 dark:bg-[#221627] text-gray-400 dark:text-gray-500 border border-gray-200 dark:border-[#38283E] cursor-not-allowed"
+                      >
+                        Sold Out
+                      </button>
+                    ) : (
+                      <button
+                        onClick={(e) => handleAddToCart(e, product)}
+                        aria-label="Add to cart"
+                        className={`
+                          px-3.5 py-2 rounded-full text-xs font-medium tracking-wide
+                          transition-all duration-300 flex items-center gap-1.5 shadow-sm
+                          ${
+                            isAdded
+                              ? "bg-emerald-600 text-white"
+                              : "bg-[#FAF6F0] dark:bg-[#241729] text-[#6D1830] dark:text-[#E5C583] hover:bg-[#6D1830] hover:text-white dark:hover:bg-[#E5C583] dark:hover:text-black border border-[#E8DFD3] dark:border-[#38283E]"
+                          }
+                        `}
+                      >
+                        {isAdded ? (
+                          <>
+                            <Check size={13} />
+                            <span>Added</span>
+                          </>
+                        ) : (
+                          <>
+                            <ShoppingCart size={13} />
+                            <span>Add</span>
+                          </>
+                        )}
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Zero State */}
+      {filteredAndSortedProducts.length === 0 && !loading && (
+        <div className="text-center py-20 bg-white/50 dark:bg-[#18101C]/50 rounded-3xl border border-[#E8DFD3] dark:border-[#2C1F32]">
+          <p className="font-serif text-2xl text-[#6D1830] dark:text-[#E5C583]">No Sarees Found</p>
+          <p className="text-xs text-gray-500 dark:text-gray-400 mt-2 font-light">
+            Try adjusting your search keyword or selected category filter.
+          </p>
+          <button
+            onClick={() => {
+              setSearch("");
+              setSelectedCategory("All");
+            }}
+            className="mt-5 px-6 py-2.5 rounded-full bg-[#6D1830] text-white text-xs font-semibold uppercase tracking-wider"
+          >
+            Clear All Filters
+          </button>
         </div>
       )}
+
+      {/* Quick View Modal */}
+      {quickViewProduct && (
+        <div
+          className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4"
+          onClick={() => setQuickViewProduct(null)}
+        >
+          <div
+            className="
+              relative bg-white dark:bg-[#18101C]
+              max-w-2xl w-full rounded-3xl overflow-hidden
+              border border-[#D4B483] shadow-2xl
+              grid grid-cols-1 md:grid-cols-2
+              animate-fadeIn
+            "
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="h-[320px] md:h-[420px] bg-[#FAF6F0] dark:bg-[#1D1322]">
+              <img
+                src={quickViewProduct.images?.[0]}
+                alt={quickViewProduct.name}
+                className="w-full h-full object-cover"
+              />
+            </div>
+            <div className="p-6 md:p-8 flex flex-col justify-between">
+              <div>
+                <div className="flex items-center justify-between">
+                  <span className="text-[11px] tracking-[2px] uppercase text-[#8C2F4D] dark:text-[#E5C583] font-semibold">
+                    Designer Drape
+                  </span>
+                  {(quickViewProduct.inStock === false || (quickViewProduct.stock !== undefined && Number(quickViewProduct.stock) <= 0)) && (
+                    <span className="px-2.5 py-0.5 rounded-full bg-red-100 dark:bg-red-950/80 text-red-600 dark:text-red-400 text-[10px] font-bold uppercase tracking-wider">
+                      Sold Out
+                    </span>
+                  )}
+                </div>
+                <h3 className="font-serif text-2xl text-[#2B2523] dark:text-[#F7F2EC] mt-2">
+                  {quickViewProduct.name}
+                </h3>
+                <p className="text-2xl font-bold font-serif text-[#6D1830] dark:text-[#E5C583] mt-3">
+                  {formatPrice ? formatPrice(quickViewProduct.priceINR) : `₹${quickViewProduct.priceINR}`}
+                </p>
+                <p className="text-sm text-gray-600 dark:text-gray-300 mt-4 leading-relaxed">
+                  {quickViewProduct.description || quickViewProduct.highlight || "Curated designer saree, finished with elegant motifs and comfortable all-day drape."}
+                </p>
+              </div>
+
+              <div className="mt-6 flex gap-3">
+                {quickViewProduct.inStock === false || (quickViewProduct.stock !== undefined && Number(quickViewProduct.stock) <= 0) ? (
+                  <button
+                    disabled
+                    className="flex-1 bg-gray-200 dark:bg-[#201525] text-gray-400 dark:text-gray-500 py-3 rounded-full text-xs font-semibold tracking-wider uppercase cursor-not-allowed flex items-center justify-center gap-2"
+                  >
+                    <span>Currently Out of Stock</span>
+                  </button>
+                ) : (
+                  <button
+                    onClick={(e) => {
+                      handleAddToCart(e, quickViewProduct);
+                      setQuickViewProduct(null);
+                    }}
+                    className="flex-1 bg-[#6D1830] hover:bg-[#8C2F4D] text-white py-3 rounded-full text-xs font-semibold tracking-wider uppercase transition shadow-md flex items-center justify-center gap-2"
+                  >
+                    <ShoppingCart size={15} />
+                    <span>Add To Bag</span>
+                  </button>
+                )}
+                <button
+                  onClick={() => setQuickViewProduct(null)}
+                  className="px-4 py-3 rounded-full border border-gray-300 dark:border-gray-700 text-xs font-semibold hover:bg-gray-100 dark:hover:bg-[#201426] transition"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }

@@ -3,6 +3,8 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
 const Product = require("../models/Product");
+const Order = require("../models/Order");
+const Coupon = require("../models/Coupon");
 const adminAuth = require("../middleware/Adminauth.js");
 // const Admin = require("../models/Admin");
 
@@ -138,21 +140,79 @@ router.post("/login", async (req, res) => {
 //   async (req, res) => {
   router.get("/dashboard", adminAuth, async (req, res) => {
     try {
-      const totalUsers =
-        await User.countDocuments();
+      const totalUsers = await User.countDocuments({ role: "user" });
+      const totalProducts = await Product.countDocuments();
+      const totalOrders = await Order.countDocuments();
 
-      const totalProducts =
-        await Product.countDocuments();
+      const validOrders = await Order.find({ orderStatus: { $ne: "Cancelled" } });
+      const revenue = validOrders.reduce((sum, order) => sum + (order.totalAmount || 0), 0);
+
+      const recentOrders = await Order.find()
+        .populate("customer", "name email")
+        .sort({ createdAt: -1 })
+        .limit(5);
+
+      const recentOrdersFormatted = recentOrders.map((o) => ({
+        id: `#ORD-${String(o._id).slice(-4).toUpperCase()}`,
+        amount: `₹${Number(o.totalAmount || 0).toLocaleString("en-IN")}`,
+        status: o.orderStatus,
+        customerName: o.customer?.name || "Customer",
+      }));
+
+      // Top products sold from orders
+      const productSalesMap = {};
+      validOrders.forEach((order) => {
+        (order.items || []).forEach((item) => {
+          const name = item.name || (item.product && item.product.name);
+          if (name) {
+            productSalesMap[name] = (productSalesMap[name] || 0) + (item.quantity || 1);
+          }
+        });
+      });
+
+      const topProducts = Object.entries(productSalesMap)
+        .map(([name, count]) => ({ name, count }))
+        .sort((a, b) => b.count - a.count)
+        .slice(0, 5);
+
+      // Active coupons count and list
+      const activeCoupons = await Coupon.find({ isActive: true }).limit(5);
+
+      // Generate last 7 days sales timeline from valid orders
+      const days = 7;
+      const salesTimeline = [];
+      for (let i = days - 1; i >= 0; i--) {
+        const d = new Date();
+        d.setDate(d.getDate() - i);
+        const dayLabel = d.toLocaleDateString("en-IN", { day: "numeric", month: "short" });
+        const startOfDay = new Date(d.setHours(0, 0, 0, 0));
+        const endOfDay = new Date(d.setHours(23, 59, 59, 999));
+
+        const dayRevenue = validOrders
+          .filter((o) => {
+            const orderDate = new Date(o.createdAt);
+            return orderDate >= startOfDay && orderDate <= endOfDay;
+          })
+          .reduce((sum, o) => sum + (o.totalAmount || 0), 0);
+
+        salesTimeline.push({
+          day: dayLabel,
+          sales: dayRevenue,
+        });
+      }
 
       res.json({
         success: true,
-
         stats: {
           totalUsers,
           totalProducts,
-          totalOrders: 0,
-          revenue: 0,
+          totalOrders,
+          revenue,
         },
+        recentOrders: recentOrdersFormatted,
+        topProducts,
+        activeCoupons,
+        salesTimeline,
       });
     } catch (error) {
       res.status(500).json({
@@ -175,7 +235,7 @@ router.get("/check-token", adminAuth, (req, res) => {
 
 router.get("/products", adminAuth, async (req, res) => {
   try {
-    const products = await Product.find();
+    const products = await Product.find().sort({ createdAt: -1 });
 
     res.json({
       success: true,
@@ -252,6 +312,61 @@ router.put("/products/:id", adminAuth, async (req, res) => {
     }
   }
 );
+
+// Update product stock and inStock status (supports both PATCH and PUT)
+const handleToggleStockRequest = async (req, res) => {
+  try {
+    const product = await Product.findById(req.params.id);
+    if (!product) {
+      return res.status(404).json({
+        success: false,
+        message: "Product not found",
+      });
+    }
+
+    // 1. If custom stock amount is specified by admin
+    if (req.body.stock !== undefined && req.body.stock !== null && req.body.stock !== "") {
+      const stockNum = Math.max(0, parseInt(req.body.stock, 10) || 0);
+      product.stock = stockNum;
+      if (typeof req.body.inStock === "boolean") {
+        product.inStock = req.body.inStock;
+      } else {
+        product.inStock = stockNum > 0;
+      }
+    } else {
+      // 2. Simple toggle of inStock state
+      const targetInStock = typeof req.body.inStock === "boolean" 
+        ? req.body.inStock 
+        : product.inStock === false ? true : false;
+
+      product.inStock = targetInStock;
+
+      if (!targetInStock) {
+        product.stock = 0;
+      } else if (targetInStock && (Number(product.stock) <= 0 || product.stock === undefined)) {
+        product.stock = 10; // Default restock if previously 0
+      }
+    }
+
+    await product.save();
+
+    res.json({
+      success: true,
+      product,
+      message: `Stock updated to ${product.stock} (${product.inStock ? "In Stock" : "Out of Stock"})`,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+router.patch("/products/:id/toggle-stock", adminAuth, handleToggleStockRequest);
+router.put("/products/:id/toggle-stock", adminAuth, handleToggleStockRequest);
+router.patch("/products/:id/stock", adminAuth, handleToggleStockRequest);
+router.put("/products/:id/stock", adminAuth, handleToggleStockRequest);
 
 router.get("/products/:id", adminAuth, async (req, res) => {
   console.log(

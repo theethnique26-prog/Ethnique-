@@ -6,7 +6,7 @@ const getHeaders = (includeAuth = false) => {
   };
 
   if (includeAuth) {
-    const token = localStorage.getItem("token");
+    const token = localStorage.getItem("token") || localStorage.getItem("adminToken");
 
     if (token) {
       headers.Authorization = `Bearer ${token}`;

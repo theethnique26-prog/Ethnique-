@@ -53,10 +53,42 @@ const adminApi = {
     return handleResponse(response);
   },
 
+  async patch(endpoint, body) {
+    const response = await fetch(`${BASE_URL}${endpoint}`, {
+      method: "PATCH",
+      headers: getHeaders(),
+      body: body ? JSON.stringify(body) : undefined,
+    });
+
+    return handleResponse(response);
+  },
+
   async delete(endpoint) {
     const response = await fetch(`${BASE_URL}${endpoint}`, {
       method: "DELETE",
       headers: getHeaders(),
+    });
+
+    return handleResponse(response);
+  },
+
+  async uploadFile(endpoint, formData) {
+    const token = localStorage.getItem("token") || localStorage.getItem("adminToken");
+    const headers = {};
+    if (token) {
+      headers["Authorization"] = `Bearer ${token}`;
+    }
+
+    const url = endpoint.startsWith("http")
+      ? endpoint
+      : endpoint.startsWith("/api")
+      ? `${API_BASE.replace(/\/api$/, "")}${endpoint}`
+      : `${API_BASE}${endpoint.startsWith("/") ? endpoint : "/" + endpoint}`;
+
+    const response = await fetch(url, {
+      method: "POST",
+      headers,
+      body: formData,
     });
 
     return handleResponse(response);

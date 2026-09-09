@@ -37,6 +37,7 @@ import Banners from "./pages/admin/Banners.jsx";
 import AdminLayout from "./layouts/AdminLayout.jsx";
 import AdminReels from "../src/pages/admin/AdminReels.jsx";
 import Reports from "./pages/admin/Reports.jsx";
+import AnimatedRoyalBackdrop from "./components/AnimatedRoyalBackdrop.jsx";
 
 function AppContent() {
   const location = useLocation();
@@ -45,133 +46,149 @@ function AppContent() {
     location.pathname.startsWith("/admin");
 
   return (
-  <>
-    {!isAdminRoute && <Navbar />}
+    <div className={!isAdminRoute ? "traditional-heritage-canvas selection:bg-[#D4B483]/30 selection:text-[#6D1830]" : ""}>
+      {!isAdminRoute && <AnimatedRoyalBackdrop />}
+      <div className={!isAdminRoute ? "traditional-heritage-content" : ""}>
+        {!isAdminRoute && <Navbar />}
 
-    {!isAdminRoute && (
-      <LoyaltyFloating />
-    )}
+        {!isAdminRoute && (
+          <LoyaltyFloating />
+        )}
 
-    <Routes>
+        <Routes>
 
-  {/* Customer Routes */}
-  <Route path="/" element={<Home />} />
-  <Route path="/login" element={<Login />} />
-  <Route path="/reels" element={<Reels />} />
+      {/* Customer Routes */}
+      <Route path="/" element={<Home />} />
+      <Route path="/login" element={<Login />} />
+      <Route path="/reels" element={<Reels />} />
 
-  <Route
-    path="/products"
-    element={<AllProducts />}
-  />
+      <Route
+        path="/products"
+        element={<AllProducts />}
+      />
 
-  <Route
-  path="/products/:id"
-  element={<ProductDetails />}
-/>
-<Route
-  path="/cart"
-  element={<Cart />}
-/>
-<Route
-  path="/checkout"
-  element={<Checkout />}
-/>
-<Route
-  path="/wishlist"
-  element={<Wishlist />}
-/>
+      <Route
+        path="/products/:id"
+        element={<ProductDetails />}
+      />
+      <Route
+        path="/product/:id"
+        element={<ProductDetails />}
+      />
+    <Route
+      path="/cart"
+      element={<Cart />}
+    />
+    <Route
+      path="/checkout"
+      element={<Checkout />}
+    />
+      <Route path="/wishlist" element={<Wishlist />} />
+      <Route path="/loyalty" element={<LoyaltyPage />} />
+      <Route path="/privilege" element={<LoyaltyPage />} />
+      <Route path="/about" element={<AboutPage />} />
+      <Route path="/contact" element={<ContactPage />} />
+      <Route path="/shipping" element={<ShippingPage />} />
+      <Route path="/returns" element={<ReturnsPage />} />
 
-  {/* Admin Login */}
-  <Route
-    path="/admin/login"
-    element={<AdminLogin />}
-  />
-  
-  <Route
-  path="/profile"
-  element={<Profile />}
-/>
+      {/* Admin Login */}
+      <Route
+        path="/admin/login"
+        element={<AdminLogin />}
+      />
+      
+      <Route
+      path="/profile"
+      element={<Profile />}
+    />
 
-  {/* Admin Routes */}
- <Route
-  path="/admin"
-  element={<AdminLayout />}
->
-  <Route
-    path="dashboard"
-    element={
-      <ProtectedRoute>
-        <Dashboard />
-      </ProtectedRoute>
-    }
-  />
+      {/* Admin Routes */}
+     <Route
+      path="/admin"
+      element={<AdminLayout />}
+    >
+      <Route
+        path="dashboard"
+        element={
+          <ProtectedRoute>
+            <Dashboard />
+          </ProtectedRoute>
+        }
+      />
 
-  <Route
-    path="products"
-    element={
-      <ProtectedRoute>
-        <Products />
-      </ProtectedRoute>
-    }
-  />
+      <Route
+        path="products"
+        element={
+          <ProtectedRoute>
+            <Products />
+          </ProtectedRoute>
+        }
+      />
 
-  <Route
-    path="orders"
-    element={
-      <ProtectedRoute>
-        <Orders />
-      </ProtectedRoute>
-    }
-  />
+      <Route
+        path="orders"
+        element={
+          <ProtectedRoute>
+            <Orders />
+          </ProtectedRoute>
+        }
+      />
 
-  <Route
-    path="customers"
-    element={
-      <ProtectedRoute>
-        <Customers />
-      </ProtectedRoute>
-    }
-  />
+      <Route
+        path="customers"
+        element={
+          <ProtectedRoute>
+            <Customers />
+          </ProtectedRoute>
+        }
+      />
 
-  <Route
-    path="homepage"
-    element={
-      <ProtectedRoute>
-        <Homepage />
-      </ProtectedRoute>
-    }
-  />
+      <Route
+        path="homepage"
+        element={
+          <ProtectedRoute>
+            <Homepage />
+          </ProtectedRoute>
+        }
+      />
 
-  <Route
-    path="reels"
-    element={
-      <ProtectedRoute>
-        <AdminReels />
-      </ProtectedRoute>
-    }
-  />
+      <Route
+        path="reels"
+        element={
+          <ProtectedRoute>
+            <AdminReels />
+          </ProtectedRoute>
+        }
+      />
 
-  <Route
-    path="banners"
-    element={
-      <ProtectedRoute>
-        <Banners />
-      </ProtectedRoute>
-    }
-  />
-  <Route path="reports" element={<Reports />} />
-</Route>
-</Routes>
+      <Route
+        path="banners"
+        element={
+          <ProtectedRoute>
+            <Banners />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="reports"
+        element={
+          <ProtectedRoute>
+            <Reports />
+          </ProtectedRoute>
+        }
+      />
+    </Route>
+    </Routes>
 
-{!isAdminRoute && <Footer />}
+    {!isAdminRoute && <Footer />}
+      </div>
 
       {/* Toast Notifications */}
       <Toaster
         position="top-right"
         reverseOrder={false}
-        />
-
-    </>
+      />
+    </div>
   );
 }
 

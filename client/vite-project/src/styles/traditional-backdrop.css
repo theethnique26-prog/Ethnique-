@@ -1,0 +1,107 @@
+/* ==========================================================================
+   ROYAL INDIAN HERITAGE BACKDROP
+   Breathing Silk Waves & Floating Golden Zari Particle Dots
+   ========================================================================== */
+
+/* Global Canvas: Clean, High-Contrast Base */
+.traditional-heritage-canvas {
+  position: relative;
+  min-height: 100vh;
+  width: 100%;
+  background-color: var(--background);
+  transition: background-color 0.4s ease, color 0.4s ease;
+  overflow-x: hidden;
+}
+
+/* Foreground Content Container - Keeps content crisp and interactive */
+.traditional-heritage-content {
+  position: relative;
+  z-index: 1;
+}
+
+/* --- KEYFRAME ANIMATIONS FOR FLOATING DOTS & SILK LIGHT --- */
+
+/* Organic Floating Silk Light Waves */
+@keyframes floatOrb1 {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+  }
+  33% {
+    transform: translate(35px, -25px) scale(1.08);
+  }
+  66% {
+    transform: translate(-25px, 20px) scale(0.95);
+  }
+}
+
+@keyframes floatOrb2 {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+  }
+  33% {
+    transform: translate(-30px, 35px) scale(1.06);
+  }
+  66% {
+    transform: translate(25px, -20px) scale(0.96);
+  }
+}
+
+@keyframes floatOrb3 {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(40px, -35px) scale(1.1);
+  }
+}
+
+/* Floating Golden Zari Dust & Star Particles with Twinkle */
+@keyframes floatGoldDust {
+  0% {
+    transform: translateY(0) translateX(0) scale(0.85) rotate(0deg);
+    opacity: 0.4;
+  }
+  25% {
+    transform: translateY(-30px) translateX(12px) scale(1.2) rotate(45deg);
+    opacity: 0.95;
+  }
+  50% {
+    transform: translateY(-65px) translateX(-8px) scale(0.9) rotate(90deg);
+    opacity: 0.55;
+  }
+  75% {
+    transform: translateY(-105px) translateX(16px) scale(1.25) rotate(135deg);
+    opacity: 0.95;
+  }
+  100% {
+    transform: translateY(-150px) translateX(0) scale(0.85) rotate(180deg);
+    opacity: 0.4;
+  }
+}
+
+.animate-floatOrb1 {
+  animation: floatOrb1 16s ease-in-out infinite;
+}
+
+.animate-floatOrb2 {
+  animation: floatOrb2 20s ease-in-out infinite;
+}
+
+.animate-floatOrb3 {
+  animation: floatOrb3 24s ease-in-out infinite;
+}
+
+.animate-floatGoldDust {
+  animation: floatGoldDust ease-in-out infinite;
+}
+
+/* Subtle Golden Hairline Divider */
+.traditional-gold-divider {
+  position: relative;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(212, 180, 131, 0.4), rgba(212, 180, 131, 0.8), rgba(212, 180, 131, 0.4), transparent);
+}
+
+html.dark .traditional-gold-divider {
+  background: linear-gradient(90deg, transparent, rgba(229, 197, 131, 0.3), rgba(229, 197, 131, 0.7), rgba(229, 197, 131, 0.3), transparent);
+}

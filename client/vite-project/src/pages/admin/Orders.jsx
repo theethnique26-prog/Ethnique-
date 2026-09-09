@@ -104,39 +104,39 @@ const handleDelete = async (id) => {
 
   return (
   <>
-    <div className="p-8">
+    <div className="space-y-6 max-w-7xl mx-auto">
 
-      <div className="flex justify-between items-center mb-8">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white dark:bg-[#18101C] rounded-3xl p-6 sm:p-8 shadow-sm border border-[#E8E2DC]/80 dark:border-[#2C1F32] transition-colors">
 
         <div>
-          <h1 className="text-3xl font-bold">
+          <h1 className="text-3xl font-serif font-bold text-[#6D1830] dark:text-[#E5C583]">
             Orders
           </h1>
 
-          <p className="text-gray-500">
-            Manage all customer orders
+          <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">
+            Manage all customer orders &amp; shipments
           </p>
         </div>
 
         <input
-          placeholder="Search..."
+          placeholder="Search orders, customers..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="border rounded-lg px-4 py-2 w-72"
+          className="border border-gray-200 dark:border-[#2C1F32] bg-white dark:bg-[#120B15] text-gray-800 dark:text-gray-100 rounded-xl px-4 py-2.5 w-72 text-sm focus:outline-none focus:border-[#6D1830]"
         />
 
       </div>
 
-      <div className="grid grid-cols-4 gap-5 mb-8">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-5">
 
-        <Card title="Orders" value={stats.totalOrders} />
-        <Card title="Pending" value={stats.pending} />
-        <Card title="Delivered" value={stats.delivered} />
-        <Card title="Revenue" value={`₹${stats.revenue || 0}`} />
+        <Card title="Total Orders" value={stats.totalOrders || 0} />
+        <Card title="Pending" value={stats.pending || 0} />
+        <Card title="Delivered" value={stats.delivered || 0} />
+        <Card title="Revenue" value={`₹${Number(stats.revenue || 0).toLocaleString("en-IN")}`} />
 
       </div>
 
-      <div className="bg-white rounded-xl shadow overflow-hidden">
+      <div className="bg-white dark:bg-[#18101C] rounded-3xl shadow-sm border border-[#E8E2DC]/80 dark:border-[#2C1F32] overflow-hidden transition-colors">
 
         <table className="w-full">
 
@@ -366,9 +366,9 @@ const handleDelete = async (id) => {
 
 function Card({ title, value }) {
   return (
-    <div className="bg-white rounded-xl shadow p-5">
-      <div className="text-gray-500">{title}</div>
-      <div className="text-3xl font-bold mt-2">{value}</div>
+    <div className="bg-white dark:bg-[#18101C] rounded-2xl shadow-sm border border-[#E8E2DC]/60 dark:border-[#2C1F32] p-5 transition-colors">
+      <div className="text-gray-500 dark:text-gray-400 text-xs font-medium uppercase tracking-wider">{title}</div>
+      <div className="text-2xl font-bold font-serif text-gray-900 dark:text-[#FAF5EF] mt-2">{value}</div>
     </div>
   );
 }

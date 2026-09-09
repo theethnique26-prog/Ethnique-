@@ -71,32 +71,28 @@ const [loading, setLoading] = useState(false);
   }
 };
 return (
-  <div className="space-y-8">
+  <div className="space-y-6 max-w-7xl mx-auto">
 
     {/* Header */}
-
-    <div className="flex items-center justify-between">
-
+    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white dark:bg-[#18101C] rounded-3xl p-6 sm:p-8 shadow-sm border border-[#E8E2DC]/80 dark:border-[#2C1F32] transition-colors">
       <div>
-        <h1 className="text-3xl font-bold">
+        <h1 className="text-3xl font-serif font-bold text-[#6D1830] dark:text-[#E5C583]">
           Homepage Management
         </h1>
 
-        <p className="text-gray-500 mt-2">
-          Manage your website hero section.
+        <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">
+          Manage your live royal storefront hero section, taglines &amp; imagery.
         </p>
       </div>
 
       <button
         onClick={save}
         disabled={loading}
-        className="bg-[#6D1830] hover:bg-[#561225] text-white px-6 py-3 rounded-xl flex items-center gap-2"
+        className="bg-[#6D1830] hover:bg-[#561225] text-white px-6 py-3 rounded-xl flex items-center gap-2 text-sm font-semibold transition shadow-md disabled:opacity-50"
       >
         <Save size={18} />
-
         {loading ? "Saving..." : "Save Changes"}
       </button>
-
     </div>
 
     <div className="grid lg:grid-cols-2 gap-8">

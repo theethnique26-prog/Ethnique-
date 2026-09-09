@@ -29,6 +29,11 @@ const clearCart = () => {
 };
 
   const addToCart = (product) => {
+    if (!product) return;
+    if (product.inStock === false || (product.stock !== undefined && Number(product.stock) <= 0)) {
+      console.warn("Cannot add out of stock product to cart:", product.name);
+      return false;
+    }
     const exists = cart.find(
       (item) =>
         item._id === product._id

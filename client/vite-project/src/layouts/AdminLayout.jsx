@@ -3,22 +3,12 @@ import AdminSidebar from "../components/admin/AdminSidebar";
 
 function AdminLayout() {
   return (
-    <div
-      style={{
-        display: "flex",
-        minHeight: "100vh",
-      }}
-    >
+    <div className="flex flex-col md:flex-row min-h-screen bg-[#F8F6F3] dark:bg-[#0E0612] text-gray-800 dark:text-gray-100 transition-colors duration-300">
       <AdminSidebar />
 
-      <div
-        style={{
-          flex: 1,
-          padding: "20px",
-        }}
-      >
+      <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto max-w-full admin-main">
         <Outlet />
-      </div>
+      </main>
     </div>
   );
 }

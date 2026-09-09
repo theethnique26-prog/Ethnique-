@@ -58,33 +58,31 @@ const handleView = async (id) => {
   }
 };
   return (
-    <div className="p-8">
+    <div className="space-y-6 max-w-7xl mx-auto">
 
-      <div className="flex justify-between items-center mb-8">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white dark:bg-[#18101C] rounded-3xl p-6 sm:p-8 shadow-sm border border-[#E8E2DC]/80 dark:border-[#2C1F32] transition-colors">
 
         <div>
-
-          <h1 className="text-3xl font-bold">
+          <h1 className="text-3xl font-serif font-bold text-[#6D1830] dark:text-[#E5C583]">
             Customers
           </h1>
 
-          <p className="text-gray-500">
-            {customers.length} Registered Customers
+          <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">
+            {customers.length} Registered Customers &bull; Jayant Saree Center
           </p>
-
         </div>
 
         <input
           type="text"
-          placeholder="Search customers..."
+          placeholder="Search customers by name or email..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="border rounded-lg px-4 py-2 w-72"
+          className="border border-gray-200 dark:border-[#2C1F32] bg-white dark:bg-[#120B15] text-gray-800 dark:text-gray-100 rounded-xl px-4 py-2.5 w-72 text-sm focus:outline-none focus:border-[#6D1830]"
         />
 
       </div>
 
-      <div className="bg-white rounded-2xl shadow overflow-hidden">
+      <div className="bg-white dark:bg-[#18101C] rounded-3xl shadow-sm border border-[#E8E2DC]/80 dark:border-[#2C1F32] overflow-hidden transition-colors">
 
         <table className="w-full">
 

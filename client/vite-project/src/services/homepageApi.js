@@ -2,10 +2,13 @@ import { API_BASE } from "./apiConfig";
 
 const BASE = `${API_BASE}/homepage`;
 
-const headers = () => ({
-  Authorization: `Bearer ${localStorage.getItem("token")}`,
-  "Content-Type": "application/json",
-});
+const headers = () => {
+  const token = localStorage.getItem("token") || localStorage.getItem("adminToken");
+  return {
+    Authorization: token ? `Bearer ${token}` : "",
+    "Content-Type": "application/json",
+  };
+};
 
 const homepageApi = {
   async getHomepage() {

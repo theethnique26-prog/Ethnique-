@@ -73,17 +73,19 @@ function Reports() {
   }
 
   return (
-    <div className="p-6 md:p-8 bg-[#F8F6F3] min-h-screen">
+    <div className="space-y-6 max-w-7xl mx-auto">
 
       {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-serif text-[#2C2C2C]">
-          Reports
-        </h1>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white dark:bg-[#18101C] rounded-3xl p-6 sm:p-8 shadow-sm border border-[#E8E2DC]/80 dark:border-[#2C1F32] transition-colors">
+        <div>
+          <h1 className="text-3xl font-serif font-bold text-[#6D1830] dark:text-[#E5C583]">
+            Reports &amp; Analytics
+          </h1>
 
-        <p className="text-gray-500 mt-2">
-          Overview of your store performance
-        </p>
+          <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">
+            Overview of store performance, revenue metrics &amp; inventory trends
+          </p>
+        </div>
       </div>
 
       {/* Summary Cards */}
@@ -322,12 +324,12 @@ function Reports() {
 
 function ReportCard({ title, value }) {
   return (
-    <div className="bg-white rounded-xl p-6 shadow-sm border border-[#E8E2DC]">
-      <p className="text-sm text-gray-500">
+    <div className="bg-white dark:bg-[#18101C] rounded-2xl p-6 shadow-sm border border-[#E8E2DC]/60 dark:border-[#2C1F32] transition-colors">
+      <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
         {title}
       </p>
 
-      <h2 className="text-2xl font-semibold mt-2 text-[#2C2C2C]">
+      <h2 className="text-2xl font-bold font-serif mt-2 text-[#2C2C2C] dark:text-[#FAF5EF]">
         {value}
       </h2>
     </div>
@@ -341,12 +343,12 @@ function ReportCard({ title, value }) {
 
 function StatusCard({ title, value }) {
   return (
-    <div className="bg-[#F8F6F3] rounded-lg p-4">
-      <p className="text-sm text-gray-500">
+    <div className="bg-[#F8F6F3] dark:bg-[#140C18] rounded-xl p-4 border border-[#E8E2DC]/60 dark:border-[#2C1F32] transition-colors">
+      <p className="text-xs font-medium text-gray-500 dark:text-gray-400">
         {title}
       </p>
 
-      <p className="text-xl font-semibold mt-1">
+      <p className="text-xl font-bold font-serif mt-1 text-gray-900 dark:text-[#FAF5EF]">
         {value}
       </p>
     </div>

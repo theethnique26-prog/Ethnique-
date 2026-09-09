@@ -14,24 +14,27 @@ import {Toaster} from "react-hot-toast";
 import {
   CountryProvider
 } from "./context/CoutryContext";
+import { ThemeProvider } from "./context/ThemeContext";
 import "./styles/theme.css";
 
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-  <CurrencyProvider>
-    <LoyaltyProvider>
-      <AuthProvider>
-        <CartProvider>
-        <CountryProvider>
-           <WishlistProvider>
-              <App />
-              <Toaster position="top-right" />
-          </WishlistProvider>
-        </CountryProvider>
-        </CartProvider>
-      </AuthProvider>
-    </LoyaltyProvider>
-  </CurrencyProvider>
+    <ThemeProvider>
+      <CurrencyProvider>
+        <AuthProvider>
+          <LoyaltyProvider>
+            <CartProvider>
+              <CountryProvider>
+                <WishlistProvider>
+                  <App />
+                  <Toaster position="top-right" />
+                </WishlistProvider>
+              </CountryProvider>
+            </CartProvider>
+          </LoyaltyProvider>
+        </AuthProvider>
+      </CurrencyProvider>
+    </ThemeProvider>
   </React.StrictMode>,
 )
