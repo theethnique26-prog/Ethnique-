@@ -26,12 +26,26 @@ const connectDB = require("./config/db");
 const bannerRoutes = require("./routes/banners");
 connectDB();  
 
+const allowedOrigins = [
+  "http://localhost:5173",
+  "http://localhost:3000",
+  "https://ethnique.netlify.app",
+  process.env.CLIENT_URL,
+].filter(Boolean);
+
 app.use(
   cors({
-    origin: [
-      "http://localhost:5173",
-      "https://ethnique.netlify.app",
-    ],
+    origin: function (origin, callback) {
+      if (!origin) return callback(null, true);
+      if (
+        allowedOrigins.includes(origin) ||
+        origin.endsWith(".vercel.app") ||
+        origin.endsWith(".netlify.app")
+      ) {
+        return callback(null, true);
+      }
+      return callback(null, true);
+    },
     methods: [
       "GET",
       "POST",
