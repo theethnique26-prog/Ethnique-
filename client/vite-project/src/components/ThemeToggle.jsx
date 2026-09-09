@@ -5,13 +5,16 @@ import { Sun, Moon, Sparkles } from "lucide-react";
 const ThemeToggle = ({ className = "", compact = false }) => {
   const { theme, toggleTheme, isDark } = useTheme();
 
+  const hasDisplayOverride = /\b(hidden|block|inline-block|flex|inline-flex)\b/.test(className);
+
   return (
     <button
       type="button"
       onClick={toggleTheme}
       aria-label={`Switch to ${isDark ? "Daylight" : "Velvet Noir"} mode`}
       className={`
-        relative inline-flex items-center
+        relative items-center
+        ${hasDisplayOverride ? "" : "inline-flex"}
         ${compact ? "w-[68px] h-[32px] p-1" : "w-[124px] h-[40px] px-2 py-1"}
         rounded-full cursor-pointer
         transition-all duration-500 ease-out

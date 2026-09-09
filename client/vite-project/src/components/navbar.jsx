@@ -224,9 +224,13 @@ const Navbar = () => {
             )}
 
             {/* Creative Dark/Light Mode Switcher */}
-            <div className="ml-1">
-              <ThemeToggle className="hidden sm:inline-flex" />
-              <ThemeToggle compact className="inline-flex sm:hidden" />
+            <div className="ml-1 flex items-center">
+              <div className="hidden sm:flex items-center">
+                <ThemeToggle />
+              </div>
+              <div className="flex sm:hidden items-center">
+                <ThemeToggle compact />
+              </div>
             </div>
 
           </div>
