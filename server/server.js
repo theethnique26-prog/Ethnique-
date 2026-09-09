@@ -58,6 +58,20 @@ app.use(
 );
 
 app.use(express.json());
+
+// Normalize URLs: if request was made without /api (e.g. /products), rewrite to /api/products
+app.use((req, res, next) => {
+  if (
+    !req.url.startsWith("/api") &&
+    req.url !== "/test" &&
+    req.url !== "/db-status" &&
+    !req.url.startsWith("/test") &&
+    !req.url.startsWith("/db-status")
+  ) {
+    req.url = "/api" + req.url;
+  }
+  next();
+});
 app.use("/api/auth", require("./routes/auth"));
 app.use("/api/admin", adminRoutes);
 app.use("/api/user", userRoutes);
