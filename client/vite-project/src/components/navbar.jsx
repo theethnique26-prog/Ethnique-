@@ -78,6 +78,31 @@ const Navbar = () => {
 
   return (
     <>
+      {/* Top Admin Mode Ribbon when logged in as administrator */}
+      {user?.role === "admin" && (
+        <div className="w-full bg-[#20050D] text-[#FAF5EF] py-2 px-4 border-b border-[#D4B483]/40 shadow-sm transition-colors relative z-50">
+          <div className="max-w-7xl mx-auto flex items-center justify-between gap-3">
+            <div className="flex items-center gap-2 text-xs">
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
+              <span className="font-bold tracking-wider text-[#E5C583] uppercase text-[11px] sm:text-xs">
+                Admin Mode Active
+              </span>
+              <span className="hidden sm:inline text-white/60 text-xs">
+                &bull; Browsing store as Administrator ({user.name || "Admin"})
+              </span>
+            </div>
+            <Link
+              to="/admin/dashboard"
+              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gradient-to-r from-[#E5C583] to-[#D4B483] hover:from-[#F3DEB0] hover:to-[#E5C583] text-[#1F0712] font-bold text-xs shadow-xs transition-all hover:scale-105 active:scale-95"
+            >
+              <ShieldCheck size={13} />
+              <span>Admin Dashboard</span>
+              <ChevronRight size={13} />
+            </Link>
+          </div>
+        </div>
+      )}
+
       {/* Top Royal Announcement Ribbon */}
       <div className="w-full bg-gradient-to-r from-[#380916] via-[#4A0E1F] to-[#380916] dark:from-[#110713] dark:via-[#1D0C22] dark:to-[#110713] text-[#F3E5D3] text-[11px] sm:text-xs tracking-[1.8px] uppercase py-2.5 px-4 text-center font-medium border-b border-[#D4B483]/35 transition-colors duration-400">
         <div className="max-w-7xl mx-auto flex items-center justify-center gap-2.5 sm:gap-4">
@@ -181,6 +206,18 @@ const Navbar = () => {
                 </span>
               )}
             </button>
+
+            {/* Direct Admin Console button when admin is browsing store */}
+            {user?.role === "admin" && (
+              <Link
+                to="/admin/dashboard"
+                className="hidden md:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gradient-to-r from-[#6D1830] to-[#8C2F4D] text-[#FAF5EF] dark:from-[#E5C583] dark:to-[#D4B483] dark:text-[#180A15] text-xs font-bold shadow-sm hover:shadow-md hover:scale-105 active:scale-95 transition-all border border-[#D4B483]/50"
+                title="Return to Admin Dashboard"
+              >
+                <ShieldCheck size={14} />
+                <span>Admin Console</span>
+              </Link>
+            )}
 
             {/* User Profile / Auth */}
             {user ? (

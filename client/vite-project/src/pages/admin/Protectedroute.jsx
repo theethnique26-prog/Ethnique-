@@ -5,7 +5,7 @@ function ProtectedRoute({ children }) {
   let user = null;
 
   try {
-    const raw = localStorage.getItem("user");
+    const raw = localStorage.getItem("user") || localStorage.getItem("adminInfo") || localStorage.getItem("admin");
     if (raw) user = JSON.parse(raw);
   } catch {
     user = null;

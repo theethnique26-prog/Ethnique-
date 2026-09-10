@@ -13,6 +13,8 @@ import {
   Clock,
   Crown,
   ChevronRight,
+  Store,
+  ExternalLink,
 } from "lucide-react";
 
 import {
@@ -86,8 +88,18 @@ function Dashboard() {
             Real-time business insights from Jayant Saree Center &bull; Ethnique
           </p>
         </div>
-        <div className="flex items-center gap-2">
-          <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-emerald-100 dark:bg-emerald-950/50 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800">
+        <div className="flex flex-wrap items-center gap-2.5">
+          <Link
+            to="/"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-2xl bg-gradient-to-r from-[#6D1830] to-[#8C2F4D] hover:from-[#581226] hover:to-[#73233D] text-[#FAF5EF] dark:from-[#E5C583] dark:to-[#D4B483] dark:text-[#180A15] text-xs font-semibold shadow-sm hover:shadow-md hover:scale-[1.02] active:scale-[0.98] transition-all"
+            title="Browse your live storefront while remaining logged in as admin"
+          >
+            <Store size={15} />
+            <span>View Live Store</span>
+            <ExternalLink size={13} className="opacity-70" />
+          </Link>
+
+          <span className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-2xl text-xs font-semibold bg-emerald-100 dark:bg-emerald-950/50 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800">
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
             Live Sync Active
           </span>

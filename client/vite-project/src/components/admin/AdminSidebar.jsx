@@ -14,6 +14,8 @@ import {
   Menu,
   X,
   Calendar,
+  Store,
+  ExternalLink,
 } from "lucide-react";
 
 import { Link, useLocation, useNavigate } from "react-router-dom";
@@ -90,7 +92,15 @@ function AdminSidebar() {
           <BrandLogo size="small" forceDark={true} />
           <span className="text-[10px] tracking-[2px] text-[#E5C583] font-bold">ADMIN</span>
         </div>
-        <div className="flex items-center gap-2.5">
+        <div className="flex items-center gap-2">
+          <Link
+            to="/"
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-[#E5C583] text-xs font-semibold transition border border-[#E5C583]/30 shadow-xs"
+            title="Go to Live Store"
+          >
+            <Store size={14} />
+            <span>Store</span>
+          </Link>
           <ThemeToggle compact />
           <button
             onClick={() => setMobileOpen(!mobileOpen)}
@@ -137,8 +147,36 @@ function AdminSidebar() {
             </button>
           </div>
 
+          {/* Quick Option to Go Back to Store as Admin */}
+          <div className="px-4 pt-4 pb-2">
+            <Link
+              to="/"
+              onClick={() => setMobileOpen(false)}
+              className="flex items-center justify-between w-full px-3.5 py-2.5 rounded-2xl bg-gradient-to-r from-[#D4B483]/20 via-[#D4B483]/10 to-transparent hover:from-[#D4B483]/30 hover:to-[#D4B483]/20 text-[#FAF5EF] border border-[#D4B483]/40 transition-all shadow-sm group hover:border-[#D4B483]/70 hover:shadow-md"
+              title="Return to the live customer storefront while remaining logged in as administrator"
+            >
+              <div className="flex items-center gap-2.5">
+                <div className="p-1.5 rounded-xl bg-[#E5C583]/20 text-[#E5C583] group-hover:scale-110 transition-transform">
+                  <Store size={16} />
+                </div>
+                <div className="text-left">
+                  <div className="font-bold text-xs text-white group-hover:text-[#E5C583] transition-colors leading-tight">
+                    Go to Store
+                  </div>
+                  <div className="text-[10px] text-[#E5C583]/80 font-medium">
+                    Browse as Admin &bull; Live
+                  </div>
+                </div>
+              </div>
+              <ExternalLink
+                size={14}
+                className="text-[#E5C583] opacity-70 group-hover:opacity-100 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform"
+              />
+            </Link>
+          </div>
+
           {/* Navigation Links */}
-          <div className="px-4 py-6 space-y-1.5 overflow-y-auto max-h-[calc(100vh-220px)]">
+          <div className="px-4 py-3 space-y-1.5 overflow-y-auto max-h-[calc(100vh-270px)]">
             {menuItems.map((item) => {
               const Icon = item.icon;
               const isActive = location.pathname === item.path;
