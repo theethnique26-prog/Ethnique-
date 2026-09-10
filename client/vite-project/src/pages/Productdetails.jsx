@@ -16,6 +16,7 @@ import {
   Scissors,
   ArrowLeft,
   Share2,
+  MessageCircle,
 } from "lucide-react";
 import toast from "react-hot-toast";
 
@@ -345,6 +346,18 @@ function ProductDetails() {
                   <ShoppingCart size={16} />
                   <span>Out of Stock • Unavailable</span>
                 </button>
+
+                <a
+                  href={`https://wa.me/917387020612?text=${encodeURIComponent(
+                    `Hello Ethnique Concierge (+91 73870 20612)! ✨\n\nI would like to inquire about restock or custom weaving for this saree:\n• Product: ${product.name}\n• Price: ₹${product.priceINR?.toLocaleString("en-IN")}\n• URL: ${window.location.href}`
+                  )}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="w-full py-3 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold uppercase tracking-wider transition duration-300 flex items-center justify-center gap-2 shadow-sm cursor-pointer"
+                >
+                  <MessageCircle size={15} />
+                  <span>Inquire Restock on WhatsApp (+91 73870 20612)</span>
+                </a>
               </div>
             ) : (
               <div className="space-y-3 pt-2">
@@ -405,6 +418,19 @@ function ProductDetails() {
                 >
                   Instant Checkout
                 </button>
+
+                {/* Request Drape Video on WhatsApp */}
+                <a
+                  href={`https://wa.me/917387020612?text=${encodeURIComponent(
+                    `Hello Ethnique Concierge (+91 73870 20612)! ✨\n\nI am interested in this saree:\n• Saree: ${product.name}\n• Price: ₹${product.priceINR?.toLocaleString("en-IN")}\n• URL: ${window.location.href}\n\nCould you please share drape videos, zari close-ups, or blouse styling options?`
+                  )}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="w-full py-3 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold uppercase tracking-wider transition duration-300 flex items-center justify-center gap-2 shadow-sm cursor-pointer"
+                >
+                  <MessageCircle size={15} />
+                  <span>Request Drape Video on WhatsApp (+91 73870 20612)</span>
+                </a>
               </div>
             )}
 

@@ -231,13 +231,13 @@ const ShippingPage = () => {
             </p>
             <div className="pt-3 flex flex-wrap justify-center gap-3">
               <a
-                href="https://wa.me/919876543210"
+                href="https://wa.me/917387020612?text=Hello%20Ethnique%20Concierge!%20I%20have%20an%20inquiry%20regarding%20shipping%20and%20orders."
                 target="_blank"
                 rel="noreferrer"
-                className="px-5 py-2.5 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs tracking-wider uppercase transition shadow-md inline-flex items-center gap-1.5"
+                className="px-5 py-2.5 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs tracking-wider uppercase transition shadow-md inline-flex items-center gap-1.5 cursor-pointer"
               >
                 <PhoneCall size={13} />
-                <span>WhatsApp Concierge</span>
+                <span>WhatsApp Concierge (+91 73870 20612)</span>
               </a>
               <Link
                 to="/contact"

@@ -1,4 +1,4 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, useRef, useEffect } from "react";
 import BrandLogo from "./BrandLogo";
 import { useLoyalty } from "../context/LoyaltyContext";
 import { useAuth } from "../context/AuthContext";
@@ -31,11 +31,44 @@ import { WishlistContext } from "../context/Wishlistcontext";
 
 const Navbar = () => {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [userDropdownOpen, setUserDropdownOpen] = useState(false);
+  const dropdownRef = useRef(null);
+  const closeTimeoutRef = useRef(null);
   const navigate = useNavigate();
   const location = useLocation();
   const { points } = useLoyalty();
   const { user, logout } = useAuth();
   const { isDark } = useTheme();
+
+  const handleMouseEnter = () => {
+    if (closeTimeoutRef.current) {
+      clearTimeout(closeTimeoutRef.current);
+      closeTimeoutRef.current = null;
+    }
+    setUserDropdownOpen(true);
+  };
+
+  const handleMouseLeave = () => {
+    if (closeTimeoutRef.current) {
+      clearTimeout(closeTimeoutRef.current);
+    }
+    closeTimeoutRef.current = setTimeout(() => {
+      setUserDropdownOpen(false);
+    }, 250);
+  };
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setUserDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      if (closeTimeoutRef.current) clearTimeout(closeTimeoutRef.current);
+    };
+  }, []);
 
   const { cart } = useContext(CartContext);
   const { wishlist } = useContext(WishlistContext);
@@ -151,60 +184,101 @@ const Navbar = () => {
 
             {/* User Profile / Auth */}
             {user ? (
-              <div className="relative group hidden sm:block">
-                <Link
-                  to="/profile"
-                  className="
-                    flex items-center gap-1.5 p-1.5 rounded-full
+              <div
+                ref={dropdownRef}
+                className="relative hidden sm:block"
+                onMouseEnter={handleMouseEnter}
+                onMouseLeave={handleMouseLeave}
+              >
+                <button
+                  type="button"
+                  onClick={() => setUserDropdownOpen((prev) => !prev)}
+                  aria-expanded={userDropdownOpen}
+                  aria-label="User account menu"
+                  className={`
+                    flex items-center gap-1.5 p-1.5 rounded-full cursor-pointer
                     hover:bg-[#EFE6DA] dark:hover:bg-[#201426]
                     text-[#2B2523] dark:text-[#F7F2EC]
                     transition-all duration-300
-                  "
+                    ${userDropdownOpen ? "bg-[#EFE6DA] dark:bg-[#201426] ring-1 ring-[#8C2F4D]/30 dark:ring-[#E5C583]/40" : ""}
+                  `}
                 >
-                  <User size={20} className="group-hover:text-[#8C2F4D] dark:group-hover:text-[#E5C583]" />
+                  <User size={20} className="hover:text-[#8C2F4D] dark:hover:text-[#E5C583]" />
                   <span className="hidden xl:inline text-xs font-medium max-w-[80px] truncate">
                     {user.name?.split(" ")[0]}
                   </span>
-                </Link>
+                </button>
 
-                {/* Dropdown Menu */}
-                <div className="absolute right-0 top-full mt-2 w-52 bg-white dark:bg-[#18101C] rounded-2xl shadow-2xl border border-[#E8DFD3] dark:border-[#2E1F33] p-2 hidden group-hover:block z-50 animate-fadeIn">
-                  <div className="px-3 py-2 border-b border-gray-100 dark:border-[#2E1F33]">
-                    <p className="text-xs font-semibold text-gray-900 dark:text-white truncate">{user.name}</p>
-                    <p className="text-[10px] text-gray-500 dark:text-gray-400 truncate">{user.email}</p>
-                    {user.role === "admin" && (
-                      <span className="inline-block mt-1 text-[10px] bg-[#6D1830]/10 text-[#6D1830] dark:bg-[#E5C583]/20 dark:text-[#E5C583] px-2 py-0.5 rounded-full font-medium">
-                        Admin
-                      </span>
-                    )}
+                {/* Dropdown Menu Container with zero-gap hover bridge */}
+                <div
+                  className={`
+                    absolute right-0 top-full pt-1.5 w-56 z-50 transition-all duration-200 origin-top-right
+                    ${
+                      userDropdownOpen
+                        ? "opacity-100 visible translate-y-0 scale-100 pointer-events-auto"
+                        : "opacity-0 invisible -translate-y-1 scale-95 pointer-events-none"
+                    }
+                  `}
+                >
+                  {/* Invisible hover bridge ensuring mouse cursor never leaves hit area */}
+                  <div className="absolute -top-3 left-0 right-0 h-4 bg-transparent" />
+
+                  <div className="bg-white dark:bg-[#18101C] rounded-2xl shadow-2xl border border-[#E8DFD3] dark:border-[#2E1F33] p-2">
+                    <div className="px-3 py-2.5 border-b border-gray-100 dark:border-[#2E1F33]">
+                      <p className="text-xs font-semibold text-gray-900 dark:text-white truncate">{user.name}</p>
+                      <p className="text-[10px] text-gray-500 dark:text-gray-400 truncate">{user.email || user.phone}</p>
+                      {user.role === "admin" && (
+                        <span className="inline-flex items-center gap-1 mt-1 text-[10px] bg-[#6D1830]/10 text-[#6D1830] dark:bg-[#E5C583]/20 dark:text-[#E5C583] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider">
+                          <ShieldCheck size={11} />
+                          Admin Console
+                        </span>
+                      )}
+                    </div>
+
+                    <div className="py-1">
+                      <Link
+                        to="/profile"
+                        onClick={() => setUserDropdownOpen(false)}
+                        className="block px-3 py-2 text-xs text-gray-700 dark:text-gray-300 hover:bg-[#FAF6F0] dark:hover:bg-[#241729] rounded-xl transition"
+                      >
+                        My Profile
+                      </Link>
+
+                      <Link
+                        to="/loyalty"
+                        onClick={() => setUserDropdownOpen(false)}
+                        className="flex items-center justify-between px-3 py-2 text-xs text-gray-700 dark:text-gray-300 hover:bg-[#FAF6F0] dark:hover:bg-[#241729] rounded-xl transition"
+                      >
+                        <span>Privilege Points</span>
+                        <span className="font-semibold text-[#8C2F4D] dark:text-[#E5C583]">{points || 0} pts</span>
+                      </Link>
+
+                      {user.role === "admin" && (
+                        <Link
+                          to="/admin/dashboard"
+                          onClick={() => setUserDropdownOpen(false)}
+                          className="flex items-center justify-between px-3 py-2 text-xs text-[#6D1830] dark:text-[#E5C583] font-bold hover:bg-[#6D1830]/10 dark:hover:bg-[#E5C583]/15 rounded-xl transition border border-[#6D1830]/25 dark:border-[#E5C583]/30 my-1 bg-[#6D1830]/5 dark:bg-[#E5C583]/10"
+                        >
+                          <span className="flex items-center gap-1.5">
+                            <ShieldCheck size={14} />
+                            Admin Dashboard
+                          </span>
+                          <ChevronRight size={13} />
+                        </Link>
+                      )}
+
+                      <button
+                        onClick={() => {
+                          setUserDropdownOpen(false);
+                          logout();
+                        }}
+                        className="w-full text-left px-3 py-2 text-xs text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/20 rounded-xl transition font-medium mt-1 flex items-center gap-1.5 cursor-pointer"
+                      >
+                        <LogOut size={13} />
+                        <span>Logout</span>
+                      </button>
+                    </div>
                   </div>
-                  <Link
-                    to="/profile"
-                    className="block px-3 py-2 text-xs text-gray-700 dark:text-gray-300 hover:bg-[#FAF6F0] dark:hover:bg-[#241729] rounded-xl transition mt-1"
-                  >
-                    My Profile
-                  </Link>
-                  <Link
-                    to="/loyalty"
-                    className="flex items-center justify-between px-3 py-2 text-xs text-gray-700 dark:text-gray-300 hover:bg-[#FAF6F0] dark:hover:bg-[#241729] rounded-xl transition"
-                  >
-                    <span>Privilege Points</span>
-                    <span className="font-semibold text-[#8C2F4D] dark:text-[#E5C583]">{points || 0} pts</span>
-                  </Link>
-                  {user.role === "admin" && (
-                    <Link
-                      to="/admin/dashboard"
-                      className="block px-3 py-2 text-xs text-[#6D1830] dark:text-[#E5C583] font-medium hover:bg-[#6D1830]/5 dark:hover:bg-[#E5C583]/10 rounded-xl transition"
-                    >
-                      Admin Dashboard
-                    </Link>
-                  )}
-                  <button
-                    onClick={logout}
-                    className="w-full text-left px-3 py-2 text-xs text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/20 rounded-xl transition font-medium mt-1"
-                  >
-                    Logout
-                  </button>
                 </div>
               </div>
             ) : (
@@ -285,13 +359,25 @@ const Navbar = () => {
                   <h4 className="text-base font-serif font-bold text-[#FAF7F2] mt-1.5">{user.name}</h4>
                   <p className="text-xs text-[#E8C58D] font-mono mt-0.5">{points || 0} Privilege Points</p>
                 </div>
-                <Link
-                  to="/profile"
-                  onClick={() => setMenuOpen(false)}
-                  className="px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-xs font-semibold text-[#E8C58D] transition border border-[#D4B483]/30"
-                >
-                  Profile
-                </Link>
+                <div className="flex flex-col gap-1.5">
+                  <Link
+                    to="/profile"
+                    onClick={() => setMenuOpen(false)}
+                    className="px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-xs font-semibold text-[#E8C58D] transition border border-[#D4B483]/30 text-center"
+                  >
+                    Profile
+                  </Link>
+                  {user.role === "admin" && (
+                    <Link
+                      to="/admin/dashboard"
+                      onClick={() => setMenuOpen(false)}
+                      className="px-2.5 py-1 rounded-xl bg-[#E5C583] hover:bg-[#D4B483] text-[11px] font-bold text-[#1F0712] transition shadow-xs text-center flex items-center justify-center gap-1"
+                    >
+                      <ShieldCheck size={12} />
+                      <span>Admin</span>
+                    </Link>
+                  )}
+                </div>
               </div>
             </div>
           ) : (

@@ -59,6 +59,10 @@ app.use(
 
 app.use(express.json());
 
+const { apiLimiter } = require("./middleware/rateLimiter");
+
+app.set("trust proxy", 1);
+
 // Normalize URLs: if request was made without /api (e.g. /products), rewrite to /api/products
 app.use((req, res, next) => {
   if (
@@ -72,6 +76,10 @@ app.use((req, res, next) => {
   }
   next();
 });
+
+// Global rate limiting for API endpoints
+app.use("/api", apiLimiter);
+
 app.use("/api/auth", require("./routes/auth"));
 app.use("/api/admin", adminRoutes);
 app.use("/api/user", userRoutes);
@@ -96,6 +104,7 @@ app.use("/api/admin/reels", reelRoutes);
 app.use("/api/payment", require("./routes/paymentRoutes"));
 app.use("/api/coupons", require("./routes/couponRoutes"));
 app.use("/api/loyalty", require("./routes/loyaltyRoutes"));
+app.use("/api/appointments", require("./routes/appointmentRoutes"));
 
 
 

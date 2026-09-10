@@ -10,14 +10,17 @@ router.put(
   authMiddleware,
   async (req, res) => {
     try {
-      const { name } = req.body;
+      const { name, phone } = req.body;
+      const updateData = {};
+      if (name !== undefined) updateData.name = name.trim();
+      if (phone !== undefined) updateData.phone = phone.trim();
 
       const user =
         await User.findByIdAndUpdate(
           req.user._id,
-          { name },
+          updateData,
           { new: true }
-        );
+        ).select("-password");
 
       res.json(user);
 

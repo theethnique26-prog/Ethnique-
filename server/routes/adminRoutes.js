@@ -6,36 +6,39 @@ const Product = require("../models/Product");
 const Order = require("../models/Order");
 const Coupon = require("../models/Coupon");
 const adminAuth = require("../middleware/Adminauth.js");
+const { authLimiter } = require("../middleware/rateLimiter");
 // const Admin = require("../models/Admin");
 
 const router = express.Router();
 
-router.post("/login", async (req, res) => {
+router.post("/login", authLimiter, async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email, phone, identifier, password } = req.body;
+    const inputIdentifier = (identifier || email || phone || "").trim();
 
-    if (!email || !password) {
+    if (!inputIdentifier || !password) {
       return res.status(400).json({
         success: false,
-        message: "Email and password are required",
+        message: "Email or phone number, and password are required",
       });
     }
 
-    const normalizedEmail = email.trim().toLowerCase();
+    const normalizedEmail = inputIdentifier.toLowerCase();
     const adminEmail = process.env.ADMIN_EMAIL ? process.env.ADMIN_EMAIL.trim().toLowerCase() : "";
+    const cleanDigits = inputIdentifier.replace(/[\s\-\(\)\.]/g, "").replace(/^\+91/, "");
 
     // Check against .env admin credentials
     if (
       adminEmail &&
-      normalizedEmail === adminEmail &&
+      (normalizedEmail === adminEmail || inputIdentifier.toLowerCase() === adminEmail) &&
       password === process.env.ADMIN_PASSWORD
     ) {
-      let admin = await User.findOne({ email: normalizedEmail });
+      let admin = await User.findOne({ email: adminEmail });
       if (!admin) {
         const hashedPassword = await bcrypt.hash(process.env.ADMIN_PASSWORD, 10);
         admin = await User.create({
           name: process.env.ADMIN_NAME || "Admin",
-          email: normalizedEmail,
+          email: adminEmail,
           password: hashedPassword,
           role: "admin",
         });
@@ -63,21 +66,31 @@ router.post("/login", async (req, res) => {
           id: admin._id,
           name: admin.name,
           email: admin.email,
+          phone: admin.phone || "",
           role: "admin",
         },
         user: {
           _id: admin._id,
           name: admin.name,
           email: admin.email,
+          phone: admin.phone || "",
           role: "admin",
         },
       });
     }
 
     // Check against DB user with admin role
+    const searchConditions = [
+      { email: normalizedEmail, role: "admin" },
+    ];
+    if (cleanDigits) {
+      searchConditions.push({ phone: cleanDigits, role: "admin" });
+      searchConditions.push({ phone: `+91${cleanDigits}`, role: "admin" });
+      searchConditions.push({ phone: inputIdentifier, role: "admin" });
+    }
+
     const admin = await User.findOne({
-      email: normalizedEmail,
-      role: "admin",
+      $or: searchConditions,
     });
 
     if (!admin) {

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { User, Mail, MapPin, Gift, LogOut, Package, Crown, Plus, CheckCircle2, ChevronRight, X } from "lucide-react";
+import { User, Mail, MapPin, Gift, LogOut, Package, Crown, Plus, CheckCircle2, ChevronRight, X, Phone } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import { useLoyalty } from "../context/LoyaltyContext";
 import { API_BASE } from "../services/apiConfig.js";
@@ -63,6 +63,7 @@ const Profile = () => {
   const [ordersLoading, setOrdersLoading] = useState(true);
   const [editing, setEditing] = useState(false);
   const [newName, setNewName] = useState(user?.name || "");
+  const [newPhone, setNewPhone] = useState(user?.phone || "");
   const [showAddressModal, setShowAddressModal] = useState(false);
 
   const [addressForm, setAddressForm] = useState({
@@ -80,6 +81,8 @@ const Profile = () => {
       navigate("/login");
       return;
     }
+    setNewName(user?.name || "");
+    setNewPhone(user?.phone || "");
     fetchAddresses();
     fetchMyOrders();
   }, [user]);
@@ -132,7 +135,10 @@ const Profile = () => {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ name: newName.trim() }),
+        body: JSON.stringify({
+          name: newName.trim(),
+          phone: newPhone.trim(),
+        }),
       });
 
       const data = await res.json();
@@ -208,6 +214,12 @@ const Profile = () => {
                 <Mail size={13} />
                 <span>{user?.email}</span>
               </p>
+              {user?.phone && (
+                <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-0.5 flex items-center gap-1.5">
+                  <Phone size={13} />
+                  <span>+91 {user.phone}</span>
+                </p>
+              )}
             </div>
           </div>
 
@@ -215,11 +227,12 @@ const Profile = () => {
             <button
               onClick={() => {
                 setNewName(user?.name || "");
+                setNewPhone(user?.phone || "");
                 setEditing(true);
               }}
-              className="px-4 py-2 rounded-xl border border-gray-200 dark:border-[#38283E] text-xs font-semibold hover:bg-gray-50 dark:hover:bg-[#201426] transition"
+              className="px-4 py-2 rounded-xl border border-gray-200 dark:border-[#38283E] text-xs font-semibold hover:bg-gray-50 dark:hover:bg-[#201426] transition cursor-pointer"
             >
-              Edit Name
+              Edit Profile
             </button>
             <button
               onClick={logout}
@@ -449,30 +462,58 @@ const Profile = () => {
         </div>
       </div>
 
-      {/* Edit Name Modal */}
+      {/* Edit Profile Modal */}
       {editing && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-white dark:bg-[#18101C] border border-[#D4B483]/40 rounded-3xl p-6 max-w-sm w-full shadow-2xl">
             <h3 className="text-lg font-serif font-bold text-gray-900 dark:text-white mb-4">
-              Edit Your Name
+              Edit Your Profile
             </h3>
-            <input
-              type="text"
-              value={newName}
-              onChange={(e) => setNewName(e.target.value)}
-              className="w-full border border-gray-200 dark:border-[#38283E] bg-gray-50 dark:bg-[#201426] text-gray-900 dark:text-white rounded-xl p-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#8B1E3F]"
-              placeholder="Your full name"
-            />
-            <div className="flex gap-3 mt-5">
+            <div className="space-y-3.5">
+              <div>
+                <label className="block text-[11px] font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1">
+                  Full Name
+                </label>
+                <input
+                  type="text"
+                  value={newName}
+                  onChange={(e) => setNewName(e.target.value)}
+                  className="w-full border border-gray-200 dark:border-[#38283E] bg-gray-50 dark:bg-[#201426] text-gray-900 dark:text-white rounded-xl p-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#8B1E3F]"
+                  placeholder="Your full name"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1">
+                  Mobile Number (+91)
+                </label>
+                <div className="relative flex items-center">
+                  <span className="absolute left-3 text-xs font-semibold text-gray-500 dark:text-gray-400 border-r border-gray-300 dark:border-gray-700 pr-2">
+                    +91
+                  </span>
+                  <input
+                    type="tel"
+                    value={newPhone}
+                    onChange={(e) => setNewPhone(e.target.value.replace(/\D/g, "").slice(0, 10))}
+                    className="w-full pl-14 pr-3 py-3 border border-gray-200 dark:border-[#38283E] bg-gray-50 dark:bg-[#201426] text-gray-900 dark:text-white rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#8B1E3F]"
+                    placeholder="10-digit mobile number"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="flex gap-3 mt-6">
               <button
+                type="button"
                 onClick={() => setEditing(false)}
-                className="flex-1 py-2.5 rounded-xl border border-gray-300 dark:border-gray-700 text-xs font-semibold hover:bg-gray-100"
+                className="flex-1 py-2.5 rounded-xl border border-gray-300 dark:border-gray-700 text-xs font-semibold hover:bg-gray-100 dark:hover:bg-gray-800 transition cursor-pointer"
               >
                 Cancel
               </button>
               <button
+                type="button"
                 onClick={updateProfile}
-                className="flex-1 py-2.5 rounded-xl bg-[#8B1E3F] hover:bg-[#721833] text-white text-xs font-semibold uppercase tracking-wider"
+                className="flex-1 py-2.5 rounded-xl bg-[#8B1E3F] hover:bg-[#721833] text-white text-xs font-semibold uppercase tracking-wider transition cursor-pointer"
               >
                 Save
               </button>

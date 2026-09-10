@@ -352,6 +352,22 @@ const handleDelete = async (id) => {
 
             </div>
 
+            {selectedOrder.shippingAddress?.phone && (
+              <div className="mt-4 pt-4 border-t flex items-center justify-between">
+                <span className="text-xs text-gray-500">Concierge Helpline: +91 73870 20612</span>
+                <a
+                  href={`https://wa.me/91${selectedOrder.shippingAddress.phone.replace(/\D/g, "").slice(-10)}?text=${encodeURIComponent(
+                    `Hello ${selectedOrder.shippingAddress.fullName || "Customer"}! ✨ Greetings from Ethnique Concierge (+91 73870 20612).\n\nYour order #${selectedOrder._id.slice(-6).toUpperCase()} status is currently: *${selectedOrder.orderStatus}*.\nTotal: ₹${selectedOrder.totalAmount}\n\nThank you for choosing Ethnique!`
+                  )}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold uppercase tracking-wider transition shadow-sm cursor-pointer"
+                >
+                  <span>Notify Client via WhatsApp</span>
+                </a>
+              </div>
+            )}
+
           </div>
 
         </div>

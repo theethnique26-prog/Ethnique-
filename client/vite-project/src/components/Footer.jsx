@@ -277,8 +277,10 @@ const Footer = () => {
             </h3>
             <div className="space-y-2 text-xs text-gray-600 dark:text-gray-400 leading-relaxed font-light">
               <p className="font-semibold text-gray-800 dark:text-gray-200">Boutique Inquiries</p>
-              <p>support@ethniquebyjayant.com</p>
-              <p>+91 98765 43210</p>
+              <a href="mailto:support@ethniquebyjayant.com" className="hover:underline block">support@ethniquebyjayant.com</a>
+              <a href="https://wa.me/917387020612" target="_blank" rel="noreferrer" className="hover:underline block text-[#6D1830] dark:text-[#E5C583] font-medium">
+                +91 73870 20612 (WhatsApp)
+              </a>
               <p className="pt-2 text-[11px] text-gray-500">
                 Mon - Sat: 10:00 AM - 7:00 PM IST
               </p>

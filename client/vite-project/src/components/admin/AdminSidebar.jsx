@@ -13,6 +13,7 @@ import {
   Film,
   Menu,
   X,
+  Calendar,
 } from "lucide-react";
 
 import { Link, useLocation, useNavigate } from "react-router-dom";
@@ -73,6 +74,11 @@ function AdminSidebar() {
       name: "Reports",
       icon: BarChart3,
       path: "/admin/reports",
+    },
+    {
+      name: "Appointments",
+      icon: Calendar,
+      path: "/admin/appointments",
     },
   ];
 

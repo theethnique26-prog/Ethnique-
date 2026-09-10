@@ -28,11 +28,18 @@ function AdminLogin() {
     setSubmitting(true);
 
     try {
+      const payload = {
+        identifier: formData.email.trim(),
+        email: formData.email.trim(),
+        phone: formData.email.trim(),
+        password: formData.password,
+      };
+
       // First try dedicated /admin/login endpoint
       let response = await fetch(`${API_BASE}/admin/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(payload),
       });
 
       let data = await response.json();
@@ -42,7 +49,7 @@ function AdminLogin() {
         const fallbackRes = await fetch(`${API_BASE}/auth/login`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(formData),
+          body: JSON.stringify(payload),
         });
 
         if (fallbackRes.ok) {
@@ -116,17 +123,17 @@ function AdminLogin() {
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
               <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-2">
-                Admin Email
+                Admin Email or Mobile Number
               </label>
               <div className="relative">
                 <Mail size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500" />
                 <input
                   required
-                  type="email"
+                  type="text"
                   name="email"
                   value={formData.email}
                   onChange={handleChange}
-                  placeholder="admin@ethnique.com"
+                  placeholder="admin@ethnique.com or 10-digit mobile"
                   className="w-full pl-10 pr-4 py-3.5 rounded-2xl border border-gray-200 dark:border-[#2C1F32] bg-white dark:bg-[#120B15] text-gray-900 dark:text-[#FAF5EF] placeholder-gray-400 dark:placeholder-gray-500 text-sm focus:outline-none focus:border-[#6D1830] dark:focus:border-[#E5C583] focus:ring-2 focus:ring-[#6D1830]/20 transition"
                 />
               </div>

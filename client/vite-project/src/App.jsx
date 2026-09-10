@@ -21,6 +21,7 @@ import Customers from "./pages/admin/Customers.jsx";
 import Cart from "./pages/Cart";
 import Checkout from "./pages/Checkout.jsx";
 import LoyaltyFloating from "../src/components/Loaylatyfloating.jsx";
+import WhatsAppFloating from "../src/components/WhatsAppFloating.jsx";
 import Wishlist from "./pages/Wishlist.jsx";
 import { Toaster } from "react-hot-toast";
 import Footer from "../src/components/Footer.jsx";
@@ -37,6 +38,7 @@ import Banners from "./pages/admin/Banners.jsx";
 import AdminLayout from "./layouts/AdminLayout.jsx";
 import AdminReels from "../src/pages/admin/AdminReels.jsx";
 import Reports from "./pages/admin/Reports.jsx";
+import AdminAppointments from "./pages/admin/AdminAppointments.jsx";
 import AnimatedRoyalBackdrop from "./components/AnimatedRoyalBackdrop.jsx";
 
 function AppContent() {
@@ -52,7 +54,10 @@ function AppContent() {
         {!isAdminRoute && <Navbar />}
 
         {!isAdminRoute && (
-          <LoyaltyFloating />
+          <>
+            <LoyaltyFloating />
+            <WhatsAppFloating />
+          </>
         )}
 
         <Routes>
@@ -177,6 +182,14 @@ function AppContent() {
           </ProtectedRoute>
         }
       />
+      <Route
+        path="appointments"
+        element={
+          <ProtectedRoute>
+            <AdminAppointments />
+          </ProtectedRoute>
+        }
+      />
     </Route>
     </Routes>
 
@@ -194,10 +207,9 @@ function AppContent() {
 
 function App() {
   return (
-    <Router>
+    <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <AppContent />
     </Router>
-
   );
 }
 
