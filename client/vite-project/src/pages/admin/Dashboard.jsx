@@ -13,8 +13,6 @@ import {
   Clock,
   Crown,
   ChevronRight,
-  Store,
-  ExternalLink,
 } from "lucide-react";
 
 import {
@@ -27,7 +25,6 @@ import {
 
 function Dashboard() {
   const [data, setData] = useState(null);
-  const [appointments, setAppointments] = useState([]);
 
   useEffect(() => {
     fetchDashboardData();
@@ -41,15 +38,6 @@ function Dashboard() {
       }
     } catch (error) {
       console.error("Dashboard fetch error:", error);
-    }
-
-    try {
-      const aptRes = await customerApi.get("/appointments", true);
-      if (aptRes && aptRes.success) {
-        setAppointments(aptRes.appointments || []);
-      }
-    } catch (e) {
-      console.error("Appointments fetch error:", e);
     }
   };
 
@@ -89,124 +77,12 @@ function Dashboard() {
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2.5">
-          <Link
-            to="/"
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-2xl bg-gradient-to-r from-[#6D1830] to-[#8C2F4D] hover:from-[#581226] hover:to-[#73233D] text-[#FAF5EF] dark:from-[#E5C583] dark:to-[#D4B483] dark:text-[#180A15] text-xs font-semibold shadow-sm hover:shadow-md hover:scale-[1.02] active:scale-[0.98] transition-all"
-            title="Browse your live storefront while remaining logged in as admin"
-          >
-            <Store size={15} />
-            <span>View Live Store</span>
-            <ExternalLink size={13} className="opacity-70" />
-          </Link>
-
           <span className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-2xl text-xs font-semibold bg-emerald-100 dark:bg-emerald-950/50 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800">
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
             Live Sync Active
           </span>
         </div>
       </div>
-
-      {/* VIP Consultation & Saree Drape Appointments Card */}
-      {appointments.length > 0 && (
-        <div className="bg-gradient-to-r from-[#FAF5ED] via-[#F4E8D7] to-[#ECE0CD] dark:from-[#241320] dark:via-[#2F172B] dark:to-[#1A0C17] rounded-3xl p-6 sm:p-7 border border-[#D4B483]/50 shadow-md">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
-            <div className="flex items-center gap-2.5">
-              <span className="p-2 rounded-2xl bg-[#6D1830] text-[#E5C583] shadow-sm">
-                <Crown size={20} />
-              </span>
-              <div>
-                <h2 className="font-serif font-bold text-lg text-gray-900 dark:text-[#FAF5EF]">
-                  VIP Saree Consultation Bookings ({appointments.length})
-                </h2>
-                <p className="text-xs text-gray-600 dark:text-gray-400">
-                  Clients awaiting 1-on-1 video saree drapes & flagship atelier sessions
-                </p>
-              </div>
-            </div>
-
-            <Link
-              to="/admin/appointments"
-              className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#6D1830] dark:text-[#E5C583] hover:underline"
-            >
-              <span>View All in Calendar</span>
-              <ChevronRight size={14} />
-            </Link>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-            {appointments.slice(0, 3).map((apt) => {
-              const cleanPhone = (apt.clientPhone || "").replace(/\D/g, "").slice(-10);
-              const isVideo = apt.sessionType?.toLowerCase().includes("video");
-
-              return (
-                <div
-                  key={apt._id}
-                  className="p-4 rounded-2xl bg-white/85 dark:bg-[#1C1220]/85 border border-[#D4B483]/30 shadow-sm space-y-2.5"
-                >
-                  <div className="flex items-center justify-between text-xs">
-                    <span className="font-mono font-bold text-[#6D1830] dark:text-[#E5C583]">
-                      {apt.bookingRef}
-                    </span>
-                    <span
-                      className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${
-                        isVideo
-                          ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300"
-                          : "bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300"
-                      }`}
-                    >
-                      {apt.sessionType}
-                    </span>
-                  </div>
-
-                  <div>
-                    <h3 className="font-bold text-sm text-gray-900 dark:text-white">
-                      {apt.clientName}
-                    </h3>
-                    <p className="text-xs text-gray-600 dark:text-gray-400">
-                      +91 {apt.clientPhone} • {apt.clientEmail}
-                    </p>
-                  </div>
-
-                  <div className="flex items-center gap-3 text-xs text-gray-700 dark:text-gray-300 bg-black/5 dark:bg-white/5 px-2.5 py-1.5 rounded-xl font-medium">
-                    <div className="flex items-center gap-1">
-                      <Calendar size={12} className="text-[#6D1830] dark:text-[#E5C583]" />
-                      <span>{apt.date}</span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <Clock size={12} className="text-[#6D1830] dark:text-[#E5C583]" />
-                      <span>{apt.timeSlot}</span>
-                    </div>
-                  </div>
-
-                  <div className="text-xs text-gray-600 dark:text-gray-400">
-                    <span className="font-semibold text-gray-800 dark:text-gray-200">Requirements: </span>
-                    <span>{apt.consultationFocus}</span>
-                    {apt.notes && (
-                      <span className="italic block mt-0.5 text-[#6D1830] dark:text-[#E5C583]">
-                        "{apt.notes}"
-                      </span>
-                    )}
-                  </div>
-
-                  {cleanPhone && (
-                    <a
-                      href={`https://wa.me/91${cleanPhone}?text=${encodeURIComponent(
-                        `Hello ${apt.clientName}! ✨ Greetings from Ethnique Concierge (+91 73870 20612). We have received your booking (${apt.bookingRef}) for a ${apt.sessionType} on ${apt.date} at ${apt.timeSlot}. Regarding your notes: "${apt.notes || apt.consultationFocus}", our master stylist is ready!`
-                      )}`}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="w-full py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold uppercase tracking-wider transition shadow-sm flex items-center justify-center gap-1.5 cursor-pointer"
-                    >
-                      <MessageCircle size={13} />
-                      <span>Connect on WhatsApp</span>
-                    </a>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      )}
 
       {/* Metrics Row */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 sm:gap-6">

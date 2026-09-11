@@ -38,7 +38,8 @@ import Banners from "./pages/admin/Banners.jsx";
 import AdminLayout from "./layouts/AdminLayout.jsx";
 import AdminReels from "../src/pages/admin/AdminReels.jsx";
 import Reports from "./pages/admin/Reports.jsx";
-import AdminAppointments from "./pages/admin/AdminAppointments.jsx";
+import AdminCoupons from "./pages/admin/AdminCoupons.jsx";
+import AdminReviews from "./pages/admin/AdminReviews.jsx";
 import AnimatedRoyalBackdrop from "./components/AnimatedRoyalBackdrop.jsx";
 
 function AppContent() {
@@ -183,10 +184,18 @@ function AppContent() {
         }
       />
       <Route
-        path="appointments"
+        path="coupons"
         element={
           <ProtectedRoute>
-            <AdminAppointments />
+            <AdminCoupons />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="reviews"
+        element={
+          <ProtectedRoute>
+            <AdminReviews />
           </ProtectedRoute>
         }
       />

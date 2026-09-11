@@ -18,8 +18,9 @@ import {
   ShieldCheck,
   Star,
 } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useLoyalty } from "../context/LoyaltyContext";
+import { useAuth } from "../context/AuthContext";
 import { API_BASE } from "../services/apiConfig";
 import toast from "react-hot-toast";
 
@@ -123,27 +124,27 @@ const GLAM_COUPONS = [
   },
 ];
 
-// 3 Simple Glam Clan Membership Tiers (Myntra Glam Clan style)
+// 3 Simple Privilege Club Membership Tiers
 const GLAM_TIERS = [
   {
     id: "insider",
-    name: "Clan Insider",
+    name: "Club Insider",
     subtitle: "Level 1 • Auto Unlocked",
     minPts: 0,
     maxPts: 499,
-    tagline: "Welcome to the Clan",
+    tagline: "Welcome to the Club",
     badge: "Entry Tier",
     badgeStyle: "bg-stone-200 dark:bg-stone-800 text-stone-800 dark:text-stone-200 border-stone-300",
     cardGradient: "from-stone-50 to-amber-50/40 dark:from-[#18111A] dark:to-[#221424]",
     perks: [
-      "Free standard delivery on orders above ₹999",
+      "Standard delivery on orders above ₹999",
       "Welcome voucher code FIRSTGLAM (₹200 OFF)",
-      "Earn 1 Clan Point on every ₹10 spent",
+      "Earn 1 Club Point on every ₹10 spent (1 pt = ₹5)",
     ],
   },
   {
     id: "elite",
-    name: "Clan Elite",
+    name: "Club Elite",
     subtitle: "Level 2 • 500+ Points",
     minPts: 500,
     maxPts: 1499,
@@ -153,7 +154,7 @@ const GLAM_TIERS = [
     badgeStyle: "bg-gradient-to-r from-[#B8860B] to-[#D4AF37] text-white border-transparent shadow-sm",
     cardGradient: "from-[#FDF8F0] via-[#FAF1E3] to-[#F5E6CE] dark:from-[#291722] dark:via-[#351A2C] dark:to-[#23121E]",
     perks: [
-      "FREE Delivery on ALL orders (zero minimum purchase)",
+      "Free Delivery on ALL orders (zero minimum purchase)",
       "Extra 5% Instant Discount code ELITE5 on checkout",
       "12-Hour Early Access to big seasonal sale drops",
       "Earn 1.5x points on all saree purchases",
@@ -161,7 +162,7 @@ const GLAM_TIERS = [
   },
   {
     id: "ultimate",
-    name: "Ultimate Glam Clan",
+    name: "VIP Royal Club",
     subtitle: "Level 3 • 1,500+ Points",
     minPts: 1500,
     maxPts: Infinity,
@@ -170,9 +171,9 @@ const GLAM_TIERS = [
     badgeStyle: "bg-gradient-to-r from-[#6D1830] to-[#8C2F4D] text-[#E8C58D] border-[#E8C58D]/40 shadow-sm",
     cardGradient: "from-[#FDF3F5] via-[#F8E2E8] to-[#F3D1DC] dark:from-[#351322] dark:via-[#44182C] dark:to-[#280C19]",
     perks: [
+      "2x points earning on all saree purchases",
+      "Free Delivery on all orders pan-India",
       "Flat 10% OFF code ULTIMATE10 on every single purchase",
-      "Free Priority 2-Day Air Express Shipping pan-India",
-      "Complimentary Fall & Pico stitching on every saree",
       "24-Hour VIP Early Sale Access before anyone else",
     ],
   },
@@ -183,7 +184,7 @@ const HOW_IT_WORKS = [
   {
     step: "01",
     title: "Shop Sarees",
-    desc: "Earn Clan points automatically with every saree you purchase.",
+    desc: "Earn Club points automatically with every saree you purchase (1 pt = ₹5).",
     icon: ShoppingBag,
   },
   {
@@ -194,8 +195,8 @@ const HOW_IT_WORKS = [
   },
   {
     step: "03",
-    title: "Unlock VIP Clan Status",
-    desc: "Reach Ultimate Glam Clan for zero shipping fees and 24h early access.",
+    title: "Unlock VIP Royal Club",
+    desc: "Reach VIP Royal Club for 2x points earning, Free Delivery, and 24h early access.",
     icon: Crown,
   },
 ];
@@ -207,17 +208,20 @@ const SIMPLE_FAQS = [
     a: "Simply click 'Copy Code' on any coupon card above. At checkout, paste the code in the promo/coupon box, and your discount will be applied immediately.",
   },
   {
-    q: "How do I upgrade to Ultimate Glam Clan?",
-    a: "You automatically upgrade as you accumulate points from purchases (1 point per ₹10 spent). Once you cross 1,500 points, your pass updates to Ultimate Glam Clan instantly!",
+    q: "How do I upgrade to VIP Royal Club?",
+    a: "You automatically upgrade as you accumulate points from purchases (1 point per ₹10 spent). Once you cross 1,500 points, your pass updates to VIP Royal Club instantly with 2x points earning!",
   },
   {
     q: "Can I use coupons with Free Delivery?",
-    a: "Yes! Clan Elite and Ultimate members get free shipping automatically on all orders, so you can still apply any flat discount coupon code on top.",
+    a: "Yes! Club Elite and VIP Royal members get free delivery automatically on all orders, so you can still apply any flat discount coupon code on top.",
   },
 ];
 
 function Loyalty() {
   const { points, tier, canClaimBonus, nextClaimInHours, claimDailyBonus } = useLoyalty();
+  const { user } = useAuth();
+  const navigate = useNavigate();
+
   const [copiedCode, setCopiedCode] = useState(null);
   const [activeFilter, setActiveFilter] = useState("all"); // 'all' | 'flat' | 'percent' | 'shipping' | 'vip'
   const [activeFaq, setActiveFaq] = useState(null);
@@ -225,6 +229,14 @@ function Loyalty() {
   const [claiming, setClaiming] = useState(false);
 
   const currentPoints = points || 0;
+
+  // Protect page: redirect unauthenticated users to login
+  useEffect(() => {
+    if (!user) {
+      toast("Please sign in to access your Privilege Club rewards", { icon: "👑" });
+      navigate("/login", { state: { from: "/loyalty" } });
+    }
+  }, [user, navigate]);
 
   // Fetch active coupons from backend if available
   useEffect(() => {
@@ -267,8 +279,8 @@ function Loyalty() {
   }, []);
 
   // Determine current member tier from backend tier or fallback
-  const currentTierName = tier?.name || (currentPoints >= 1500 ? "Ultimate Glam Clan" : currentPoints >= 500 ? "Clan Elite" : "Clan Insider");
-  const nextTierName = tier?.nextTier || (currentPoints >= 1500 ? "Highest Status" : currentPoints >= 500 ? "Ultimate Glam Clan" : "Clan Elite");
+  const currentTierName = tier?.name || (currentPoints >= 1500 ? "VIP Royal Club" : currentPoints >= 500 ? "Club Elite" : "Club Insider");
+  const nextTierName = tier?.nextTier || (currentPoints >= 1500 ? "Highest Status" : currentPoints >= 500 ? "VIP Royal Club" : "Club Elite");
   const pointsNeeded = tier?.pointsNeeded !== undefined ? tier.pointsNeeded : Math.max(0, 500 - currentPoints);
   const progressPercent = tier?.progressPercent !== undefined ? tier.progressPercent : Math.min((currentPoints / 500) * 100, 100);
 
@@ -310,15 +322,15 @@ function Loyalty() {
           {/* Badge */}
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-[#D4B483]/50 bg-[#D4B483]/10 backdrop-blur-md text-[#8C2F4D] dark:text-[#E8C58D] text-xs uppercase tracking-[0.25em] font-semibold mb-4 shadow-sm">
             <Crown size={14} className="text-[#B8860B]" />
-            <span>Ethnique Privilege • Ultimate Glam Clan</span>
+            <span>Ethnique Privilege • VIP Royal Club</span>
           </div>
 
           <h1 className="text-3xl sm:text-5xl md:text-6xl font-serif text-[var(--text-primary)] tracking-tight font-medium">
-            Member Coupons & Glam Clan
+            Member Coupons & Privilege Club
           </h1>
 
           <p className="mt-3.5 text-[var(--text-muted)] text-sm sm:text-base max-w-xl mx-auto font-light leading-relaxed">
-            Instant copy coupons, flat checkout savings, and zero-delivery perks. Simple rewards with zero complex rules.
+            Instant copy coupons, flat checkout savings (1 pt = ₹5), and Free Delivery perks.
           </p>
         </div>
       </section>
@@ -346,10 +358,10 @@ function Loyalty() {
 
                 <div>
                   <h2 className="text-2xl sm:text-3xl font-serif font-medium text-[#FAF7F2]">
-                    Ultimate Glam Clan Pass
+                    VIP Royal Club Pass
                   </h2>
                   <p className="text-xs sm:text-sm text-white/70 mt-1 font-light">
-                    Use member coupons below at checkout for instant discounts.
+                    Use member coupons below at checkout for instant discounts. (1 pt = ₹5)
                   </p>
                 </div>
 
@@ -370,7 +382,7 @@ function Loyalty() {
                 ) : (
                   <div className="text-xs text-[#E8C58D] flex items-center gap-1.5 font-medium pt-1">
                     <Sparkles size={14} />
-                    <span>Unlocked: Ultimate Glam Clan VIP Status</span>
+                    <span>Unlocked: VIP Royal Club Status (2x Points)</span>
                   </div>
                 )}
               </div>
@@ -564,17 +576,17 @@ function Loyalty() {
         </div>
       </section>
 
-      {/* 4. Myntra Glam Clan Tiers (Clean, 3 Simple Levels) */}
+      {/* 4. Privilege Club Tiers (Clean, 3 Simple Levels) */}
       <section className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 mb-24">
         <div className="text-center mb-12">
           <span className="text-[#8C2F4D] dark:text-[#E8C58D] text-xs uppercase tracking-[0.25em] font-semibold">
             Privilege Levels
           </span>
           <h2 className="text-2xl sm:text-4xl font-serif text-[var(--text-primary)] font-medium mt-1">
-            Ultimate Glam Clan Tiers
+            Privilege Club Tiers
           </h2>
           <p className="text-xs sm:text-sm text-[var(--text-muted)] mt-1.5 max-w-lg mx-auto">
-            Modeled after Myntra Glam Clan: straightforward perks that save you money on every drape.
+            Transparent perks: 1 point = ₹5 redemption, 2x earning in VIP Royal, and Free Delivery.
           </p>
         </div>
 
@@ -651,14 +663,14 @@ function Loyalty() {
         </div>
       </section>
 
-      {/* 5. Simple 3 Steps: How Clan Works */}
+      {/* 5. Simple 3 Steps: How Club Works */}
       <section className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 mb-24">
         <div className="text-center mb-10">
           <span className="text-[#8C2F4D] dark:text-[#E8C58D] text-xs uppercase tracking-[0.25em] font-semibold">
             Zero Hassle
           </span>
           <h2 className="text-2xl sm:text-3xl font-serif text-[var(--text-primary)] font-medium mt-1">
-            How The Clan Works
+            How The Club Works
           </h2>
         </div>
 

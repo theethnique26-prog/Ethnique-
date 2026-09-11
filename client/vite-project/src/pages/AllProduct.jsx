@@ -13,6 +13,8 @@ import {
   Layers,
   SlidersHorizontal,
   ArrowUpDown,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import { useNavigate, useSearchParams, Link } from "react-router-dom";
 import { API_BASE } from "../services/apiConfig.js";
@@ -30,6 +32,11 @@ function AllProducts() {
   const [quickViewProduct, setQuickViewProduct] = useState(null);
   const [addedAnimId, setAddedAnimId] = useState(null);
 
+  const [priceFilter, setPriceFilter] = useState("all"); // 'all' | '5k-100k' | '5k-25k' | '25k-50k' | '50k-100k'
+  const [minPrice, setMinPrice] = useState(5000);
+  const [maxPrice, setMaxPrice] = useState(100000);
+  const [quickViewImageIdx, setQuickViewImageIdx] = useState(0);
+
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { addToCart } = useContext(CartContext);
@@ -41,9 +48,11 @@ function AllProducts() {
     // Support category query param like /products?cat=cotton
     const catParam = searchParams.get("cat");
     if (catParam) {
-      if (catParam.toLowerCase() === "cotton") setSelectedCategory("Cotton");
-      if (catParam.toLowerCase() === "silk") setSelectedCategory("Silk");
-      if (catParam.toLowerCase() === "bridal") setSelectedCategory("Bridal");
+      const lower = catParam.toLowerCase();
+      if (lower === "cotton") setSelectedCategory("Cotton");
+      else if (lower === "art") setSelectedCategory("Art");
+      else if (lower === "silk") setSelectedCategory("Silk");
+      else if (lower === "maheshwari" || lower === "maheswari") setSelectedCategory("Maheshwari");
     }
   }, [searchParams]);
 
@@ -90,34 +99,55 @@ function AllProducts() {
     setTimeout(() => setAddedAnimId(null), 1600);
   };
 
+  // Nike-Style Saree Categories requested by user
+  const categories = [
+    "All",
+    "Cotton",
+    "Art",
+    "Silk",
+    "Maheshwari",
+  ];
+
   // Filter and Sort Products
   const filteredAndSortedProducts = useMemo(() => {
     let result = products.filter((product) => {
       const name = (product.name || "").toLowerCase();
       const highlight = (product.highlight || "").toLowerCase();
       const category = (product.category || "").toLowerCase();
+      const fabric = (product.fabric || "").toLowerCase();
       const searchLower = search.toLowerCase();
 
       // Search matching
       const matchesSearch =
         name.includes(searchLower) ||
         highlight.includes(searchLower) ||
-        category.includes(searchLower);
+        category.includes(searchLower) ||
+        fabric.includes(searchLower);
 
       if (!matchesSearch) return false;
 
-      // Category matching
-      if (selectedCategory === "All") return true;
-      if (selectedCategory === "Bridal")
-        return name.includes("bridal") || name.includes("wedding") || category.includes("bridal") || highlight.includes("bridal") || name.includes("zari");
-      if (selectedCategory === "Printed")
-        return name.includes("printed") || highlight.includes("printed") || category.includes("print");
-      if (selectedCategory === "Festive")
-        return name.includes("festive") || name.includes("zari") || name.includes("silk") || category.includes("festive");
-      if (selectedCategory === "Cotton")
-        return name.includes("cotton") || category.includes("cotton");
-      if (selectedCategory === "Silk")
-        return name.includes("silk") || category.includes("silk");
+      // Category matching: 1) Cotton, 2) Art, 3) Silk, 4) Maheshwari
+      if (selectedCategory === "Cotton") {
+        const isCotton = name.includes("cotton") || category.includes("cotton") || highlight.includes("cotton") || fabric.includes("cotton");
+        if (!isCotton) return false;
+      } else if (selectedCategory === "Art") {
+        const isArt = name.includes("art") || category.includes("art") || highlight.includes("art") || fabric.includes("art");
+        if (!isArt) return false;
+      } else if (selectedCategory === "Silk") {
+        const isSilk = name.includes("silk") || category.includes("silk") || highlight.includes("silk") || fabric.includes("silk") || name.includes("zari");
+        if (!isSilk) return false;
+      } else if (selectedCategory === "Maheshwari") {
+        const isMaheshwari = name.includes("maheshwari") || name.includes("maheswari") || category.includes("maheshwari") || category.includes("maheswari") || highlight.includes("maheshwari") || fabric.includes("maheshwari");
+        if (!isMaheshwari) return false;
+      }
+
+      // Price filter matching (5,000 to 1 Lakh range)
+      const price = Number(product.priceINR) || 0;
+      if (priceFilter === "5k-100k" && (price < 5000 || price > 100000)) return false;
+      if (priceFilter === "5k-25k" && (price < 5000 || price > 25000)) return false;
+      if (priceFilter === "25k-50k" && (price < 25000 || price > 50000)) return false;
+      if (priceFilter === "50k-100k" && (price < 50000 || price > 100000)) return false;
+      if (priceFilter === "custom" && (price < minPrice || price > maxPrice)) return false;
 
       return true;
     });
@@ -132,16 +162,7 @@ function AllProducts() {
     }
 
     return result;
-  }, [products, search, selectedCategory, sortBy]);
-
-  const categories = [
-    "All",
-    "Cotton",
-    "Silk",
-    "Bridal",
-    "Festive",
-    "Printed",
-  ];
+  }, [products, search, selectedCategory, priceFilter, minPrice, maxPrice, sortBy]);
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 transition-colors duration-400">
@@ -214,13 +235,13 @@ function AllProducts() {
 
         <div className="p-5 rounded-2xl bg-white/75 dark:bg-[#18101C]/75 backdrop-blur-md border border-[#E8DFD3] dark:border-[#2C1F32] shadow-sm hover:border-[#D4B483] dark:hover:border-[#E5C583] hover:-translate-y-1 transition-all duration-300 text-center">
           <div className="w-10 h-10 mx-auto rounded-full bg-[#6D1830]/10 dark:bg-[#E5C583]/15 text-[#6D1830] dark:text-[#E5C583] flex items-center justify-center mb-2.5">
-            <Scissors size={20} />
+            <Sparkles size={20} />
           </div>
           <h3 className="text-xl sm:text-2xl font-bold font-serif text-[#2B2523] dark:text-[#F7F2EC]">
-            Fall & Pico
+            Handloom Craft
           </h3>
           <p className="text-xs text-gray-500 dark:text-gray-400 font-light mt-0.5 uppercase tracking-wider">
-            Ready-to-Drape Pre-Stitched
+            Pure Artisanal Weaves
           </p>
         </div>
 
@@ -229,15 +250,15 @@ function AllProducts() {
             <Truck size={20} />
           </div>
           <h3 className="text-xl sm:text-2xl font-bold font-serif text-[#2B2523] dark:text-[#F7F2EC]">
-            Complimentary
+            Free Delivery
           </h3>
           <p className="text-xs text-gray-500 dark:text-gray-400 font-light mt-0.5 uppercase tracking-wider">
-            Pan-India Insured Delivery
+            Pan-India Insured Dispatch
           </p>
         </div>
       </div>
 
-      {/* --- Section 3: Smart Search & Sorting Controls --- */}
+      {/* --- Section 3: Smart Search, Nike-Style Categories & ₹5k-₹1L Price Filter --- */}
       <div className="bg-white/80 dark:bg-[#18101C]/80 backdrop-blur-md rounded-3xl p-5 sm:p-6 border border-[#E8DFD3] dark:border-[#2C1F32] shadow-sm mb-8">
         <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
 
@@ -301,14 +322,17 @@ function AllProducts() {
 
         </div>
 
-        {/* Category Filter Pills (100% Functional) */}
+        {/* Nike-Style Saree Category Switcher (1. Cotton, 2. Art, 3. Silk, 4. Maheshwari) */}
         <div className="flex items-center gap-2 sm:gap-2.5 overflow-x-auto pt-4 mt-4 border-t border-[#E8DFD3]/80 dark:border-[#2C1F32]">
+          <span className="text-[11px] font-bold tracking-[2px] uppercase text-gray-400 mr-1 hidden sm:inline">
+            Category:
+          </span>
           {categories.map((cat) => (
             <button
               key={cat}
               onClick={() => setSelectedCategory(cat)}
               className={`
-                px-4 sm:px-5 py-2 rounded-full text-xs font-medium tracking-wider uppercase whitespace-nowrap transition-all duration-300
+                px-4 sm:px-5 py-2 rounded-full text-xs font-semibold tracking-wider uppercase whitespace-nowrap transition-all duration-300 cursor-pointer
                 ${
                   selectedCategory === cat
                     ? "bg-[#6D1830] dark:bg-[#E5C583] text-white dark:text-black shadow-md scale-[1.03]"
@@ -317,6 +341,36 @@ function AllProducts() {
               `}
             >
               {cat}
+            </button>
+          ))}
+        </div>
+
+        {/* ₹5,000 to ₹1,00,000 Price Range Filter */}
+        <div className="flex flex-wrap items-center gap-2 pt-3 mt-3 border-t border-[#E8DFD3]/50 dark:border-[#2C1F32]/50 text-xs">
+          <div className="flex items-center gap-1.5 text-gray-500 dark:text-gray-400 uppercase font-semibold text-[11px] tracking-wider mr-2">
+            <SlidersHorizontal size={13} className="text-[#D4B483]" />
+            <span>Price (₹5k - ₹1L):</span>
+          </div>
+          {[
+            { id: "all", label: "All Prices" },
+            { id: "5k-100k", label: "₹5,000 - ₹1,00,000 (Full Range)" },
+            { id: "5k-25k", label: "₹5,000 - ₹25,000" },
+            { id: "25k-50k", label: "₹25,000 - ₹50,000" },
+            { id: "50k-100k", label: "₹50,000 - ₹1,00,000" },
+          ].map((range) => (
+            <button
+              key={range.id}
+              onClick={() => setPriceFilter(range.id)}
+              className={`
+                px-3 py-1.5 rounded-full text-[11px] font-medium tracking-wide transition-all cursor-pointer
+                ${
+                  priceFilter === range.id
+                    ? "bg-[#D4B483] dark:bg-[#E5C583] text-black font-bold shadow-xs scale-102"
+                    : "bg-white/80 dark:bg-[#221629] text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-800 hover:border-[#D4B483]"
+                }
+              `}
+            >
+              {range.label}
             </button>
           ))}
         </div>
@@ -430,6 +484,7 @@ function AllProducts() {
                       e.preventDefault();
                       e.stopPropagation();
                       setQuickViewProduct(product);
+                      setQuickViewImageIdx(0);
                     }}
                     className="
                       absolute bottom-4 left-1/2 -translate-x-1/2
@@ -534,83 +589,166 @@ function AllProducts() {
         </div>
       )}
 
-      {/* Quick View Modal */}
-      {quickViewProduct && (
-        <div
-          className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4"
-          onClick={() => setQuickViewProduct(null)}
-        >
+      {/* Quick View Modal with Multi-Image Gallery */}
+      {quickViewProduct && (() => {
+        const qvImages = (Array.isArray(quickViewProduct.images) && quickViewProduct.images.length > 0)
+          ? quickViewProduct.images
+          : [quickViewProduct.image || "https://images.unsplash.com/photo-1610030469983-98e550d6193c"];
+
+        return (
           <div
-            className="
-              relative bg-white dark:bg-[#18101C]
-              max-w-2xl w-full rounded-3xl overflow-hidden
-              border border-[#D4B483] shadow-2xl
-              grid grid-cols-1 md:grid-cols-2
-              animate-fadeIn
-            "
-            onClick={(e) => e.stopPropagation()}
+            className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4"
+            onClick={() => setQuickViewProduct(null)}
           >
-            <div className="h-[320px] md:h-[420px] bg-[#FAF6F0] dark:bg-[#1D1322]">
-              <img
-                src={quickViewProduct.images?.[0]}
-                alt={quickViewProduct.name}
-                className="w-full h-full object-cover"
-              />
-            </div>
-            <div className="p-6 md:p-8 flex flex-col justify-between">
-              <div>
-                <div className="flex items-center justify-between">
-                  <span className="text-[11px] tracking-[2px] uppercase text-[#8C2F4D] dark:text-[#E5C583] font-semibold">
-                    Designer Drape
-                  </span>
-                  {(quickViewProduct.inStock === false || (quickViewProduct.stock !== undefined && Number(quickViewProduct.stock) <= 0)) && (
-                    <span className="px-2.5 py-0.5 rounded-full bg-red-100 dark:bg-red-950/80 text-red-600 dark:text-red-400 text-[10px] font-bold uppercase tracking-wider">
-                      Sold Out
-                    </span>
+            <div
+              className="
+                relative bg-white dark:bg-[#18101C]
+                max-w-3xl w-full rounded-3xl overflow-hidden
+                border border-[#D4B483] shadow-2xl
+                grid grid-cols-1 md:grid-cols-2
+                animate-fadeIn
+              "
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Left Column: Interactive Image Gallery */}
+              <div className="relative flex flex-col bg-[#FAF6F0] dark:bg-[#1D1322]">
+                <div className="relative h-[320px] md:h-[400px] w-full overflow-hidden group">
+                  <img
+                    src={qvImages[quickViewImageIdx] || qvImages[0]}
+                    alt={`${quickViewProduct.name} - view ${quickViewImageIdx + 1}`}
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  />
+
+                  {/* Image Counter Badge */}
+                  {qvImages.length > 1 && (
+                    <div className="absolute top-3 left-3 px-2.5 py-1 rounded-full bg-black/60 backdrop-blur-md text-white text-[10px] font-semibold tracking-wider">
+                      {quickViewImageIdx + 1} / {qvImages.length}
+                    </div>
+                  )}
+
+                  {/* Next / Previous Arrow Controls */}
+                  {qvImages.length > 1 && (
+                    <>
+                      <button
+                        type="button"
+                        aria-label="Previous Image"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setQuickViewImageIdx((prev) => (prev > 0 ? prev - 1 : qvImages.length - 1));
+                        }}
+                        className="absolute left-2.5 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/50 hover:bg-black/80 text-white backdrop-blur-md transition-all cursor-pointer shadow-md"
+                      >
+                        <ChevronLeft size={16} />
+                      </button>
+
+                      <button
+                        type="button"
+                        aria-label="Next Image"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setQuickViewImageIdx((prev) => (prev < qvImages.length - 1 ? prev + 1 : 0));
+                        }}
+                        className="absolute right-2.5 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/50 hover:bg-black/80 text-white backdrop-blur-md transition-all cursor-pointer shadow-md"
+                      >
+                        <ChevronRight size={16} />
+                      </button>
+                    </>
                   )}
                 </div>
-                <h3 className="font-serif text-2xl text-[#2B2523] dark:text-[#F7F2EC] mt-2">
-                  {quickViewProduct.name}
-                </h3>
-                <p className="text-2xl font-bold font-serif text-[#6D1830] dark:text-[#E5C583] mt-3">
-                  {formatPrice ? formatPrice(quickViewProduct.priceINR) : `₹${quickViewProduct.priceINR}`}
-                </p>
-                <p className="text-sm text-gray-600 dark:text-gray-300 mt-4 leading-relaxed">
-                  {quickViewProduct.description || quickViewProduct.highlight || "Curated designer saree, finished with elegant motifs and comfortable all-day drape."}
-                </p>
+
+                {/* Thumbnails Row */}
+                {qvImages.length > 1 && (
+                  <div className="flex items-center gap-2 p-3 bg-black/10 dark:bg-black/40 overflow-x-auto border-t border-black/5">
+                    {qvImages.map((img, idx) => (
+                      <button
+                        key={idx}
+                        type="button"
+                        onClick={() => setQuickViewImageIdx(idx)}
+                        className={`
+                          w-12 h-14 rounded-lg overflow-hidden border-2 transition-all flex-shrink-0 cursor-pointer
+                          ${
+                            quickViewImageIdx === idx
+                              ? "border-[#8C2F4D] dark:border-[#E5C583] scale-105 shadow-sm"
+                              : "border-transparent opacity-60 hover:opacity-100"
+                          }
+                        `}
+                      >
+                        <img src={img} alt={`Thumbnail ${idx + 1}`} className="w-full h-full object-cover" />
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
 
-              <div className="mt-6 flex gap-3">
-                {quickViewProduct.inStock === false || (quickViewProduct.stock !== undefined && Number(quickViewProduct.stock) <= 0) ? (
-                  <button
-                    disabled
-                    className="flex-1 bg-gray-200 dark:bg-[#201525] text-gray-400 dark:text-gray-500 py-3 rounded-full text-xs font-semibold tracking-wider uppercase cursor-not-allowed flex items-center justify-center gap-2"
+              {/* Right Column: Saree Details & Action */}
+              <div className="p-6 md:p-8 flex flex-col justify-between">
+                <div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-[11px] tracking-[2px] uppercase text-[#8C2F4D] dark:text-[#E5C583] font-semibold">
+                      Designer Drape
+                    </span>
+                    {(quickViewProduct.inStock === false || (quickViewProduct.stock !== undefined && Number(quickViewProduct.stock) <= 0)) && (
+                      <span className="px-2.5 py-0.5 rounded-full bg-red-100 dark:bg-red-950/80 text-red-600 dark:text-red-400 text-[10px] font-bold uppercase tracking-wider">
+                        Sold Out
+                      </span>
+                    )}
+                  </div>
+                  <h3 className="font-serif text-2xl text-[#2B2523] dark:text-[#F7F2EC] mt-2 font-semibold">
+                    {quickViewProduct.name}
+                  </h3>
+                  <p className="text-2xl font-bold font-serif text-[#6D1830] dark:text-[#E5C583] mt-3">
+                    {formatPrice ? formatPrice(quickViewProduct.priceINR) : `₹${quickViewProduct.priceINR}`}
+                  </p>
+                  <p className="text-sm text-gray-600 dark:text-gray-300 mt-4 leading-relaxed font-light">
+                    {quickViewProduct.description || quickViewProduct.highlight || "Curated designer saree from Jayant Saree Center, finished with elegant motifs and comfortable all-day drape."}
+                  </p>
+
+                  <div className="mt-4 pt-3 border-t border-gray-100 dark:border-[#2C1F32] flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
+                    <span>Fabric: <strong className="text-gray-800 dark:text-gray-200">{quickViewProduct.fabric || "Pure Silk Blend"}</strong></span>
+                    <span>&bull;</span>
+                    <span>Color: <strong className="text-gray-800 dark:text-gray-200">{quickViewProduct.color || "Heritage"}</strong></span>
+                  </div>
+                </div>
+
+                <div className="mt-6 flex gap-3">
+                  {quickViewProduct.inStock === false || (quickViewProduct.stock !== undefined && Number(quickViewProduct.stock) <= 0) ? (
+                    <button
+                      disabled
+                      className="flex-1 bg-gray-200 dark:bg-[#201525] text-gray-400 dark:text-gray-500 py-3 rounded-full text-xs font-semibold tracking-wider uppercase cursor-not-allowed flex items-center justify-center gap-2"
+                    >
+                      <span>Currently Out of Stock</span>
+                    </button>
+                  ) : (
+                    <button
+                      onClick={(e) => {
+                        handleAddToCart(e, quickViewProduct);
+                        setQuickViewProduct(null);
+                      }}
+                      className="flex-1 bg-[#6D1830] hover:bg-[#8C2F4D] text-white py-3 rounded-full text-xs font-semibold tracking-wider uppercase transition shadow-md flex items-center justify-center gap-2 cursor-pointer"
+                    >
+                      <ShoppingCart size={15} />
+                      <span>Add To Bag</span>
+                    </button>
+                  )}
+                  <Link
+                    to={`/product/${quickViewProduct._id}`}
+                    onClick={() => setQuickViewProduct(null)}
+                    className="px-4 py-3 rounded-full border border-[#D4B483] text-[#8C2F4D] dark:text-[#E5C583] text-xs font-semibold hover:bg-[#FAF6F0] dark:hover:bg-[#201426] transition text-center"
                   >
-                    <span>Currently Out of Stock</span>
-                  </button>
-                ) : (
+                    View Details
+                  </Link>
                   <button
-                    onClick={(e) => {
-                      handleAddToCart(e, quickViewProduct);
-                      setQuickViewProduct(null);
-                    }}
-                    className="flex-1 bg-[#6D1830] hover:bg-[#8C2F4D] text-white py-3 rounded-full text-xs font-semibold tracking-wider uppercase transition shadow-md flex items-center justify-center gap-2"
+                    onClick={() => setQuickViewProduct(null)}
+                    className="px-4 py-3 rounded-full border border-gray-300 dark:border-gray-700 text-xs font-semibold hover:bg-gray-100 dark:hover:bg-[#201426] transition cursor-pointer"
                   >
-                    <ShoppingCart size={15} />
-                    <span>Add To Bag</span>
+                    Close
                   </button>
-                )}
-                <button
-                  onClick={() => setQuickViewProduct(null)}
-                  className="px-4 py-3 rounded-full border border-gray-300 dark:border-gray-700 text-xs font-semibold hover:bg-gray-100 dark:hover:bg-[#201426] transition"
-                >
-                  Close
-                </button>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      )}
+        );
+      })()}
 
     </div>
   );

@@ -21,7 +21,11 @@ import {
   RefreshCw,
   Star,
   Image as ImageIcon,
+  FileSpreadsheet,
+  Download,
 } from "lucide-react";
+import * as XLSX from "xlsx";
+import toast from "react-hot-toast";
 
 function Products() {
   const [products, setProducts] = useState([]);
@@ -41,6 +45,167 @@ function Products() {
   const [uploadingVideo, setUploadingVideo] = useState(false);
   const [uploadProgressText, setUploadProgressText] = useState("");
   const [manualPhotoUrl, setManualPhotoUrl] = useState("");
+  const [excelImporting, setExcelImporting] = useState(false);
+
+  // Excel Handlers
+  const handleDownloadExcelTemplate = () => {
+    const templateData = [
+      {
+        name: "Banarasi Katan Silk Saree",
+        category: "Silk",
+        priceINR: 12500,
+        stock: 15,
+        fabric: "Pure Katan Silk",
+        color: "Crimson Red & Gold Zari",
+        sareeLength: "5.5 Meters",
+        blouse: "0.8 Meter Running",
+        collection: "Bridal Heritage",
+        description: "Exquisite handloom Banarasi silk saree with authentic gold zari kadwa motifs.",
+        image: "https://images.unsplash.com/photo-1610030469983-98e550d6193c",
+        sku: "ETH-BAN-001",
+      },
+      {
+        name: "Handwoven Chanderi Cotton Saree",
+        category: "Cotton",
+        priceINR: 4200,
+        stock: 20,
+        fabric: "Chanderi Pure Cotton",
+        color: "Peacock Blue",
+        sareeLength: "5.5 Meters",
+        blouse: "0.8 Meter",
+        collection: "Summer Festive",
+        description: "Lightweight and breathable daily luxury handcrafted by master weavers.",
+        image: "https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b",
+        sku: "ETH-COT-002",
+      },
+      {
+        name: "Maheshwari Zari Border Saree",
+        category: "Maheshwari",
+        priceINR: 6800,
+        stock: 12,
+        fabric: "Silk Cotton Blend",
+        color: "Emerald Green",
+        sareeLength: "5.5 Meters",
+        blouse: "0.8 Meter",
+        collection: "Royal Maheshwari",
+        description: "Traditional Maheshwari weave with reversible zari border and lightweight drape.",
+        image: "https://images.unsplash.com/photo-1617627143750-d86bc21e42bb",
+        sku: "ETH-MAH-003",
+      },
+      {
+        name: "Designer Art Silk Saree",
+        category: "Art",
+        priceINR: 2899,
+        stock: 30,
+        fabric: "Art Silk",
+        color: "Mustard Gold",
+        sareeLength: "5.5 Meters",
+        blouse: "0.8 Meter",
+        collection: "Festive Glam",
+        description: "Shimmering art silk with digital floral accents and contrast pallu.",
+        image: "https://images.unsplash.com/photo-1610030469983-98e550d6193c",
+        sku: "ETH-ART-004",
+      },
+    ];
+
+    const ws = XLSX.utils.json_to_sheet(templateData);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Saree_Import_Template");
+    XLSX.writeFile(wb, "Ethnique_Saree_Import_Template.xlsx");
+    toast.success("Excel template downloaded!");
+  };
+
+  const handleExportCatalogToExcel = () => {
+    if (!products.length) {
+      toast.error("No products to export");
+      return;
+    }
+    const exportData = products.map((p) => ({
+      ID: p._id,
+      SKU: p.sku || "—",
+      Name: p.name,
+      Category: p.category || "—",
+      Collection: p.collection || "—",
+      Price_INR: p.priceINR,
+      Stock: p.stock ?? 0,
+      In_Stock: p.inStock ? "Yes" : "No",
+      Fabric: p.fabric || "—",
+      Color: p.color || "—",
+      Image_URL: p.image || "—",
+    }));
+
+    const ws = XLSX.utils.json_to_sheet(exportData);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Catalog");
+    XLSX.writeFile(wb, `Ethnique_Catalog_${new Date().toISOString().slice(0, 10)}.xlsx`);
+    toast.success("Catalog exported to Excel successfully!");
+  };
+
+  const handleExcelFileUpload = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setExcelImporting(true);
+    const reader = new FileReader();
+    reader.onload = async (evt) => {
+      try {
+        const bstr = evt.target.result;
+        const wb = XLSX.read(bstr, { type: "binary" });
+        const firstSheetName = wb.SheetNames[0];
+        const ws = wb.Sheets[firstSheetName];
+        const rawRows = XLSX.utils.sheet_to_json(ws);
+
+        if (!rawRows || rawRows.length === 0) {
+          toast.error("Excel sheet is empty");
+          setExcelImporting(false);
+          return;
+        }
+
+        const formattedProducts = rawRows.map((row, idx) => ({
+          name: row.name || row.Name || row["Saree Name"] || `Imported Saree ${idx + 1}`,
+          sku: row.sku || row.SKU || `ETH-IMP-${Math.floor(1000 + Math.random() * 9000)}`,
+          category: row.category || row.Category || "Cotton",
+          collection: row.collection || row.Collection || "Heritage Collection",
+          priceINR: Number(row.priceINR || row.price || row.Price || row["Price (INR)"]) || 1999,
+          stock: Number(row.stock || row.Stock || row.Quantity) || 10,
+          inStock: true,
+          fabric: row.fabric || row.Fabric || "Handloom",
+          color: row.color || row.Color || "Multicolor",
+          sareeLength: row.sareeLength || row["Saree Length"] || "5.5 Meters",
+          blouse: row.blouse || row.Blouse || "0.8 Meter",
+          description: row.description || row.Description || "Authentic handcrafted drape from Jayant Saree Center.",
+          image: row.image || row.Image || row["Image URL"] || "https://images.unsplash.com/photo-1610030469983-98e550d6193c",
+        }));
+
+        const res = await fetch(`${API_BASE}/admin/products/bulk`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("adminToken") || localStorage.getItem("token")}`,
+          },
+          body: JSON.stringify({ products: formattedProducts }),
+        });
+
+        const data = await res.json();
+        if (res.ok && data.success) {
+          toast.success(`Successfully imported ${data.count || formattedProducts.length} sarees from Excel!`, {
+            icon: "📊",
+            duration: 4000,
+          });
+          fetchProducts();
+        } else {
+          toast.error(data.message || "Failed to import sarees from Excel");
+        }
+      } catch (err) {
+        console.error("Excel parse error:", err);
+        toast.error("Error parsing Excel file. Please use the standard template.");
+      } finally {
+        setExcelImporting(false);
+        e.target.value = "";
+      }
+    };
+    reader.readAsBinaryString(file);
+  };
 
   const [formData, setFormData] = useState({
     name: "",
@@ -463,7 +628,7 @@ function Products() {
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2.5 flex-wrap">
           <button
             onClick={fetchProducts}
             className="p-3 rounded-2xl border border-gray-200 dark:border-[#2C1F32] text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#201426] transition"
@@ -472,13 +637,46 @@ function Products() {
             <RefreshCw size={18} className={loading ? "animate-spin text-[#6D1830] dark:text-[#E5C583]" : ""} />
           </button>
 
+          {/* Excel Template */}
+          <button
+            onClick={handleDownloadExcelTemplate}
+            title="Download blank Excel spreadsheet template to fill sarees"
+            className="inline-flex items-center gap-1.5 px-3.5 py-3 rounded-2xl border border-gray-200 dark:border-[#2C1F32] bg-white dark:bg-[#18101C] text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#201426] text-xs font-semibold transition shadow-xs"
+          >
+            <Download size={15} className="text-gray-500" />
+            <span>Template</span>
+          </button>
+
+          {/* Excel Export */}
+          <button
+            onClick={handleExportCatalogToExcel}
+            title="Export all sarees to an Excel sheet"
+            className="inline-flex items-center gap-1.5 px-3.5 py-3 rounded-2xl border border-emerald-500/30 bg-emerald-50/50 dark:bg-emerald-950/20 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-50 text-xs font-semibold transition shadow-xs"
+          >
+            <FileSpreadsheet size={15} />
+            <span>Export Excel</span>
+          </button>
+
+          {/* Excel Import */}
+          <label className="cursor-pointer inline-flex items-center gap-1.5 px-3.5 py-3 rounded-2xl border border-blue-500/30 bg-blue-50/50 dark:bg-blue-950/20 text-blue-700 dark:text-blue-400 hover:bg-blue-50 text-xs font-semibold transition shadow-xs">
+            <Upload size={15} />
+            <span>{excelImporting ? "Importing..." : "Import Excel"}</span>
+            <input
+              type="file"
+              accept=".xlsx, .xls, .csv"
+              onChange={handleExcelFileUpload}
+              disabled={excelImporting}
+              className="hidden"
+            />
+          </label>
+
           <button
             onClick={handleOpenAdd}
             className="
               inline-flex items-center gap-2
               bg-gradient-to-r from-[#6D1830] to-[#8C2F4D]
               text-[#FAF7F2] font-semibold text-sm
-              px-6 py-3.5 rounded-2xl
+              px-5 py-3.5 rounded-2xl
               shadow-[0_10px_25px_rgba(109,24,48,0.25)]
               hover:shadow-[0_14px_30px_rgba(109,24,48,0.35)]
               hover:scale-[1.02] active:scale-[0.98]
@@ -1231,14 +1429,31 @@ function Products() {
                   </label>
                 </div>
 
-                {/* Collection / Category */}
+                {/* Category (Nike Style) */}
                 <div>
                   <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1.5">
-                    Collection / Category
+                    Saree Category *
+                  </label>
+                  <select
+                    value={formData.category}
+                    onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                    className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-[#2C1F32] bg-white dark:bg-[#120B15] text-gray-800 dark:text-gray-100 text-sm focus:outline-none focus:border-[#6D1830] dark:focus:border-[#E5C583]"
+                  >
+                    <option value="Cotton">1) Cotton Saree</option>
+                    <option value="Art">2) Art Saree</option>
+                    <option value="Silk">3) Silk Saree</option>
+                    <option value="Maheshwari">4) Maheshwari Saree</option>
+                  </select>
+                </div>
+
+                {/* Collection */}
+                <div>
+                  <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1.5">
+                    Collection / Edit
                   </label>
                   <input
                     type="text"
-                    placeholder="e.g. Festive Silk, Cotton Saree"
+                    placeholder="e.g. Festive Silk, Daily Heritage"
                     value={formData.collection}
                     onChange={(e) => setFormData({ ...formData, collection: e.target.value })}
                     className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-[#2C1F32] bg-white dark:bg-[#120B15] text-gray-800 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 text-sm focus:outline-none focus:border-[#6D1830] dark:focus:border-[#E5C583]"

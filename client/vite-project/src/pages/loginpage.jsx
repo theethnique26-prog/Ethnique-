@@ -6,7 +6,7 @@ import BrandLogo from "../components/BrandLogo";
 import { Mail, Lock, User, Sparkles, Phone, Eye, EyeOff, KeyRound, ArrowLeft, RotateCw, CheckCircle2 } from "lucide-react";
 
 const Login = () => {
-  const [isLogin, setIsLogin] = useState(true);
+  const [isLogin, setIsLogin] = useState(false); // First account creation then login option
   const [loginMethod, setLoginMethod] = useState("phone"); // 'phone' | 'email'
 
   // Phone OTP state
@@ -104,28 +104,25 @@ const Login = () => {
       try {
         data = await res.json();
       } catch {
-        if (res.status === 404) {
-          throw new Error("Route not found (404). Please restart the backend server so the new OTP routes are loaded.");
-        }
-        throw new Error(`Server communication error (${res.status})`);
+        throw new Error("Invalid response from verification server");
       }
 
       if (!res.ok) {
-        throw new Error(data.message || "Verification failed");
+        throw new Error(data.message || "Invalid or expired verification code");
       }
 
       login(data.user, data.token);
       localStorage.setItem("token", data.token);
       localStorage.setItem("user", JSON.stringify(data.user));
 
-      if (data.user.role === "admin") {
+      if (data.user?.role === "admin") {
         navigate("/admin/dashboard");
       } else {
         navigate("/");
       }
     } catch (err) {
       console.error("VERIFY OTP ERROR:", err);
-      alert(err.message || "Invalid verification code");
+      alert(err.message || "Verification failed");
     } finally {
       setLoading(false);
     }
@@ -134,6 +131,16 @@ const Login = () => {
   // Standard Email Login or Account Registration
   const handleSubmitStandard = async (e) => {
     e.preventDefault();
+
+    // .com only email validation check
+    if (email) {
+      const trimmedEmail = email.trim();
+      if (!/^[^\s@]+@[^\s@]+\.com$/i.test(trimmedEmail)) {
+        alert("Please enter an email address ending with .com only (e.g. name@example.com)");
+        return;
+      }
+    }
+
     setLoading(true);
 
     const url = isLogin
@@ -217,6 +224,49 @@ const Login = () => {
                   : "Sign in with OTP or your credentials"
                 : "Create your account for bespoke saree experiences"}
             </p>
+          </div>
+
+          {/* Main Mode Switcher: 1) Create Account, 2) Sign In */}
+          <div className="grid grid-cols-2 p-1 mb-6 rounded-2xl bg-[#F4EDE2]/90 dark:bg-[#120A17] border border-[#D4B483]/40">
+            <button
+              type="button"
+              onClick={() => {
+                setIsLogin(false);
+                setPhoneStep("input");
+                setOtpCode("");
+              }}
+              className={`
+                flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl text-xs font-semibold transition-all duration-200 cursor-pointer
+                ${
+                  !isLogin
+                    ? "bg-[#6D1830] dark:bg-[#E5C583] text-white dark:text-black shadow-md font-bold"
+                    : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200"
+                }
+              `}
+            >
+              <User size={14} />
+              <span>1. Create Account</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                setIsLogin(true);
+                setPhoneStep("input");
+                setOtpCode("");
+              }}
+              className={`
+                flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl text-xs font-semibold transition-all duration-200 cursor-pointer
+                ${
+                  isLogin
+                    ? "bg-[#6D1830] dark:bg-[#E5C583] text-white dark:text-black shadow-md font-bold"
+                    : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200"
+                }
+              `}
+            >
+              <KeyRound size={14} />
+              <span>2. Sign In</span>
+            </button>
           </div>
 
           {/* Login Method Tabs (Phone OTP vs Email) */}
@@ -394,8 +444,9 @@ const Login = () => {
               )}
 
               <div>
-                <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1.5">
-                  Email Address
+                <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1.5 flex justify-between items-center">
+                  <span>Email Address</span>
+                  <span className="text-[10px] text-[#B8860B] font-mono lowercase tracking-normal">(.com only)</span>
                 </label>
                 <div className="relative">
                   <Mail size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500" />

@@ -263,21 +263,21 @@ function ProductDetails() {
                 )}
 
                 <span className="text-xs text-gray-500 dark:text-gray-400 font-light block w-full mt-1">
-                  Inclusive of all taxes &amp; pre-finished fall/pico
+                  Inclusive of all taxes &bull; 100% Insured Delivery
                 </span>
               </div>
 
-              {/* Clan Points Pill */}
+              {/* Club Points Pill */}
               <div className="mt-3.5 inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-gradient-to-r from-amber-500/15 via-amber-400/10 to-transparent border border-amber-400/40 text-xs text-amber-800 dark:text-amber-300 font-medium">
                 <Crown size={14} className="text-amber-600 dark:text-amber-400" />
-                <span>Earn +{clanPointsEarned} Clan Points with this purchase</span>
+                <span>Earn +{clanPointsEarned} Club Points with this purchase</span>
               </div>
             </div>
 
             {/* Description */}
             <p className="text-sm sm:text-base text-gray-600 dark:text-gray-300 font-light leading-relaxed">
               {product.description ||
-                "A luxurious designer saree curated by Jayant Saree Center, meticulously finished with matching fall and delicate pico for a flawless drape at all your festive celebrations."}
+                "A luxurious designer saree curated by Jayant Saree Center, featuring authentic weaving patterns and pure comfort for all your festive celebrations."}
             </p>
 
             {/* Saree Specifications Grid */}
@@ -311,9 +311,9 @@ function ProductDetails() {
                   </span>
                 </div>
                 <div>
-                  <span className="text-gray-400 block">Fall & Pico</span>
+                  <span className="text-gray-400 block">Dispatch</span>
                   <span className="font-semibold text-emerald-600 dark:text-emerald-400 mt-0.5 block flex items-center gap-1">
-                    <Check size={12} /> Pre-Finished Ready
+                    <Check size={12} /> Ready to Ship
                   </span>
                 </div>
                 <div>
@@ -443,9 +443,9 @@ function ProductDetails() {
                 </span>
               </div>
               <div className="flex items-center gap-2.5 p-3 rounded-xl bg-white/70 dark:bg-[#18101C]/70 border border-gray-100 dark:border-[#2C1F32]">
-                <Scissors size={18} className="text-[#8B1E3F] dark:text-[#E5C583] flex-shrink-0" />
+                <Sparkles size={18} className="text-[#8B1E3F] dark:text-[#E5C583] flex-shrink-0" />
                 <span className="text-[11px] text-gray-600 dark:text-gray-300 font-medium">
-                  Pre-Finished Fall & Pico Included
+                  100% Authentic Handloom Weave
                 </span>
               </div>
               <div className="flex items-center gap-2.5 p-3 rounded-xl bg-white/70 dark:bg-[#18101C]/70 border border-gray-100 dark:border-[#2C1F32]">

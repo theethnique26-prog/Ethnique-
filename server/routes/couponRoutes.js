@@ -124,6 +124,19 @@ const SEED_COUPONS = [
     popular: false,
     isActive: true,
   },
+  {
+    code: "ETHNIQUE2498",
+    title: "Grand Royal Celebration ₹2,498 Voucher",
+    description: "Flat ₹2,498 instant discount on designer bridal and festive drapes above ₹4,999.",
+    discountType: "flat",
+    discountValue: 2498,
+    minOrderAmount: 4999,
+    maxDiscount: null,
+    requiredTier: "all",
+    badge: "Special ₹2,498 OFF",
+    popular: true,
+    isActive: true,
+  },
 ];
 
 // Helper to seed initial coupons if none exist
@@ -132,7 +145,25 @@ const ensureCouponsSeeded = async () => {
     const count = await Coupon.countDocuments();
     if (count === 0) {
       await Coupon.insertMany(SEED_COUPONS);
-      console.log("Glam Clan Coupons successfully initialized in database.");
+      console.log("Coupons successfully initialized in database.");
+    } else {
+      const has2498 = await Coupon.findOne({ code: "ETHNIQUE2498" });
+      if (!has2498) {
+        await Coupon.create({
+          code: "ETHNIQUE2498",
+          title: "Grand Royal Celebration ₹2,498 Voucher",
+          description: "Flat ₹2,498 instant discount on designer bridal and festive drapes above ₹4,999.",
+          discountType: "flat",
+          discountValue: 2498,
+          minOrderAmount: 4999,
+          maxDiscount: null,
+          requiredTier: "all",
+          badge: "Special ₹2,498 OFF",
+          popular: true,
+          isActive: true,
+        });
+        console.log("ETHNIQUE2498 coupon created in database.");
+      }
     }
   } catch (err) {
     console.error("Coupon seed check error:", err.message);
@@ -157,7 +188,7 @@ const getOptionalUser = async (req) => {
 };
 
 // =====================================
-// 1. GET ALL ACTIVE COUPONS
+// 1. GET ALL ACTIVE COUPONS (PUBLIC)
 // =====================================
 router.get("/", async (req, res) => {
   try {
@@ -173,6 +204,27 @@ router.get("/", async (req, res) => {
     res.status(500).json({
       success: false,
       message: "Failed to fetch coupons",
+    });
+  }
+});
+
+// =====================================
+// 1B. GET ALL COUPONS (ADMIN)
+// =====================================
+router.get("/admin", adminAuth, async (req, res) => {
+  try {
+    await ensureCouponsSeeded();
+    const coupons = await Coupon.find().sort({ createdAt: -1 });
+
+    res.json({
+      success: true,
+      coupons,
+    });
+  } catch (error) {
+    console.error("GET ADMIN COUPONS ERROR:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch admin coupons",
     });
   }
 });

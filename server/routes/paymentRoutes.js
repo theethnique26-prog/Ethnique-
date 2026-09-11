@@ -118,9 +118,10 @@ router.post("/verify-payment", authMiddleware, async (req, res) => {
       });
     }
 
-    // Calculate Clan Points earned (1 pt per ₹10, or 1.5 pts for 500+ pts elite)
+    // Calculate Club Points earned (1 pt per ₹10, 1.5 pts for 500+ pts, 2x (0.2) for 1500+ VIP Royal)
     const user = await User.findById(req.user._id);
-    const earnRate = user && user.loyaltyPoints >= 500 ? 0.15 : 0.1;
+    const isVip = user && user.loyaltyPoints >= 1500;
+    const earnRate = isVip ? 0.2 : user && user.loyaltyPoints >= 500 ? 0.15 : 0.1;
     const paidBasis = Math.max(0, (subtotal || totalAmount) - (discount || 0));
     const pointsEarned = Math.max(0, Math.floor(paidBasis * earnRate));
 

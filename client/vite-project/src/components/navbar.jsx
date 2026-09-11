@@ -207,17 +207,6 @@ const Navbar = () => {
               )}
             </button>
 
-            {/* Direct Admin Console button when admin is browsing store */}
-            {user?.role === "admin" && (
-              <Link
-                to="/admin/dashboard"
-                className="hidden md:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gradient-to-r from-[#6D1830] to-[#8C2F4D] text-[#FAF5EF] dark:from-[#E5C583] dark:to-[#D4B483] dark:text-[#180A15] text-xs font-bold shadow-sm hover:shadow-md hover:scale-105 active:scale-95 transition-all border border-[#D4B483]/50"
-                title="Return to Admin Dashboard"
-              >
-                <ShieldCheck size={14} />
-                <span>Admin Console</span>
-              </Link>
-            )}
 
             {/* User Profile / Auth */}
             {user ? (

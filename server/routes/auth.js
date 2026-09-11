@@ -37,6 +37,13 @@ router.post("/signup", authLimiter, async (req, res) => {
     const rawPhone = phone ? phone.trim() : "";
     const cleanedDigits = cleanPhone(rawPhone).replace(/^\+91/, "");
 
+    if (normalizedEmail && !/^[^\s@]+@[^\s@]+\.com$/i.test(normalizedEmail)) {
+      return res.status(400).json({
+        success: false,
+        msg: "Registration requires an email address ending with .com only",
+      });
+    }
+
     // Check if user already exists by email or phone
     const existingChecks = [];
     if (normalizedEmail) {

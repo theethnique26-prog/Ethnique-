@@ -16,6 +16,7 @@ import {
   X,
   Crown,
   ChevronRight,
+  Loader2,
 } from "lucide-react";
 import toast from "react-hot-toast";
 
@@ -50,8 +51,9 @@ function Checkout() {
   const [availableCoupons, setAvailableCoupons] = useState([]);
   const [showCouponsModal, setShowCouponsModal] = useState(false);
 
-  // Clan Points Redemption state
+  // Club Points Redemption state
   const [redeemClanPoints, setRedeemClanPoints] = useState(false);
+  const [pincodeLoading, setPincodeLoading] = useState(false);
 
   const [formData, setFormData] = useState({
     fullName: user?.name || "",
@@ -69,13 +71,13 @@ function Checkout() {
     0
   );
 
-  // Calculate Clan Points redemption discount (10 pts = ₹5, max 50% of subtotal)
+  // Calculate Club Points redemption discount (1 pt = ₹5, max 50% of subtotal)
   const maxAllowedPoints = Math.min(
     points || 0,
-    Math.floor((subtotal * 0.5) / 0.5)
+    Math.floor((subtotal * 0.5) / 5)
   );
   const pointsToUse = redeemClanPoints ? maxAllowedPoints : 0;
-  const clanPointsDiscount = Math.round(pointsToUse * 0.5);
+  const clanPointsDiscount = Math.round(pointsToUse * 5);
 
   // Calculate Coupon discount
   const couponDiscount = appliedCoupon ? appliedCoupon.discountAmount : 0;
@@ -92,8 +94,12 @@ function Checkout() {
   const totalDiscount = couponDiscount + clanPointsDiscount;
   const finalTotal = Math.max(0, subtotal - totalDiscount + shippingCharge);
 
-  // Clan points earned on this order
-  const earnRate = (points || 0) >= 500 ? 0.15 : 0.1;
+  // Club points earned on this order: Standard 10%, Elite 15%, VIP Royal (1500+) 2x (20%)
+  const isVipTier =
+    (points || 0) >= 1500 ||
+    tier?.name?.toLowerCase().includes("royal") ||
+    tier?.level === 3;
+  const earnRate = isVipTier ? 0.2 : (points || 0) >= 500 ? 0.15 : 0.1;
   const pointsEarned = Math.max(
     0,
     Math.floor((subtotal - totalDiscount) * earnRate)
@@ -158,11 +164,45 @@ function Checkout() {
     }
   };
 
+  const lookupPincode = async (pin) => {
+    if (!/^\d{6}$/.test(pin)) return;
+    setPincodeLoading(true);
+    try {
+      const res = await fetch(`https://api.postalpincode.in/pincode/${pin}`);
+      if (res.ok) {
+        const data = await res.json();
+        if (data?.[0]?.Status === "Success" && data[0]?.PostOffice?.length > 0) {
+          const po = data[0].PostOffice[0];
+          const detectedCity = po.District || po.Circle || po.Name || "";
+          const detectedState = po.State || "";
+          setFormData((prev) => ({
+            ...prev,
+            city: detectedCity,
+            state: detectedState,
+          }));
+          toast.success(`Location detected: ${detectedCity}, ${detectedState}`);
+        }
+      }
+    } catch (err) {
+      console.warn("Pincode lookup error:", err);
+    } finally {
+      setPincodeLoading(false);
+    }
+  };
+
   const handleInputChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+
+    if (name === "pincode") {
+      const cleanPin = value.replace(/\D/g, "");
+      if (cleanPin.length === 6) {
+        lookupPincode(cleanPin);
+      }
+    }
   };
 
   const validateAddress = () => {
@@ -317,7 +357,7 @@ function Checkout() {
               clearCart();
               if (refreshLoyalty) refreshLoyalty();
               toast.success(
-                `Payment successful! You earned +${pointsEarned} Clan Points!`
+                `Payment successful! You earned +${pointsEarned} Club Points!`
               );
               navigate("/profile");
             } else {
@@ -503,17 +543,26 @@ function Checkout() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Postal Code / PIN *
-                  </label>
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="block text-xs font-medium text-gray-700 dark:text-gray-300">
+                      Postal Code / PIN *
+                    </label>
+                    {pincodeLoading && (
+                      <span className="text-[11px] text-[#8B1E3F] dark:text-[#E5C583] flex items-center gap-1 font-medium">
+                        <Loader2 size={12} className="animate-spin" /> Detecting...
+                      </span>
+                    )}
+                  </div>
                   <input
                     type="text"
                     name="pincode"
+                    maxLength={6}
                     value={formData.pincode}
                     onChange={handleInputChange}
-                    placeholder="6-digit PIN code"
+                    placeholder="Enter 6-digit PIN code"
                     className="w-full border border-gray-200 dark:border-[#38283E] bg-white dark:bg-[#201426] text-gray-900 dark:text-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#8B1E3F]"
                   />
+                  <p className="text-[11px] text-gray-400 mt-1">City & State will auto-fill on 6-digit PIN</p>
                 </div>
 
                 <div>
@@ -675,7 +724,7 @@ function Checkout() {
               </div>
 
               {/* ================================================= */}
-              {/* CLAN POINTS REDEMPTION BOX */}
+              {/* CLUB POINTS REDEMPTION BOX */}
               {/* ================================================= */}
               <div className="mt-4 pt-4 border-t border-gray-100 dark:border-[#2C1F32]">
                 <div className="p-3.5 rounded-2xl bg-gradient-to-r from-amber-500/10 via-amber-400/5 to-transparent border border-amber-300/40 dark:border-amber-600/30 flex items-center justify-between">
@@ -686,7 +735,7 @@ function Checkout() {
                     <div>
                       <div className="flex items-center gap-1.5">
                         <span className="text-xs font-semibold text-gray-900 dark:text-[#FAF5EF]">
-                          Redeem Clan Points
+                          Redeem Club Points
                         </span>
                         <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-amber-500/20 text-amber-800 dark:text-amber-300 font-mono font-medium">
                           {points || 0} pts available
@@ -694,8 +743,8 @@ function Checkout() {
                       </div>
                       <p className="text-[11px] text-gray-500 dark:text-gray-400 mt-0.5">
                         {points > 0
-                          ? `Use ${maxAllowedPoints} pts for instant ₹${Math.round(maxAllowedPoints * 0.5)} OFF`
-                          : "Earn 1 pt per ₹10 spent on this purchase"}
+                          ? `Use ${maxAllowedPoints} pts for instant ₹${Math.round(maxAllowedPoints * 5)} OFF (1 pt = ₹5)`
+                          : "Earn 1 pt per ₹10 spent (2x VIP Royal)"}
                       </p>
                     </div>
                   </div>
@@ -732,7 +781,7 @@ function Checkout() {
 
                 {redeemClanPoints && clanPointsDiscount > 0 && (
                   <div className="flex justify-between text-amber-600 dark:text-amber-400 font-medium">
-                    <span>Clan Points Discount ({pointsToUse} pts)</span>
+                    <span>Club Points Discount ({pointsToUse} pts)</span>
                     <span>-₹{clanPointsDiscount.toLocaleString("en-IN")}</span>
                   </div>
                 )}
@@ -753,7 +802,7 @@ function Checkout() {
                 <div className="pt-2">
                   <div className="bg-[#8B1E3F]/5 dark:bg-[#E5C583]/10 border border-[#8B1E3F]/15 dark:border-[#E5C583]/20 rounded-xl p-2.5 text-center text-xs text-[#8B1E3F] dark:text-[#E5C583] flex items-center justify-center gap-1.5 font-medium">
                     <Sparkles size={14} />
-                    <span>You will earn +{pointsEarned} Clan Points with this order</span>
+                    <span>You will earn +{pointsEarned} Club Points with this order</span>
                   </div>
                 </div>
               </div>

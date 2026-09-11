@@ -13,7 +13,8 @@ import {
   Film,
   Menu,
   X,
-  Calendar,
+  Tag,
+  MessageSquare,
   Store,
   ExternalLink,
 } from "lucide-react";
@@ -53,6 +54,16 @@ function AdminSidebar() {
       path: "/admin/orders",
     },
     {
+      name: "Coupons",
+      icon: Tag,
+      path: "/admin/coupons",
+    },
+    {
+      name: "Reviews",
+      icon: MessageSquare,
+      path: "/admin/reviews",
+    },
+    {
       name: "Customers",
       icon: Users,
       path: "/admin/customers",
@@ -76,11 +87,6 @@ function AdminSidebar() {
       name: "Reports",
       icon: BarChart3,
       path: "/admin/reports",
-    },
-    {
-      name: "Appointments",
-      icon: Calendar,
-      path: "/admin/appointments",
     },
   ];
 

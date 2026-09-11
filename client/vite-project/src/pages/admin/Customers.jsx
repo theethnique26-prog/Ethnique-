@@ -14,9 +14,11 @@ const [customerOrders, setCustomerOrders] = useState([]);
   }, []);
 
   useEffect(() => {
+    const query = search.toLowerCase();
     const result = customers.filter((customer) =>
-      customer.name.toLowerCase().includes(search.toLowerCase()) ||
-      customer.email.toLowerCase().includes(search.toLowerCase())
+      (customer.name && customer.name.toLowerCase().includes(query)) ||
+      (customer.email && customer.email.toLowerCase().includes(query)) ||
+      (customer.phone && customer.phone.toLowerCase().includes(query))
     );
 
     setFiltered(result);
@@ -94,6 +96,8 @@ const handleView = async (id) => {
 
               <th className="text-left p-4">Email</th>
 
+              <th className="text-left p-4">Phone</th>
+
               <th className="text-left p-4">Orders</th>
 
               <th className="text-left p-4">Points</th>
@@ -115,7 +119,7 @@ const handleView = async (id) => {
               <tr>
 
                 <td
-                  colSpan={7}
+                  colSpan={8}
                   className="text-center py-10 text-gray-500"
                 >
                   No customers found.
@@ -138,6 +142,10 @@ const handleView = async (id) => {
 
                   <td className="p-4">
                     {customer.email}
+                  </td>
+
+                  <td className="p-4 font-mono text-sm text-gray-700 dark:text-gray-300">
+                    {customer.phone || "—"}
                   </td>
 
                   <td className="p-4">
@@ -201,6 +209,7 @@ const handleView = async (id) => {
         <div>
           <p><strong>Name:</strong> {selectedCustomer.name}</p>
           <p><strong>Email:</strong> {selectedCustomer.email}</p>
+          <p><strong>Phone:</strong> {selectedCustomer.phone || "—"}</p>
           <p><strong>Loyalty Points:</strong> {selectedCustomer.loyaltyPoints}</p>
         </div>
 

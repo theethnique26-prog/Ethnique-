@@ -33,6 +33,7 @@ router.get("/", adminAuth, async (req, res) => {
       _id: user._id,
       name: user.name,
       email: user.email,
+      phone: user.phone || user.addresses?.[0]?.phone || "—",
       loyaltyPoints: user.loyaltyPoints,
       createdAt: user.createdAt,
       addresses: user.addresses,

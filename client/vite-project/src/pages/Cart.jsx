@@ -55,7 +55,7 @@ function Cart() {
               Shopping Bag
             </h1>
             <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-1">
-              Curated drapes by Jayant Saree Center • Pre-finished Fall & Pico included
+              Curated drapes by Jayant Saree Center • Insured Pan-India Dispatch
             </p>
           </div>
           {cart.length > 0 && (
@@ -155,7 +155,7 @@ function Cart() {
                       <div className="flex flex-wrap items-center gap-3 mt-2 text-xs text-gray-500 dark:text-gray-400">
                         {item.fabric && <span>Fabric: {item.fabric}</span>}
                         <span className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400">
-                          <Scissors size={12} /> Pre-Finished Fall & Pico
+                          <Check size={12} /> Pure Weave Handcrafted
                         </span>
                       </div>
                     </div>
@@ -223,8 +223,8 @@ function Cart() {
                   </div>
 
                   <div className="flex justify-between text-gray-600 dark:text-gray-400">
-                    <span>Pre-Finished Fall & Pico</span>
-                    <span className="text-emerald-600 font-semibold">FREE</span>
+                    <span>Quality Inspection</span>
+                    <span className="text-emerald-600 font-semibold">PASSED</span>
                   </div>
 
                   {/* Estimated Points */}
@@ -232,7 +232,7 @@ function Cart() {
                     <div className="p-2.5 rounded-xl bg-amber-500/10 border border-amber-400/30 text-amber-800 dark:text-amber-300 text-xs flex items-center justify-between">
                       <span className="flex items-center gap-1.5 font-medium">
                         <Crown size={14} className="text-amber-600" />
-                        <span>Clan Points Earned</span>
+                        <span>Club Points Earned</span>
                       </span>
                       <span className="font-bold font-mono">+{estimatedPoints} pts</span>
                     </div>

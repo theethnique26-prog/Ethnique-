@@ -1,7 +1,8 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Star, Quote, CheckCircle2, Sparkles } from "lucide-react";
+import { API_BASE } from "../services/apiConfig";
 
-const reviews = [
+const DEFAULT_REVIEWS = [
   {
     name: "Priya Sharma",
     location: "Bangalore",
@@ -37,6 +38,24 @@ const reviews = [
 ];
 
 const ReviewsSlider = () => {
+  const [reviewsList, setReviewsList] = useState(DEFAULT_REVIEWS);
+
+  useEffect(() => {
+    const fetchReviews = async () => {
+      try {
+        const res = await fetch(`${API_BASE}/reviews`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data.success && Array.isArray(data.reviews) && data.reviews.length > 0) {
+            setReviewsList(data.reviews);
+          }
+        }
+      } catch (err) {
+        console.log("Using default reviews fallback:", err);
+      }
+    };
+    fetchReviews();
+  }, []);
   return (
     <section className="py-20 bg-gradient-to-b from-transparent via-[#F4EFEA]/60 to-transparent dark:via-[#140F18]/70 overflow-hidden transition-colors duration-400">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-12 text-center">
@@ -62,7 +81,7 @@ const ReviewsSlider = () => {
         <div className="absolute right-0 top-0 bottom-0 w-16 sm:w-32 bg-gradient-to-l from-[#FAF7F2] dark:from-[#0E0B0F] to-transparent z-10 pointer-events-none" />
 
         <div className="flex gap-6 sm:gap-8 animate-scroll hover:[animation-play-state:paused] w-max">
-          {[...reviews, ...reviews, ...reviews].map((review, index) => (
+          {[...reviewsList, ...reviewsList, ...reviewsList].map((review, index) => (
             <div
               key={index}
               className="

@@ -17,7 +17,7 @@ const ReturnsPage = () => {
 
         <div className="rounded-3xl border border-[#D4B483]/35 bg-[var(--card-bg)] p-8 sm:p-10 shadow-xl text-left space-y-5 my-8">
           <p className="text-sm sm:text-base text-[var(--text-primary)] leading-relaxed font-light">
-            At <strong>Ethnique by Jayant Saree Center</strong>, each saree is carefully selected, steam-pressed, and pre-finished with complimentary fall and pico stitching before dispatch.
+            At <strong>Ethnique by Jayant Saree Center</strong>, each saree is carefully selected, steam-pressed, and thoroughly inspected by our master craftsmen before dispatch.
           </p>
 
           <p className="text-sm text-[var(--text-muted)] leading-relaxed font-light">

@@ -284,6 +284,29 @@ router.post("/products", adminAuth, async (req, res) => {
   }
 });
 
+router.post("/products/bulk", adminAuth, async (req, res) => {
+  try {
+    const { products } = req.body;
+    if (!Array.isArray(products) || products.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "Please provide a non-empty array of products",
+      });
+    }
+
+    const created = await Product.insertMany(products);
+    res.status(201).json({
+      success: true,
+      count: created.length,
+      products: created,
+      message: `Successfully imported ${created.length} products!`,
+    });
+  } catch (error) {
+    console.error("BULK PRODUCT IMPORT ERROR:", error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
 router.delete("/products/:id", adminAuth, async (req, res) => {
     try {
       await Product.findByIdAndDelete(

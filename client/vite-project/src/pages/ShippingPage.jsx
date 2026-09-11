@@ -27,7 +27,7 @@ const SHIPPING_FAQS = [
   },
   {
     q: "What is your store's No-Returns policy?",
-    a: "At Ethnique by Jayant Saree Center, all our sarees are curated festive, bridal, and designer ethnic wear that arrive steam-pressed with pre-stitched fall and pico. To guarantee highest standards of hygiene and pristine product quality for every shopper, we do not accept returns or exchanges once delivered.",
+    a: "At Ethnique by Jayant Saree Center, all our sarees are curated festive, bridal, and designer ethnic wear that arrive steam-pressed and handloom inspected. To guarantee highest standards of hygiene and pristine product quality for every shopper, we do not accept returns or exchanges once delivered.",
   },
   {
     q: "What if my parcel is damaged during transit?",
@@ -39,77 +39,61 @@ const ShippingPage = () => {
   const [openFaq, setOpenFaq] = useState(null);
 
   return (
-    <div className="min-h-screen bg-transparent text-[var(--text-primary)] transition-colors duration-400 pb-24">
+    <div className="min-h-screen bg-transparent text-[var(--text-primary)] transition-colors duration-400 pb-28">
       {/* 1. Hero Section */}
       <section className="relative pt-12 pb-16 px-4 sm:px-6 lg:px-8 text-center overflow-hidden">
         <div className="max-w-4xl mx-auto">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-[#D4B483]/40 bg-[#D4B483]/10 backdrop-blur-md text-[#8C2F4D] dark:text-[#E8C58D] text-xs uppercase tracking-[0.25em] font-semibold mb-4 shadow-sm">
-            <Store size={14} className="text-[#B8860B]" />
-            <span>Jayant Saree Center • Insured Delivery</span>
+            <Truck size={14} className="text-[#B8860B]" />
+            <span>Pan-India Delivery & Quality Policy</span>
           </div>
 
-          <h1 className="text-3xl sm:text-5xl font-serif text-[var(--text-primary)] tracking-tight font-medium">
-            Insured Shipping & Store Policy
+          <h1 className="text-3xl sm:text-5xl md:text-6xl font-serif text-[var(--text-primary)] tracking-tight font-medium">
+            Shipping & Dispatch
           </h1>
 
-          <p className="mt-4 text-[var(--text-muted)] text-sm sm:text-base max-w-2xl mx-auto font-light leading-relaxed">
-            Every designer saree from Ethnique by Jayant Saree Center is prepared with utmost care, packed in luxury keepsake boxes, and hand-delivered directly to your doorstep with full transit insurance.
+          <p className="mt-4 text-[var(--text-muted)] text-sm sm:text-base max-w-xl mx-auto font-light leading-relaxed">
+            Every Jayant Saree Center drape is packed with ceremonial care and insured for doorstep delivery across India.
           </p>
         </div>
       </section>
 
-      {/* 2. Four Pillars of White-Glove Logistics */}
+      {/* 2. Key Pillars */}
       <section className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 mb-20">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {/* Card 1 */}
-          <div className="rounded-3xl border border-[#D4B483]/30 bg-[var(--card-bg)] p-6 shadow-sm hover:border-[#8C2F4D] hover:shadow-lg transition-all">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="rounded-3xl border border-[#D4B483]/30 bg-[var(--card-bg)] p-6 sm:p-7 hover:border-[#8C2F4D] hover:shadow-lg transition-all">
             <div className="w-12 h-12 rounded-2xl bg-[#D4B483]/15 text-[#8C2F4D] dark:text-[#E8C58D] flex items-center justify-center mb-4">
               <Truck size={22} />
             </div>
             <h3 className="font-serif font-bold text-lg text-[var(--text-primary)]">
-              Pan-India Express
+              Express Insured Shipping
             </h3>
             <p className="text-xs text-[var(--text-muted)] mt-2 leading-relaxed">
-              Fast 3–5 business day delivery via premium air express couriers (BlueDart, Delhivery) across all PIN codes in India.
+              Dispatched via premium courier partners (BlueDart, Delhivery, DTDC) with 100% in-transit transit insurance protection.
             </p>
           </div>
 
-          {/* Card 2 */}
-          <div className="rounded-3xl border border-[#D4B483]/30 bg-[var(--card-bg)] p-6 shadow-sm hover:border-[#8C2F4D] hover:shadow-lg transition-all">
+          <div className="rounded-3xl border border-[#D4B483]/30 bg-[var(--card-bg)] p-6 sm:p-7 hover:border-[#8C2F4D] hover:shadow-lg transition-all">
             <div className="w-12 h-12 rounded-2xl bg-[#D4B483]/15 text-[#8C2F4D] dark:text-[#E8C58D] flex items-center justify-center mb-4">
               <ShieldCheck size={22} />
             </div>
             <h3 className="font-serif font-bold text-lg text-[var(--text-primary)]">
-              100% In-Transit Insurance
+              Rigid Keepsake Box
             </h3>
             <p className="text-xs text-[var(--text-muted)] mt-2 leading-relaxed">
-              Every parcel is fully insured against theft, loss, or transit damage from our boutique doors right up to yours.
+              Enclosed in bespoke tamper-evident packaging with moisture barriers to ensure your delicate silk reaches in pristine state.
             </p>
           </div>
 
-          {/* Card 3 */}
-          <div className="rounded-3xl border border-[#D4B483]/30 bg-[var(--card-bg)] p-6 shadow-sm hover:border-[#8C2F4D] hover:shadow-lg transition-all">
-            <div className="w-12 h-12 rounded-2xl bg-[#D4B483]/15 text-[#8C2F4D] dark:text-[#E8C58D] flex items-center justify-center mb-4">
-              <Package size={22} />
-            </div>
-            <h3 className="font-serif font-bold text-lg text-[var(--text-primary)]">
-              Luxury Keepsake Box
-            </h3>
-            <p className="text-xs text-[var(--text-muted)] mt-2 leading-relaxed">
-              Encased in rigid archival saree boxes wrapped in moisture-resistant butter paper and herbal lavender protection.
-            </p>
-          </div>
-
-          {/* Card 4 */}
-          <div className="rounded-3xl border border-[#D4B483]/30 bg-[var(--card-bg)] p-6 shadow-sm hover:border-[#8C2F4D] hover:shadow-lg transition-all">
+          <div className="rounded-3xl border border-[#D4B483]/30 bg-[var(--card-bg)] p-6 sm:p-7 hover:border-[#8C2F4D] hover:shadow-lg transition-all">
             <div className="w-12 h-12 rounded-2xl bg-[#D4B483]/15 text-[#8C2F4D] dark:text-[#E8C58D] flex items-center justify-center mb-4">
               <Award size={22} />
             </div>
             <h3 className="font-serif font-bold text-lg text-[var(--text-primary)]">
-              Fall & Pico Pre-Stitched
+              Authentic Handloom Weave
             </h3>
             <p className="text-xs text-[var(--text-muted)] mt-2 leading-relaxed">
-              Ready-to-drape out of the box. Complimentary fall, pico edging, and quality inspection seals included on every saree.
+              Ready-to-drape out of the box. Pure artisanal weaves and quality inspection seals included on every saree.
             </p>
           </div>
         </div>
@@ -129,13 +113,13 @@ const ShippingPage = () => {
             </h2>
 
             <p className="text-sm sm:text-base text-[#3A2A2F] dark:text-[#EADFD5] leading-relaxed font-light">
-              At Ethnique by Jayant Saree Center, each saree is an exclusive designer piece, carefully steam-pressed, inspected, and pre-finished before dispatch. To guarantee pristine hygiene and quality for every customer, our sarees are strictly non-returnable and non-exchangeable once delivered.
+              At Ethnique by Jayant Saree Center, each saree is an exclusive designer piece, carefully steam-pressed, inspected, and quality verified before dispatch. To guarantee pristine hygiene and quality for every customer, our sarees are strictly non-returnable and non-exchangeable once delivered.
             </p>
 
             <div className="space-y-3 pt-2">
               <div className="flex items-start gap-3 text-xs sm:text-sm text-[#3A2A2F] dark:text-[#EADFD5]">
                 <CheckCircle2 size={18} className="text-[#8C2F4D] dark:text-[#E8C58D] mt-0.5 flex-shrink-0" />
-                <span><strong>Pristine Product Promise:</strong> We never re-circulate pre-worn or returned garments. Every client receives brand-new, untampered drapes with intact pre-stitched fall and pico.</span>
+                <span><strong>Pristine Product Promise:</strong> We never re-circulate pre-worn or returned garments. Every client receives brand-new, untampered drapes with uncompromised handloom quality.</span>
               </div>
               <div className="flex items-start gap-3 text-xs sm:text-sm text-[#3A2A2F] dark:text-[#EADFD5]">
                 <CheckCircle2 size={18} className="text-[#8C2F4D] dark:text-[#E8C58D] mt-0.5 flex-shrink-0" />

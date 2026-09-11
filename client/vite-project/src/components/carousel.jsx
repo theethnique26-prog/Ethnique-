@@ -66,7 +66,7 @@ const Carousel = () => {
           <div className="flex flex-wrap items-center justify-center gap-2 mt-4">
             {[
               { id: "all", label: "✨ The Full Collection" },
-              { id: "banarasi", label: "👑 Banarasi Drape" },
+              { id: "banarasi", label: "👑 Banarasi Saree" },
               { id: "signature", label: "🌸 Signature Sarees" },
               { id: "mulmul", label: "🌿 Breathable Mulmul" },
             ].map((tab) => (
@@ -74,7 +74,7 @@ const Carousel = () => {
                 key={tab.id}
                 onClick={() => setSelectedDrape(tab.id)}
                 className={`
-                  px-3.5 py-1 rounded-full text-xs font-medium tracking-wide transition-all duration-300
+                  px-3.5 py-1 rounded-full text-xs font-medium tracking-wide transition-all duration-300 cursor-pointer
                   ${
                     selectedDrape === tab.id
                       ? "bg-[#6D1830] dark:bg-[#E5C583] text-white dark:text-black shadow-md scale-[1.03]"
@@ -93,16 +93,18 @@ const Carousel = () => {
         {/* Visible on Desktop & Tablet */}
         <div className="hidden md:flex justify-center items-end gap-3 md:gap-4 lg:gap-8 xl:gap-10 pb-4 pt-1">
 
-          {/* Left Archway: Banarasi Drape */}
-          <div
+          {/* Left Archway: Clickable Banarasi Saree */}
+          <Link
+            to="/products?search=banarasi"
+            title="Explore Authentic Banarasi Sarees"
             className={`
-              jharokha-frame jharokha-arch left-arch
+              jharokha-frame jharokha-arch left-arch block cursor-pointer group/banarasi
               w-[210px] md:w-[220px] lg:w-[280px] xl:w-[320px]
               h-[350px] md:h-[390px] lg:h-[450px] xl:h-[490px]
               border-2 transition-all duration-500
               ${
                 selectedDrape === "banarasi" || selectedDrape === "all"
-                  ? "border-[#D4B483] dark:border-[#E5C583] opacity-100 scale-100"
+                  ? "border-[#D4B483] dark:border-[#E5C583] opacity-100 scale-100 shadow-xl"
                   : "border-[#D4B483]/30 dark:border-[#E5C583]/20 opacity-60 scale-95"
               }
             `}
@@ -112,7 +114,7 @@ const Carousel = () => {
                 <img
                   key={index}
                   src={img}
-                  alt="Banarasi Drape Model"
+                  alt="Banarasi Saree Drape Model"
                   className={`fade-image ${index === currentIndex ? "active" : ""}`}
                 />
               ))}
@@ -120,19 +122,22 @@ const Carousel = () => {
               {/* Architectural Arch Line Overlay */}
               <div className="absolute inset-0 jharokha-arch pointer-events-none border border-white/30 dark:border-[#E5C583]/20 m-2" />
 
-              {/* Royal Badge */}
-              <div className="absolute top-5 left-1/2 -translate-x-1/2 z-10 bg-black/55 backdrop-blur-md border border-[#D4B483]/50 text-[#F7F2EC] text-[10px] font-semibold tracking-[2px] uppercase px-3.5 py-1 rounded-full shadow-lg whitespace-nowrap">
-                Banarasi Drape
+              {/* Royal Badge - Clickable to Banarasi Sarees */}
+              <div className="absolute top-5 left-1/2 -translate-x-1/2 z-10 bg-black/65 backdrop-blur-md border border-[#D4B483]/70 text-[#FAF6F0] text-[10px] font-semibold tracking-[2px] uppercase px-3.5 py-1 rounded-full shadow-lg whitespace-nowrap group-hover/banarasi:bg-[#6D1830] group-hover/banarasi:border-[#E5C583] transition-all">
+                👑 Banarasi Saree
               </div>
 
               {/* Bottom Subtle Gradient */}
-              <div className="absolute bottom-0 inset-x-0 h-24 bg-gradient-to-t from-black/80 via-black/30 to-transparent flex items-end p-4">
+              <div className="absolute bottom-0 inset-x-0 h-24 bg-gradient-to-t from-black/85 via-black/40 to-transparent flex flex-col justify-end p-4">
                 <p className="text-white text-xs font-serif font-medium tracking-wide">
                   Pure Zari Weave &bull; Heritage Red
                 </p>
+                <span className="text-[10px] text-[#E5C583] tracking-wider uppercase font-semibold mt-0.5 group-hover/banarasi:underline">
+                  Shop Banarasi &rarr;
+                </span>
               </div>
             </div>
-          </div>
+          </Link>
 
           {/* Center Archway: Masterpiece Signature (Taller with Crown Styling) */}
           <div
@@ -238,13 +243,16 @@ const Carousel = () => {
                 />
               ))}
 
-              <div className="absolute top-5 left-1/2 -translate-x-1/2 z-10 bg-black/60 backdrop-blur-md border border-[#D4B483] text-[#FAF6F0] text-[10px] font-semibold tracking-[2px] uppercase px-4 py-1.5 rounded-full shadow-lg whitespace-nowrap">
-                {activeMobileCard === 0 ? "Banarasi Drape" : activeMobileCard === 1 ? "Signature Atelier" : "Mulmul Cotton"}
-              </div>
+              <Link
+                to={activeMobileCard === 0 ? "/products?search=banarasi" : "/products"}
+                className="absolute top-5 left-1/2 -translate-x-1/2 z-10 bg-black/60 backdrop-blur-md border border-[#D4B483] text-[#FAF6F0] text-[10px] font-semibold tracking-[2px] uppercase px-4 py-1.5 rounded-full shadow-lg whitespace-nowrap"
+              >
+                {activeMobileCard === 0 ? "👑 Banarasi Saree" : activeMobileCard === 1 ? "Signature Atelier" : "Mulmul Cotton"}
+              </Link>
 
               <div className="absolute bottom-0 inset-x-0 h-24 bg-gradient-to-t from-black/80 to-transparent flex items-end p-4">
                 <p className="text-white text-xs font-serif font-medium">
-                  {activeMobileCard === 0 ? "Pure Zari Weave" : activeMobileCard === 1 ? "Designer Festive Drape" : "Breathable Everyday Comfort"}
+                  {activeMobileCard === 0 ? "Pure Zari Weave • Tap to Shop" : activeMobileCard === 1 ? "Designer Festive Drape" : "Breathable Everyday Comfort"}
                 </p>
               </div>
             </div>
@@ -252,7 +260,7 @@ const Carousel = () => {
 
           {/* Mobile Tab Switcher */}
           <div className="flex justify-center items-center gap-2 mt-4">
-            {["Banarasi", "Signature", "Mulmul"].map((title, i) => (
+            {["Banarasi Saree", "Signature", "Mulmul"].map((title, i) => (
               <button
                 key={i}
                 onClick={() => setActiveMobileCard(i)}

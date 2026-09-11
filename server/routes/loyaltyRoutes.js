@@ -9,20 +9,20 @@ const getTierDetails = (points = 0) => {
   if (points >= 1500) {
     return {
       tierId: "ultimate",
-      name: "Ultimate Glam Clan",
+      name: "Ultimate Glam Club",
       subtitle: "Level 3 • Top Tier VIP",
       badge: "VIP Monarch",
       minPts: 1500,
       nextTier: null,
       pointsNeeded: 0,
       progressPercent: 100,
-      earnRate: "2.0x Clan Points on every purchase",
+      earnRate: "2.0x Club Points on every purchase",
       freeShippingAlways: true,
       perks: [
-        "100% FREE Insured Priority Shipping on all orders (no minimum)",
-        "Complimentary Bespoke Blouse Finishing & Fall/Pico Concierge",
-        "Direct WhatsApp Stylist Priority Access",
-        "Earn 2x Clan Points on all designer drapes",
+        "Free Delivery on all orders (no minimum purchase)",
+        "Bespoke Blouse Finishing & Stylist Concierge",
+        "Direct WhatsApp Priority Access",
+        "Earn 2x Club Points on all designer drapes",
       ],
     };
   }
@@ -30,45 +30,45 @@ const getTierDetails = (points = 0) => {
   if (points >= 500) {
     return {
       tierId: "elite",
-      name: "Clan Elite",
+      name: "Club Elite",
       subtitle: "Level 2 • 500+ Points",
       badge: "Most Popular",
       minPts: 500,
-      nextTier: "Ultimate Glam Clan",
+      nextTier: "Ultimate Glam Club",
       pointsNeeded: 1500 - points,
       progressPercent: Math.min(Math.round(((points - 500) / 1000) * 100), 100),
-      earnRate: "1.5x Clan Points on every purchase",
+      earnRate: "1.5x Club Points on every purchase",
       freeShippingAlways: true,
       perks: [
-        "FREE Insured Delivery on ALL orders (zero minimum purchase)",
+        "Free Delivery on ALL orders (zero minimum purchase)",
         "Extra 5% Instant Discount code ELITE5 on checkout",
         "12-Hour Early Access to big seasonal sale drops",
-        "Earn 1.5x Clan Points on all purchases",
+        "Earn 1.5x Club Points on all purchases",
       ],
     };
   }
 
   return {
     tierId: "insider",
-    name: "Clan Insider",
+    name: "Club Insider",
     subtitle: "Level 1 • Auto Unlocked",
     badge: "Entry Tier",
     minPts: 0,
-    nextTier: "Clan Elite",
+    nextTier: "Club Elite",
     pointsNeeded: 500 - points,
     progressPercent: Math.min(Math.round((points / 500) * 100), 100),
-    earnRate: "1.0x Clan Point per ₹10 spent",
+    earnRate: "1.0x Club Point per ₹10 spent",
     freeShippingAlways: false,
     perks: [
-      "Free standard delivery on orders above ₹999",
+      "Standard delivery on orders above ₹999",
       "Welcome voucher code FIRSTGLAM (₹200 OFF)",
-      "Earn 1 Clan Point on every ₹10 spent",
+      "Earn 1 Club Point on every ₹10 spent",
     ],
   };
 };
 
 // =====================================
-// 1. GET LOYALTY STATUS & CLAN PROGRESS
+// 1. GET LOYALTY STATUS & CLUB PROGRESS
 // =====================================
 router.get("/status", authMiddleware, async (req, res) => {
   try {
@@ -112,7 +112,7 @@ router.get("/status", authMiddleware, async (req, res) => {
         canClaimBonus,
         nextClaimInHours,
         ordersCount: userOrders.length,
-        pointsRedemptionRate: "10 Clan Points = ₹5 off at checkout (max 50% cart total)",
+        pointsRedemptionRate: "1 Club Point = ₹5 off at checkout (max 50% cart total)",
       },
     });
   } catch (error) {
@@ -122,7 +122,7 @@ router.get("/status", authMiddleware, async (req, res) => {
 });
 
 // =====================================
-// 2. CLAIM BONUS CLAN POINTS (+50 PTS)
+// 2. CLAIM BONUS CLUB POINTS (+50 PTS)
 // =====================================
 router.post("/claim-bonus", authMiddleware, async (req, res) => {
   try {
@@ -156,7 +156,7 @@ router.post("/claim-bonus", authMiddleware, async (req, res) => {
 
     res.json({
       success: true,
-      message: `✨ Congratulations! +${BONUS_POINTS} Clan Points added to your VIP Pass!`,
+      message: `✨ Congratulations! +${BONUS_POINTS} Club Points added to your VIP Pass!`,
       points: user.loyaltyPoints,
       tier,
     });
@@ -167,7 +167,7 @@ router.post("/claim-bonus", authMiddleware, async (req, res) => {
 });
 
 // =====================================
-// 3. CALCULATE POINTS REDEMPTION DISCOUNT
+// 3. CALCULATE POINTS REDEMPTION DISCOUNT (1 Point = ₹5)
 // =====================================
 router.post("/redeem-preview", authMiddleware, async (req, res) => {
   try {
@@ -192,16 +192,16 @@ router.post("/redeem-preview", authMiddleware, async (req, res) => {
     if (requestedPoints > userAvailablePoints) {
       return res.status(400).json({
         success: false,
-        message: `You only have ${userAvailablePoints} Clan Points available.`,
+        message: `You only have ${userAvailablePoints} Club Points available.`,
       });
     }
 
-    // 10 points = ₹5 discount (₹0.50 per point)
-    const rawDiscount = requestedPoints * 0.5;
+    // 1 point = ₹5 discount
+    const rawDiscount = requestedPoints * 5;
     // Cap at 50% of subtotal
     const maxAllowedDiscount = Math.floor((Number(subtotal) || 0) * 0.5);
     const finalDiscount = Math.min(rawDiscount, maxAllowedDiscount);
-    const actualPointsUsed = Math.ceil(finalDiscount / 0.5);
+    const actualPointsUsed = Math.ceil(finalDiscount / 5);
 
     res.json({
       success: true,

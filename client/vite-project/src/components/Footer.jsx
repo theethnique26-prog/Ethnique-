@@ -81,10 +81,10 @@ const Footer = () => {
                 </div>
                 <div className="p-5 rounded-2xl bg-white/70 dark:bg-[#1A141F]/70 border border-[#E8E2DC]/80 dark:border-[#2C2030] shadow-sm group-hover:shadow-md group-hover:border-[#D4B483] transition-all">
                   <h3 className="font-serif text-lg font-bold text-[#2B2B2B] dark:text-[#FAF5EF]">
-                    Curated Range
+                    Artisanal Weaves
                   </h3>
                   <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mt-2 font-light leading-relaxed">
-                    Expanded into exclusive wedding collections, banarasi zari edits, and pre-stitched ready-to-drape sarees.
+                    Expanded into exclusive handloom curations, authentic Banarasi silks, and pure Maheshwari drapes.
                   </p>
                 </div>
               </div>
@@ -114,7 +114,7 @@ const Footer = () => {
                     Pan-India Community
                   </h3>
                   <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mt-2 font-light leading-relaxed">
-                    Delivering curated designer ethnic sarees to women nationwide with insured express delivery and concierge care.
+                    Delivering curated designer ethnic sarees to women nationwide with insured free delivery and concierge care.
                   </p>
                 </div>
               </div>
@@ -135,10 +135,10 @@ const Footer = () => {
               </div>
               <div>
                 <h4 className="font-serif font-bold text-sm text-[#2B2B2B] dark:text-[#FAF5EF]">
-                  Pan-India Express
+                  Free Delivery
                 </h4>
                 <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 font-light">
-                  Complimentary & Insured
+                  Insured Pan-India Dispatch
                 </p>
               </div>
             </div>
@@ -163,10 +163,10 @@ const Footer = () => {
               </div>
               <div>
                 <h4 className="font-serif font-bold text-sm text-[#2B2B2B] dark:text-[#FAF5EF]">
-                  Fall & Pico Included
+                  Authentic Handloom
                 </h4>
                 <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 font-light">
-                  Ready-to-Drape Perfection
+                  100% Genuine Quality Fabrics
                 </p>
               </div>
             </div>
@@ -226,18 +226,46 @@ const Footer = () => {
               </form>
             </div>
 
-            {/* Social Links */}
+            {/* Social Links - Accessible Facebook and Pinterest Placement */}
             <div className="flex gap-4 mt-6 text-gray-600 dark:text-gray-400">
-              <a href="#" aria-label="Instagram" className="p-2.5 rounded-full bg-white dark:bg-[#1A141F] border border-[#E8E2DC] dark:border-[#2C2132] hover:text-[#6D1830] dark:hover:text-[#E5C583] hover:scale-110 transition">
-                <FaInstagram size={16} />
-              </a>
-              <a href="#" aria-label="Facebook" className="p-2.5 rounded-full bg-white dark:bg-[#1A141F] border border-[#E8E2DC] dark:border-[#2C2132] hover:text-[#6D1830] dark:hover:text-[#E5C583] hover:scale-110 transition">
+              <a
+                href="https://www.facebook.com/ethniquebyjayant"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Follow Ethnique on Facebook"
+                title="Facebook"
+                className="p-2.5 rounded-full bg-white dark:bg-[#1A141F] border border-[#E8E2DC] dark:border-[#2C2132] hover:text-[#1877F2] dark:hover:text-[#1877F2] hover:scale-110 transition shadow-xs"
+              >
                 <FaFacebookF size={16} />
               </a>
-              <a href="#" aria-label="Pinterest" className="p-2.5 rounded-full bg-white dark:bg-[#1A141F] border border-[#E8E2DC] dark:border-[#2C2132] hover:text-[#6D1830] dark:hover:text-[#E5C583] hover:scale-110 transition">
+              <a
+                href="https://www.pinterest.com/ethniquebyjayant"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Discover Ethnique Sarees on Pinterest"
+                title="Pinterest"
+                className="p-2.5 rounded-full bg-white dark:bg-[#1A141F] border border-[#E8E2DC] dark:border-[#2C2132] hover:text-[#BD081C] dark:hover:text-[#BD081C] hover:scale-110 transition shadow-xs"
+              >
                 <FaPinterestP size={16} />
               </a>
-              <a href="#" aria-label="YouTube" className="p-2.5 rounded-full bg-white dark:bg-[#1A141F] border border-[#E8E2DC] dark:border-[#2C2132] hover:text-[#6D1830] dark:hover:text-[#E5C583] hover:scale-110 transition">
+              <a
+                href="https://www.instagram.com/ethniquebyjayant"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Follow Ethnique on Instagram"
+                title="Instagram"
+                className="p-2.5 rounded-full bg-white dark:bg-[#1A141F] border border-[#E8E2DC] dark:border-[#2C2132] hover:text-[#E4405F] dark:hover:text-[#E4405F] hover:scale-110 transition shadow-xs"
+              >
+                <FaInstagram size={16} />
+              </a>
+              <a
+                href="https://www.youtube.com/@ethniquebyjayant"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Watch Ethnique Sarees on YouTube"
+                title="YouTube"
+                className="p-2.5 rounded-full bg-white dark:bg-[#1A141F] border border-[#E8E2DC] dark:border-[#2C2132] hover:text-[#CD201F] dark:hover:text-[#CD201F] hover:scale-110 transition shadow-xs"
+              >
                 <FaYoutube size={16} />
               </a>
             </div>
@@ -249,10 +277,11 @@ const Footer = () => {
               Shop Collections
             </h3>
             <ul className="space-y-2.5 text-xs text-gray-600 dark:text-gray-400">
-              <li><Link to="/products" className="hover:text-[#6D1830] dark:hover:text-[#E5C583] transition">New Arrivals</Link></li>
+              <li><Link to="/products" className="hover:text-[#6D1830] dark:hover:text-[#E5C583] transition">All Collections</Link></li>
               <li><Link to="/products?cat=cotton" className="hover:text-[#6D1830] dark:hover:text-[#E5C583] transition">Pure Cotton Sarees</Link></li>
+              <li><Link to="/products?cat=art" className="hover:text-[#6D1830] dark:hover:text-[#E5C583] transition">Art Sarees</Link></li>
               <li><Link to="/products?cat=silk" className="hover:text-[#6D1830] dark:hover:text-[#E5C583] transition">Designer Silk Edit</Link></li>
-              <li><Link to="/products" className="hover:text-[#6D1830] dark:hover:text-[#E5C583] transition">Chanderi & Festive</Link></li>
+              <li><Link to="/products?cat=maheshwari" className="hover:text-[#6D1830] dark:hover:text-[#E5C583] transition">Maheshwari Drapes</Link></li>
               <li><Link to="/reels" className="hover:text-[#6D1830] dark:hover:text-[#E5C583] transition">Video Lookbook</Link></li>
             </ul>
           </div>
@@ -279,11 +308,8 @@ const Footer = () => {
               <p className="font-semibold text-gray-800 dark:text-gray-200">Boutique Inquiries</p>
               <a href="mailto:support@ethniquebyjayant.com" className="hover:underline block">support@ethniquebyjayant.com</a>
               <a href="https://wa.me/917387020612" target="_blank" rel="noreferrer" className="hover:underline block text-[#6D1830] dark:text-[#E5C583] font-medium">
-                +91 73870 20612 (WhatsApp)
+                +91 73870 20612 (WhatsApp Concierge)
               </a>
-              <p className="pt-2 text-[11px] text-gray-500">
-                Mon - Sat: 10:00 AM - 7:00 PM IST
-              </p>
             </div>
           </div>
 
