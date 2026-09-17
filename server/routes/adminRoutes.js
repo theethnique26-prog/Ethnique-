@@ -23,9 +23,23 @@ router.post("/login", authLimiter, async (req, res) => {
       });
     }
 
-    const normalizedEmail = inputIdentifier.toLowerCase();
+    const normalizedEmail = (email || inputIdentifier).trim().toLowerCase();
     const adminEmail = process.env.ADMIN_EMAIL ? process.env.ADMIN_EMAIL.trim().toLowerCase() : "";
     const cleanDigits = inputIdentifier.replace(/[\s\-\(\)\.]/g, "").replace(/^\+91/, "");
+    const isEmailFormat = inputIdentifier.includes("@") || (Boolean(email) && email.includes("@"));
+
+    // ==========================================
+    // SECURITY CHECK: Enforce @gmail.com only for email login
+    // ==========================================
+    if (isEmailFormat) {
+      const isGmail = /^[a-zA-Z0-9._%+-]+@gmail\.com$/i.test(normalizedEmail);
+      if (!isGmail) {
+        return res.status(400).json({
+          success: false,
+          message: "Security restriction: Only @gmail.com email addresses are allowed.",
+        });
+      }
+    }
 
     // Check against .env admin credentials
     if (

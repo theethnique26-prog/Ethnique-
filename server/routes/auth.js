@@ -11,10 +11,14 @@ const {
   otpVerifyLimiter,
 } = require("../middleware/rateLimiter");
 
-// Helper to strip non-digit formatting characters from phone
+// Helper to strip non-digit formatting characters and extract 10-digit Indian mobile
 const cleanPhone = (phoneStr) => {
   if (!phoneStr) return "";
-  return phoneStr.toString().replace(/[\s\-\(\)\.]/g, "");
+  let digits = phoneStr.toString().replace(/[\s\-\(\)\.]/g, "").replace(/^\+?91/, "");
+  if (digits.length > 10) {
+    digits = digits.slice(-10);
+  }
+  return digits;
 };
 
 // SIGNUP
@@ -29,19 +33,19 @@ router.post("/signup", authLimiter, async (req, res) => {
       });
     }
 
-    if (!process.env.JWT_SECRET) {
-      return res.status(500).json({ success: false, msg: "JWT secret missing" });
-    }
-
     const normalizedEmail = email ? email.trim().toLowerCase() : "";
     const rawPhone = phone ? phone.trim() : "";
     const cleanedDigits = cleanPhone(rawPhone).replace(/^\+91/, "");
 
-    if (normalizedEmail && !/^[^\s@]+@[^\s@]+\.com$/i.test(normalizedEmail)) {
+    if (normalizedEmail && !/^[a-zA-Z0-9._%+-]+@gmail\.com$/i.test(normalizedEmail)) {
       return res.status(400).json({
         success: false,
-        msg: "Registration requires an email address ending with .com only",
+        msg: "Security restriction: Only @gmail.com email addresses are allowed.",
       });
+    }
+
+    if (!process.env.JWT_SECRET) {
+      return res.status(500).json({ success: false, msg: "JWT secret missing" });
     }
 
     // Check if user already exists by email or phone
@@ -122,17 +126,30 @@ router.post("/login", authLimiter, async (req, res) => {
       });
     }
 
+    const isEmailFormat = inputIdentifier.includes("@") || (Boolean(email) && email.includes("@"));
+    const normalizedEmail = (email || inputIdentifier).trim().toLowerCase();
+    const cleanedDigits = cleanPhone(inputIdentifier).replace(/^\+91/, "");
+    const adminEmail = process.env.ADMIN_EMAIL ? process.env.ADMIN_EMAIL.trim().toLowerCase() : "";
+
+    // ==========================================
+    // SECURITY CHECK: Enforce @gmail.com only for email login
+    // ==========================================
+    if (isEmailFormat) {
+      const isGmail = /^[a-zA-Z0-9._%+-]+@gmail\.com$/i.test(normalizedEmail);
+      if (!isGmail) {
+        return res.status(400).json({
+          success: false,
+          message: "Security restriction: Only @gmail.com email addresses are allowed for login.",
+        });
+      }
+    }
+
     if (!process.env.JWT_SECRET) {
       return res.status(500).json({
         success: false,
         message: "JWT secret is not configured",
       });
     }
-
-    const isEmailFormat = inputIdentifier.includes("@");
-    const normalizedEmail = inputIdentifier.toLowerCase();
-    const cleanedDigits = cleanPhone(inputIdentifier).replace(/^\+91/, "");
-    const adminEmail = process.env.ADMIN_EMAIL ? process.env.ADMIN_EMAIL.trim().toLowerCase() : "";
 
     // ==========================
     // ADMIN LOGIN (.env match)
@@ -293,6 +310,8 @@ router.post("/send-otp", otpSendLimiter, async (req, res) => {
     });
 
     // If an SMS Gateway is configured (e.g. FAST2SMS), dispatch real SMS:
+    let smsDelivered = false;
+    let gatewayMessage = "";
     if (process.env.FAST2SMS_API_KEY) {
       try {
         const smsRes = await fetch("https://www.fast2sms.com/dev/bulkV2", {
@@ -309,20 +328,36 @@ router.post("/send-otp", otpSendLimiter, async (req, res) => {
         });
         const smsData = await smsRes.json();
         console.log(`[FAST2SMS DISPATCH TO +91 ${cleanedDigits}]:`, smsData);
+
+        if (smsData && smsData.return) {
+          smsDelivered = true;
+        } else if (smsData && smsData.message) {
+          gatewayMessage = Array.isArray(smsData.message) ? smsData.message.join(", ") : smsData.message;
+          console.warn("[FAST2SMS NOTICE]:", gatewayMessage);
+        }
       } catch (smsErr) {
         console.error("[FAST2SMS GATEWAY ERROR]:", smsErr.message);
       }
-    } else {
+    }
+
+    // Console log backup for debugging/testing
+    if (!process.env.FAST2SMS_API_KEY || !smsDelivered) {
       console.log(`\n=============================================================`);
       console.log(`[ETHNIQUE OTP] Code for +91 ${cleanedDigits}: >>> ${otp} <<<`);
-      console.log(`(NOTE: To deliver real SMS to mobile handsets, add FAST2SMS_API_KEY in server/.env)`);
+      if (!process.env.FAST2SMS_API_KEY) {
+        console.log(`(NOTE: To deliver real SMS to mobile handsets, add FAST2SMS_API_KEY in server/.env)`);
+      } else if (!smsDelivered && gatewayMessage) {
+        console.log(`(FAST2SMS Gateway Notice: ${gatewayMessage})`);
+      }
       console.log(`=============================================================\n`);
     }
 
     return res.json({
       success: true,
-      message: `Verification code sent to +91 ${cleanedDigits}`,
-      smsSent: Boolean(process.env.FAST2SMS_API_KEY),
+      message: smsDelivered
+        ? `Verification code sent to +91 ${cleanedDigits} via SMS`
+        : `Verification code sent to +91 ${cleanedDigits}`,
+      smsSent: smsDelivered,
     });
   } catch (err) {
     console.error("SEND OTP ERROR:", err);
@@ -336,7 +371,7 @@ router.post("/send-otp", otpSendLimiter, async (req, res) => {
 // VERIFY OTP & SIGN IN (OR AUTO-REGISTER)
 router.post("/verify-otp", otpVerifyLimiter, async (req, res) => {
   try {
-    const { phone, otp } = req.body || {};
+    const { phone, otp, name } = req.body || {};
     if (!phone || !otp) {
       return res.status(400).json({
         success: false,
@@ -376,15 +411,18 @@ router.post("/verify-otp", otpVerifyLimiter, async (req, res) => {
     });
 
     if (!user) {
-      // Auto-register guest account
+      // Auto-register account
       const hashedPassword = await bcrypt.hash(`phone_${Date.now()}`, 10);
       user = await User.create({
-        name: `Guest ${cleanedDigits.slice(-4)}`,
+        name: (name && name.trim()) || `Patron ${cleanedDigits.slice(-4)}`,
         email: `${cleanedDigits}@ethnique.customer`,
         phone: cleanedDigits,
         password: hashedPassword,
         role: "user",
       });
+    } else if (name && name.trim() && (user.name.startsWith("Guest ") || user.name.startsWith("Patron "))) {
+      user.name = name.trim();
+      await user.save();
     }
 
     const token = jwt.sign(

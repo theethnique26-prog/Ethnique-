@@ -1,12 +1,33 @@
-# React + Vite
+# Ethnique — Frontend Client
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+This directory contains the client-side single page application (SPA) for **Ethnique**, built with **React 19**, **Vite 6**, and **Tailwind CSS v4**.
 
-Currently, two official plugins are available:
+- **Deployed Live URL**: [https://ethnique.vercel.app/](https://ethnique.vercel.app/)
+- **Full Project Documentation**: Please see the root [README.md](../../README.md) for full project architecture, features, backend APIs, database models, and deployment instructions.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Development Scripts
 
-## Expanding the ESLint configuration
+```bash
+# Install dependencies
+npm install
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+# Start development server with Hot Module Replacement (HMR)
+npm run dev
+
+# Build for production
+npm run build
+
+# Preview production build locally
+npm run preview
+
+# Run ESLint
+npm run lint
+```
+
+## Environment Configuration
+
+Create a `.env` file in this directory based on `.env.example`:
+
+```ini
+VITE_API_BASE=http://localhost:5000/api
+```

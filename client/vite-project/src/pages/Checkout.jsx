@@ -683,7 +683,7 @@ function Checkout() {
                         </span>
                         <p className="text-[11px] text-emerald-600 dark:text-emerald-400">
                           {appliedCoupon.freeShipping
-                            ? "Free Express Shipping unlocked"
+                            ? "Standard Delivery unlocked"
                             : `₹${appliedCoupon.discountAmount} discount applied`}
                         </p>
                       </div>
@@ -750,15 +750,17 @@ function Checkout() {
                   </div>
 
                   {points > 0 && (
-                    <label className="relative inline-flex items-center cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={redeemClanPoints}
-                        onChange={(e) => setRedeemClanPoints(e.target.checked)}
-                        className="sr-only peer"
-                      />
-                      <div className="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-amber-600"></div>
-                    </label>
+                    <button
+                      type="button"
+                      onClick={() => setRedeemClanPoints(!redeemClanPoints)}
+                      className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition ${
+                        redeemClanPoints
+                          ? "bg-amber-600 text-white"
+                          : "border border-amber-500 text-amber-800 dark:text-amber-300 hover:bg-amber-500/10"
+                      }`}
+                    >
+                      {redeemClanPoints ? "Applied" : "Redeem"}
+                    </button>
                   )}
                 </div>
               </div>
@@ -787,9 +789,9 @@ function Checkout() {
                 )}
 
                 <div className="flex justify-between text-gray-600 dark:text-gray-400">
-                  <span>Insured Express Shipping</span>
+                  <span>Insured Standard Delivery</span>
                   <span className={shippingCharge === 0 ? "text-emerald-600 dark:text-emerald-400 font-semibold" : "font-medium"}>
-                    {shippingCharge === 0 ? "FREE" : `₹${shippingCharge}`}
+                    {shippingCharge === 0 ? "Standard Delivery (₹0)" : `₹${shippingCharge}`}
                   </span>
                 </div>
 

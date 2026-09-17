@@ -98,11 +98,11 @@ function Cart() {
                     <Truck size={15} className="text-[#8B1E3F] dark:text-[#E5C583]" />
                     {isFreeShipping ? (
                       <span className="text-emerald-600 dark:text-emerald-400 font-semibold">
-                        🎉 You've unlocked FREE Insured Express Shipping Across India!
+                        🎉 You've unlocked Standard Insured Express Delivery Across India!
                       </span>
                     ) : (
                       <span>
-                        Add <strong className="text-[#8B1E3F] dark:text-[#E5C583]">₹{amountNeededForFreeShipping.toLocaleString("en-IN")}</strong> more for FREE Shipping
+                        Add <strong className="text-[#8B1E3F] dark:text-[#E5C583]">₹{amountNeededForFreeShipping.toLocaleString("en-IN")}</strong> more for Standard Delivery
                       </span>
                     )}
                   </span>

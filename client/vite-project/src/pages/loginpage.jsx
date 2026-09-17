@@ -1,12 +1,17 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { API_BASE } from "../services/apiConfig.js";
 import BrandLogo from "../components/BrandLogo";
 import { Mail, Lock, User, Sparkles, Phone, Eye, EyeOff, KeyRound, ArrowLeft, RotateCw, CheckCircle2 } from "lucide-react";
 
 const Login = () => {
-  const [isLogin, setIsLogin] = useState(false); // First account creation then login option
+  const [searchParams] = useSearchParams();
+  // Account creation is first by default, unless URL explicitly requests signin
+  const [isLogin, setIsLogin] = useState(() => {
+    const mode = searchParams.get("mode");
+    return mode === "signin" || mode === "login";
+  });
   const [loginMethod, setLoginMethod] = useState("phone"); // 'phone' | 'email'
 
   // Phone OTP state
@@ -26,6 +31,15 @@ const Login = () => {
   const navigate = useNavigate();
   const { login } = useAuth();
 
+  useEffect(() => {
+    const mode = searchParams.get("mode");
+    if (mode === "signin" || mode === "login") {
+      setIsLogin(true);
+    } else if (mode === "signup" || mode === "create-account") {
+      setIsLogin(false);
+    }
+  }, [searchParams]);
+
   // Resend countdown timer
   useEffect(() => {
     let interval = null;
@@ -42,6 +56,12 @@ const Login = () => {
   // Request OTP from server
   const handleSendOtp = async (e) => {
     if (e) e.preventDefault();
+
+    if (!isLogin && (!name || name.trim().length < 2)) {
+      alert("Please enter your full name to create an account");
+      return;
+    }
+
     if (!phone || phone.length < 10) {
       alert("Please enter a valid 10-digit mobile number");
       return;
@@ -81,7 +101,7 @@ const Login = () => {
     }
   };
 
-  // Verify OTP and complete sign-in
+  // Verify OTP and complete sign-in / registration
   const handleVerifyOtp = async (e) => {
     if (e) e.preventDefault();
     if (!otpCode || otpCode.trim().length < 6) {
@@ -97,6 +117,7 @@ const Login = () => {
         body: JSON.stringify({
           phone: phone.trim(),
           otp: otpCode.trim(),
+          name: name ? name.trim() : undefined,
         }),
       });
 
@@ -132,11 +153,11 @@ const Login = () => {
   const handleSubmitStandard = async (e) => {
     e.preventDefault();
 
-    // .com only email validation check
+    // Security check: Only @gmail.com is valid when authenticating with email
     if (email) {
       const trimmedEmail = email.trim();
-      if (!/^[^\s@]+@[^\s@]+\.com$/i.test(trimmedEmail)) {
-        alert("Please enter an email address ending with .com only (e.g. name@example.com)");
+      if (!/^[a-zA-Z0-9._%+-]+@gmail\.com$/i.test(trimmedEmail)) {
+        alert("Security restriction: Only @gmail.com email addresses are allowed (e.g. yourname@gmail.com)");
         return;
       }
     }
@@ -214,20 +235,20 @@ const Login = () => {
             </div>
 
             <h1 className="text-2xl sm:text-3xl font-serif font-bold text-gray-900 dark:text-[#FAF5EF]">
-              {isLogin ? "Welcome Back" : "Join the Royal Family"}
+              {!isLogin ? "Create Your Royal Account" : "Welcome Back"}
             </h1>
 
             <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-1">
-              {isLogin
-                ? loginMethod === "phone" && phoneStep === "otp"
-                  ? "Enter the verification code sent to your mobile"
-                  : "Sign in with OTP or your credentials"
-                : "Create your account for bespoke saree experiences"}
+              {!isLogin
+                ? "Join the Ethnique family for bespoke sarees & privilege perks"
+                : loginMethod === "phone" && phoneStep === "otp"
+                ? "Enter the verification code sent to your mobile"
+                : "Sign in via Mobile OTP or your Gmail account"}
             </p>
           </div>
 
-          {/* Main Mode Switcher: 1) Create Account, 2) Sign In */}
-          <div className="grid grid-cols-2 p-1 mb-6 rounded-2xl bg-[#F4EDE2]/90 dark:bg-[#120A17] border border-[#D4B483]/40">
+          {/* Main Mode Switcher: 1) Create Account (FIRST), 2) Sign In */}
+          <div className="grid grid-cols-2 p-1 mb-5 rounded-2xl bg-[#F4EDE2]/90 dark:bg-[#120A17] border border-[#D4B483]/40">
             <button
               type="button"
               onClick={() => {
@@ -269,53 +290,70 @@ const Login = () => {
             </button>
           </div>
 
-          {/* Login Method Tabs (Phone OTP vs Email) */}
-          {isLogin && (
-            <div className="grid grid-cols-2 p-1 mb-6 rounded-2xl bg-[#F4EDE2]/80 dark:bg-[#120A17] border border-[#D4B483]/30">
-              <button
-                type="button"
-                onClick={() => {
-                  setLoginMethod("phone");
-                  setPhoneStep("input");
-                  setOtpCode("");
-                }}
-                className={`
-                  flex items-center justify-center gap-2 py-2 px-3 rounded-xl text-xs font-semibold transition-all duration-200 cursor-pointer
-                  ${
-                    loginMethod === "phone"
-                      ? "bg-white dark:bg-[#201326] text-[#6D1830] dark:text-[#E5C583] shadow-sm font-bold"
-                      : "text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200"
-                  }
-                `}
-              >
-                <Phone size={14} />
-                <span>Mobile OTP</span>
-              </button>
+          {/* Method Tabs: Mobile OTP vs Email (Available for both Create Account and Sign In) */}
+          <div className="grid grid-cols-2 p-1 mb-6 rounded-2xl bg-[#F4EDE2]/80 dark:bg-[#120A17] border border-[#D4B483]/30">
+            <button
+              type="button"
+              onClick={() => {
+                setLoginMethod("phone");
+                setPhoneStep("input");
+                setOtpCode("");
+              }}
+              className={`
+                flex items-center justify-center gap-2 py-2 px-3 rounded-xl text-xs font-semibold transition-all duration-200 cursor-pointer
+                ${
+                  loginMethod === "phone"
+                    ? "bg-white dark:bg-[#201326] text-[#6D1830] dark:text-[#E5C583] shadow-sm font-bold"
+                    : "text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200"
+                }
+              `}
+            >
+              <Phone size={14} />
+              <span>{isLogin ? "Mobile OTP" : "Mobile Sign Up"}</span>
+            </button>
 
-              <button
-                type="button"
-                onClick={() => setLoginMethod("email")}
-                className={`
-                  flex items-center justify-center gap-2 py-2 px-3 rounded-xl text-xs font-semibold transition-all duration-200 cursor-pointer
-                  ${
-                    loginMethod === "email"
-                      ? "bg-white dark:bg-[#201326] text-[#6D1830] dark:text-[#E5C583] shadow-sm font-bold"
-                      : "text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200"
-                  }
-                `}
-              >
-                <Mail size={14} />
-                <span>Email Login</span>
-              </button>
-            </div>
-          )}
+            <button
+              type="button"
+              onClick={() => setLoginMethod("email")}
+              className={`
+                flex items-center justify-center gap-2 py-2 px-3 rounded-xl text-xs font-semibold transition-all duration-200 cursor-pointer
+                ${
+                  loginMethod === "email"
+                    ? "bg-white dark:bg-[#201326] text-[#6D1830] dark:text-[#E5C583] shadow-sm font-bold"
+                    : "text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200"
+                }
+              `}
+            >
+              <Mail size={14} />
+              <span>{isLogin ? "Email Login" : "Email Sign Up"}</span>
+            </button>
+          </div>
 
-          {/* 1. PHONE OTP LOGIN FLOW */}
-          {isLogin && loginMethod === "phone" ? (
+          {/* 1. PHONE OTP FLOW (Works for both Account Creation & Sign In) */}
+          {loginMethod === "phone" ? (
             <div>
               {phoneStep === "input" ? (
-                /* Step 1: Input Phone Number */
+                /* Step 1: Input Mobile Number (and Full Name if creating account) */
                 <form onSubmit={handleSendOtp} className="space-y-4">
+                  {!isLogin && (
+                    <div>
+                      <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1.5">
+                        Full Name
+                      </label>
+                      <div className="relative">
+                        <User size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500" />
+                        <input
+                          required
+                          type="text"
+                          placeholder="e.g. Maharani Gayatri Devi"
+                          value={name}
+                          onChange={(e) => setName(e.target.value)}
+                          className="w-full pl-10 pr-4 py-3.5 rounded-2xl border border-gray-200 dark:border-[#2C1F32] bg-white dark:bg-[#120B15] text-gray-900 dark:text-[#FAF5EF] placeholder-gray-400 dark:placeholder-gray-500 text-sm focus:outline-none focus:border-[#6D1830] dark:focus:border-[#E5C583] focus:ring-2 focus:ring-[#6D1830]/20 transition"
+                        />
+                      </div>
+                    </div>
+                  )}
+
                   <div>
                     <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1.5">
                       Mobile Number
@@ -344,11 +382,11 @@ const Login = () => {
 
                   <button
                     type="submit"
-                    disabled={loading || phone.length < 10}
-                    className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-[#6D1830] to-[#8C2F4D] hover:from-[#561225] hover:to-[#73233D] text-[#FAF5EF] font-serif font-semibold text-sm tracking-wider uppercase transition-all shadow-[0_8px_20px_rgba(109,24,48,0.25)] hover:shadow-[0_12px_25px_rgba(109,24,48,0.35)] hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50 mt-2 cursor-pointer flex items-center justify-center gap-2"
+                    disabled={loading || phone.length < 10 || (!isLogin && (!name || name.trim().length < 2))}
+                    className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-[#6D1830] to-[#8C2F4D] hover:from-[#561225] hover:to-[#73233D] text-[#FAF6F0] font-serif font-semibold text-sm tracking-wider uppercase transition-all shadow-[0_8px_20px_rgba(109,24,48,0.25)] hover:shadow-[0_12px_25px_rgba(109,24,48,0.35)] hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50 mt-2 cursor-pointer flex items-center justify-center gap-2"
                   >
                     <KeyRound size={16} />
-                    <span>{loading ? "Sending Code..." : "Send Verification Code"}</span>
+                    <span>{loading ? "Sending Code..." : isLogin ? "Send Verification Code" : "Send Registration Code"}</span>
                   </button>
                 </form>
               ) : (
@@ -414,9 +452,9 @@ const Login = () => {
                   <button
                     type="submit"
                     disabled={loading || otpCode.length < 6}
-                    className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-[#6D1830] to-[#8C2F4D] hover:from-[#561225] hover:to-[#73233D] text-[#FAF5EF] font-serif font-semibold text-sm tracking-wider uppercase transition-all shadow-[0_8px_20px_rgba(109,24,48,0.25)] hover:shadow-[0_12px_25px_rgba(109,24,48,0.35)] hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50 mt-2 cursor-pointer"
+                    className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-[#6D1830] to-[#8C2F4D] hover:from-[#561225] hover:to-[#73233D] text-[#FAF6F0] font-serif font-semibold text-sm tracking-wider uppercase transition-all shadow-[0_8px_20px_rgba(109,24,48,0.25)] hover:shadow-[0_12px_25px_rgba(109,24,48,0.35)] hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50 mt-2 cursor-pointer"
                   >
-                    {loading ? "Verifying..." : "Verify & Sign In"}
+                    {loading ? "Verifying..." : isLogin ? "Verify & Sign In" : "Verify & Create Account"}
                   </button>
                 </form>
               )}
@@ -446,14 +484,14 @@ const Login = () => {
               <div>
                 <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1.5 flex justify-between items-center">
                   <span>Email Address</span>
-                  <span className="text-[10px] text-[#B8860B] font-mono lowercase tracking-normal">(.com only)</span>
+                  <span className="text-[10px] text-[#B8860B] font-mono lowercase tracking-normal">(@gmail.com only)</span>
                 </label>
                 <div className="relative">
                   <Mail size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500" />
                   <input
                     required
                     type="email"
-                    placeholder="your.email@example.com"
+                    placeholder="yourname@gmail.com"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     className="w-full pl-10 pr-4 py-3 rounded-2xl border border-gray-200 dark:border-[#2C1F32] bg-white dark:bg-[#120B15] text-gray-900 dark:text-[#FAF5EF] placeholder-gray-400 dark:placeholder-gray-500 text-sm focus:outline-none focus:border-[#6D1830] dark:focus:border-[#E5C583] focus:ring-2 focus:ring-[#6D1830]/20 transition"
@@ -513,7 +551,7 @@ const Login = () => {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-[#6D1830] to-[#8C2F4D] hover:from-[#561225] hover:to-[#73233D] text-[#FAF5EF] font-serif font-semibold text-sm tracking-wider uppercase transition-all shadow-[0_8px_20px_rgba(109,24,48,0.25)] hover:shadow-[0_12px_25px_rgba(109,24,48,0.35)] hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50 mt-2 cursor-pointer"
+                className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-[#6D1830] to-[#8C2F4D] hover:from-[#561225] hover:to-[#73233D] text-[#FAF6F0] font-serif font-semibold text-sm tracking-wider uppercase transition-all shadow-[0_8px_20px_rgba(109,24,48,0.25)] hover:shadow-[0_12px_25px_rgba(109,24,48,0.35)] hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50 mt-2 cursor-pointer"
               >
                 {loading ? "Processing..." : isLogin ? "Sign In to Royal Sanctuary" : "Create My Royal Account"}
               </button>

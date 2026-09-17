@@ -45,14 +45,20 @@ function AllProducts() {
 
   useEffect(() => {
     fetchProducts();
-    // Support category query param like /products?cat=cotton
-    const catParam = searchParams.get("cat");
+    // Support category query param like /products?cat=cotton or /products?category=silk
+    const catParam = searchParams.get("cat") || searchParams.get("category");
     if (catParam) {
       const lower = catParam.toLowerCase();
-      if (lower === "cotton") setSelectedCategory("Cotton");
+      if (lower === "cotton" || lower === "mulmul") setSelectedCategory("Cotton");
       else if (lower === "art") setSelectedCategory("Art");
-      else if (lower === "silk") setSelectedCategory("Silk");
+      else if (lower === "silk" || lower === "banarasi" || lower === "chanderi") setSelectedCategory("Silk");
       else if (lower === "maheshwari" || lower === "maheswari") setSelectedCategory("Maheshwari");
+    }
+
+    // Support search query param like /products?search=banarasi
+    const searchParam = searchParams.get("search");
+    if (searchParam) {
+      setSearch(searchParam);
     }
   }, [searchParams]);
 
@@ -250,7 +256,7 @@ function AllProducts() {
             <Truck size={20} />
           </div>
           <h3 className="text-xl sm:text-2xl font-bold font-serif text-[#2B2523] dark:text-[#F7F2EC]">
-            Free Delivery
+            Standard Delivery
           </h3>
           <p className="text-xs text-gray-500 dark:text-gray-400 font-light mt-0.5 uppercase tracking-wider">
             Pan-India Insured Dispatch

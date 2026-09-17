@@ -153,7 +153,7 @@ const ShippingPage = () => {
               <tr className="hover:bg-[#D4B483]/5 transition">
                 <td className="p-4 sm:p-5 font-medium">All Prepaid Orders (UPI, Cards, NetBanking)</td>
                 <td className="p-4 sm:p-5 text-[var(--text-muted)]">3–5 Business Days</td>
-                <td className="p-4 sm:p-5 font-bold text-emerald-600">FREE</td>
+                <td className="p-4 sm:p-5 font-bold text-emerald-600">Standard Delivery</td>
               </tr>
               <tr className="hover:bg-[#D4B483]/5 transition">
                 <td className="p-4 sm:p-5 font-medium">VIP Express Air (Glam Clan Members)</td>

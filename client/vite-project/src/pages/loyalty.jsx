@@ -65,11 +65,11 @@ const GLAM_COUPONS = [
   {
     id: "freeship",
     code: "FREESHIP",
-    discount: "FREE DELIVERY",
+    discount: "STANDARD DELIVERY",
     type: "shipping",
-    title: "Zero Shipping Pan-India",
+    title: "Standard Shipping Pan-India",
     minOrder: "No minimum purchase",
-    description: "Standard doorstep delivery free on all sarees.",
+    description: "Standard doorstep delivery on all sarees.",
     badge: "All Members",
     badgeColor: "bg-blue-500/15 text-blue-700 dark:text-blue-400 border-blue-500/30",
     popular: false,
@@ -154,7 +154,7 @@ const GLAM_TIERS = [
     badgeStyle: "bg-gradient-to-r from-[#B8860B] to-[#D4AF37] text-white border-transparent shadow-sm",
     cardGradient: "from-[#FDF8F0] via-[#FAF1E3] to-[#F5E6CE] dark:from-[#291722] dark:via-[#351A2C] dark:to-[#23121E]",
     perks: [
-      "Free Delivery on ALL orders (zero minimum purchase)",
+      "Standard Delivery on ALL orders (zero minimum purchase)",
       "Extra 5% Instant Discount code ELITE5 on checkout",
       "12-Hour Early Access to big seasonal sale drops",
       "Earn 1.5x points on all saree purchases",
@@ -172,7 +172,7 @@ const GLAM_TIERS = [
     cardGradient: "from-[#FDF3F5] via-[#F8E2E8] to-[#F3D1DC] dark:from-[#351322] dark:via-[#44182C] dark:to-[#280C19]",
     perks: [
       "2x points earning on all saree purchases",
-      "Free Delivery on all orders pan-India",
+      "Standard Delivery on all orders pan-India",
       "Flat 10% OFF code ULTIMATE10 on every single purchase",
       "24-Hour VIP Early Sale Access before anyone else",
     ],
@@ -196,7 +196,7 @@ const HOW_IT_WORKS = [
   {
     step: "03",
     title: "Unlock VIP Royal Club",
-    desc: "Reach VIP Royal Club for 2x points earning, Free Delivery, and 24h early access.",
+    desc: "Reach VIP Royal Club for 2x points earning, Standard Delivery, and 24h early access.",
     icon: Crown,
   },
 ];
@@ -212,8 +212,8 @@ const SIMPLE_FAQS = [
     a: "You automatically upgrade as you accumulate points from purchases (1 point per ₹10 spent). Once you cross 1,500 points, your pass updates to VIP Royal Club instantly with 2x points earning!",
   },
   {
-    q: "Can I use coupons with Free Delivery?",
-    a: "Yes! Club Elite and VIP Royal members get free delivery automatically on all orders, so you can still apply any flat discount coupon code on top.",
+    q: "Can I use coupons with Standard Delivery?",
+    a: "Yes! Club Elite and VIP Royal members get standard delivery automatically on all orders, so you can still apply any flat discount coupon code on top.",
   },
 ];
 
@@ -330,7 +330,7 @@ function Loyalty() {
           </h1>
 
           <p className="mt-3.5 text-[var(--text-muted)] text-sm sm:text-base max-w-xl mx-auto font-light leading-relaxed">
-            Instant copy coupons, flat checkout savings (1 pt = ₹5), and Free Delivery perks.
+            Instant copy coupons, flat checkout savings (1 pt = ₹5), and Standard Delivery perks.
           </p>
         </div>
       </section>
@@ -447,7 +447,7 @@ function Loyalty() {
               { id: "all", label: "All Coupons" },
               { id: "flat", label: "Flat ₹ OFF" },
               { id: "percent", label: "Percentage %" },
-              { id: "shipping", label: "Free Shipping" },
+              { id: "shipping", label: "Standard Shipping" },
               { id: "vip", label: "VIP Vault" },
             ].map((tab) => (
               <button
@@ -586,7 +586,7 @@ function Loyalty() {
             Privilege Club Tiers
           </h2>
           <p className="text-xs sm:text-sm text-[var(--text-muted)] mt-1.5 max-w-lg mx-auto">
-            Transparent perks: 1 point = ₹5 redemption, 2x earning in VIP Royal, and Free Delivery.
+            Transparent perks: 1 point = ₹5 redemption, 2x earning in VIP Royal, and Standard Delivery.
           </p>
         </div>
 

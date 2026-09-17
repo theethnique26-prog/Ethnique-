@@ -114,7 +114,7 @@ const Footer = () => {
                     Pan-India Community
                   </h3>
                   <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mt-2 font-light leading-relaxed">
-                    Delivering curated designer ethnic sarees to women nationwide with insured free delivery and concierge care.
+                    Delivering curated designer ethnic sarees to women nationwide with insured standard delivery and concierge care.
                   </p>
                 </div>
               </div>
@@ -135,7 +135,7 @@ const Footer = () => {
               </div>
               <div>
                 <h4 className="font-serif font-bold text-sm text-[#2B2B2B] dark:text-[#FAF5EF]">
-                  Free Delivery
+                  Standard Delivery
                 </h4>
                 <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 font-light">
                   Insured Pan-India Dispatch

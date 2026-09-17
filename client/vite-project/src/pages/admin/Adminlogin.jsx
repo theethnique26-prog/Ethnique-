@@ -25,6 +25,15 @@ function AdminLogin() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    const inputIdentifier = formData.email.trim();
+    if (inputIdentifier.includes("@")) {
+      if (!/^[a-zA-Z0-9._%+-]+@gmail\.com$/i.test(inputIdentifier)) {
+        alert("Security restriction: Only @gmail.com email addresses are allowed.");
+        return;
+      }
+    }
+
     setSubmitting(true);
 
     try {
@@ -122,8 +131,9 @@ function AdminLogin() {
 
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
-              <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-2">
-                Admin Email or Mobile Number
+              <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-2 flex justify-between items-center">
+                <span>Admin Email or Mobile Number</span>
+                <span className="text-[10px] text-[#B8860B] font-mono lowercase tracking-normal">(@gmail.com only)</span>
               </label>
               <div className="relative">
                 <Mail size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500" />
@@ -133,7 +143,7 @@ function AdminLogin() {
                   name="email"
                   value={formData.email}
                   onChange={handleChange}
-                  placeholder="admin@ethnique.com or 10-digit mobile"
+                  placeholder="admin@gmail.com or 10-digit mobile"
                   className="w-full pl-10 pr-4 py-3.5 rounded-2xl border border-gray-200 dark:border-[#2C1F32] bg-white dark:bg-[#120B15] text-gray-900 dark:text-[#FAF5EF] placeholder-gray-400 dark:placeholder-gray-500 text-sm focus:outline-none focus:border-[#6D1830] dark:focus:border-[#E5C583] focus:ring-2 focus:ring-[#6D1830]/20 transition"
                 />
               </div>

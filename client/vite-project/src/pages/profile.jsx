@@ -78,7 +78,7 @@ const Profile = () => {
 
   useEffect(() => {
     if (!user) {
-      navigate("/login");
+      navigate("/login?mode=signup");
       return;
     }
     setNewName(user?.name || "");

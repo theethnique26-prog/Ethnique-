@@ -101,7 +101,7 @@ const Carousel = () => {
               jharokha-frame jharokha-arch left-arch block cursor-pointer group/banarasi
               w-[210px] md:w-[220px] lg:w-[280px] xl:w-[320px]
               h-[350px] md:h-[390px] lg:h-[450px] xl:h-[490px]
-              border-2 transition-all duration-500
+              border-2 transition-all duration-500 hover:scale-[1.02]
               ${
                 selectedDrape === "banarasi" || selectedDrape === "all"
                   ? "border-[#D4B483] dark:border-[#E5C583] opacity-100 scale-100 shadow-xl"
@@ -122,7 +122,7 @@ const Carousel = () => {
               {/* Architectural Arch Line Overlay */}
               <div className="absolute inset-0 jharokha-arch pointer-events-none border border-white/30 dark:border-[#E5C583]/20 m-2" />
 
-              {/* Royal Badge - Clickable to Banarasi Sarees */}
+              {/* Royal Badge - Banarasi Sarees */}
               <div className="absolute top-5 left-1/2 -translate-x-1/2 z-10 bg-black/65 backdrop-blur-md border border-[#D4B483]/70 text-[#FAF6F0] text-[10px] font-semibold tracking-[2px] uppercase px-3.5 py-1 rounded-full shadow-lg whitespace-nowrap group-hover/banarasi:bg-[#6D1830] group-hover/banarasi:border-[#E5C583] transition-all">
                 👑 Banarasi Saree
               </div>
@@ -132,20 +132,19 @@ const Carousel = () => {
                 <p className="text-white text-xs font-serif font-medium tracking-wide">
                   Pure Zari Weave &bull; Heritage Red
                 </p>
-                <span className="text-[10px] text-[#E5C583] tracking-wider uppercase font-semibold mt-0.5 group-hover/banarasi:underline">
-                  Shop Banarasi &rarr;
-                </span>
               </div>
             </div>
           </Link>
 
-          {/* Center Archway: Masterpiece Signature (Taller with Crown Styling) */}
-          <div
+          {/* Center Archway: Masterpiece Signature (Clickable to Chanderi & Festive Silk) */}
+          <Link
+            to="/products?search=chanderi"
+            title="Explore Curated Chanderi & Festive Silk Sarees"
             className={`
-              jharokha-frame jharokha-arch-center center-arch
+              jharokha-frame jharokha-arch-center center-arch block cursor-pointer group/center
               w-[240px] md:w-[260px] lg:w-[330px] xl:w-[370px]
               h-[400px] md:h-[450px] lg:h-[510px] xl:h-[570px]
-              border-2 transition-all duration-500 z-10
+              border-2 transition-all duration-500 z-10 hover:scale-[1.02]
               ${
                 selectedDrape === "signature" || selectedDrape === "all"
                   ? "border-[#D4B483] dark:border-[#E5C583] shadow-[0_25px_60px_rgba(109,24,48,0.18)] dark:shadow-[0_25px_60px_rgba(0,0,0,0.9)] opacity-100 scale-100"
@@ -167,7 +166,7 @@ const Carousel = () => {
               <div className="absolute inset-0 jharokha-arch-center pointer-events-none border-2 border-[#D4B483]/40 dark:border-[#E5C583]/30 m-2.5" />
 
               {/* Grand Center Crown Badge */}
-              <div className="absolute top-6 left-1/2 -translate-x-1/2 z-10 bg-gradient-to-r from-[#6D1830]/95 to-[#8C2F4D]/95 dark:from-[#1D1222]/95 dark:to-[#311838]/95 backdrop-blur-md border border-[#D4B483] text-[#FAF6F0] text-[11px] font-bold tracking-[2.5px] uppercase px-4 py-1.5 rounded-full shadow-2xl flex items-center gap-1.5 whitespace-nowrap">
+              <div className="absolute top-6 left-1/2 -translate-x-1/2 z-10 bg-gradient-to-r from-[#6D1830]/95 to-[#8C2F4D]/95 dark:from-[#1D1222]/95 dark:to-[#311838]/95 backdrop-blur-md border border-[#D4B483] text-[#FAF6F0] text-[11px] font-bold tracking-[2.5px] uppercase px-4 py-1.5 rounded-full shadow-2xl flex items-center gap-1.5 whitespace-nowrap group-hover/center:border-[#E5C583] transition-all">
                 <Sparkles size={12} className="text-[#E5C583]" />
                 <span>The Atelier Signature</span>
               </div>
@@ -180,15 +179,17 @@ const Carousel = () => {
                 </p>
               </div>
             </div>
-          </div>
+          </Link>
 
-          {/* Right Archway: Mulmul Cotton */}
-          <div
+          {/* Right Archway: Mulmul Cotton (Clickable to Mulmul Cotton Sarees) */}
+          <Link
+            to="/products?search=mulmul"
+            title="Explore Breathable Mulmul Cotton Sarees"
             className={`
-              jharokha-frame jharokha-arch right-arch
+              jharokha-frame jharokha-arch right-arch block cursor-pointer group/mulmul
               w-[210px] md:w-[220px] lg:w-[280px] xl:w-[320px]
               h-[350px] md:h-[390px] lg:h-[450px] xl:h-[490px]
-              border-2 transition-all duration-500
+              border-2 transition-all duration-500 hover:scale-[1.02]
               ${
                 selectedDrape === "mulmul" || selectedDrape === "all"
                   ? "border-[#D4B483] dark:border-[#E5C583] opacity-100 scale-100"
@@ -210,7 +211,7 @@ const Carousel = () => {
               <div className="absolute inset-0 jharokha-arch pointer-events-none border border-white/30 dark:border-[#E5C583]/20 m-2" />
 
               {/* Royal Badge */}
-              <div className="absolute top-5 left-1/2 -translate-x-1/2 z-10 bg-black/55 backdrop-blur-md border border-[#D4B483]/50 text-[#F7F2EC] text-[10px] font-semibold tracking-[2px] uppercase px-3.5 py-1 rounded-full shadow-lg whitespace-nowrap">
+              <div className="absolute top-5 left-1/2 -translate-x-1/2 z-10 bg-black/55 backdrop-blur-md border border-[#D4B483]/50 text-[#F7F2EC] text-[10px] font-semibold tracking-[2px] uppercase px-3.5 py-1 rounded-full shadow-lg whitespace-nowrap group-hover/mulmul:bg-[#6D1830] group-hover/mulmul:border-[#E5C583] transition-all">
                 Mulmul Cotton
               </div>
 
@@ -221,13 +222,22 @@ const Carousel = () => {
                 </p>
               </div>
             </div>
-          </div>
+          </Link>
 
         </div>
 
         {/* --- MOBILE VIEW: Single Jharokha Archway with Look Switcher --- */}
         <div className="block md:hidden py-3">
-          <div className="relative mx-auto w-[88vw] max-w-[320px] h-[400px] sm:h-[460px] jharokha-frame jharokha-arch border-2 border-[#D4B483] dark:border-[#E5C583] shadow-2xl">
+          <Link
+            to={
+              activeMobileCard === 0
+                ? "/products?search=banarasi"
+                : activeMobileCard === 1
+                ? "/products?search=chanderi"
+                : "/products?search=mulmul"
+            }
+            className="block relative mx-auto w-[88vw] max-w-[320px] h-[400px] sm:h-[460px] jharokha-frame jharokha-arch border-2 border-[#D4B483] dark:border-[#E5C583] shadow-2xl cursor-pointer"
+          >
             <div className="image-container jharokha-arch">
               {(activeMobileCard === 0
                 ? leftImages
@@ -243,20 +253,17 @@ const Carousel = () => {
                 />
               ))}
 
-              <Link
-                to={activeMobileCard === 0 ? "/products?search=banarasi" : "/products"}
-                className="absolute top-5 left-1/2 -translate-x-1/2 z-10 bg-black/60 backdrop-blur-md border border-[#D4B483] text-[#FAF6F0] text-[10px] font-semibold tracking-[2px] uppercase px-4 py-1.5 rounded-full shadow-lg whitespace-nowrap"
-              >
+              <div className="absolute top-5 left-1/2 -translate-x-1/2 z-10 bg-black/60 backdrop-blur-md border border-[#D4B483] text-[#FAF6F0] text-[10px] font-semibold tracking-[2px] uppercase px-4 py-1.5 rounded-full shadow-lg whitespace-nowrap">
                 {activeMobileCard === 0 ? "👑 Banarasi Saree" : activeMobileCard === 1 ? "Signature Atelier" : "Mulmul Cotton"}
-              </Link>
+              </div>
 
               <div className="absolute bottom-0 inset-x-0 h-24 bg-gradient-to-t from-black/80 to-transparent flex items-end p-4">
                 <p className="text-white text-xs font-serif font-medium">
-                  {activeMobileCard === 0 ? "Pure Zari Weave • Tap to Shop" : activeMobileCard === 1 ? "Designer Festive Drape" : "Breathable Everyday Comfort"}
+                  {activeMobileCard === 0 ? "Pure Zari Weave &bull; Banarasi Collection" : activeMobileCard === 1 ? "Designer Festive Drape &bull; Silk Collection" : "Breathable Everyday Comfort &bull; Mulmul Collection"}
                 </p>
               </div>
             </div>
-          </div>
+          </Link>
 
           {/* Mobile Tab Switcher */}
           <div className="flex justify-center items-center gap-2 mt-4">
@@ -298,25 +305,32 @@ const Carousel = () => {
           ))}
         </div>
 
-        {/* Call to Action Buttons */}
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-6">
+        {/* Action Buttons */}
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-3.5 mt-8 px-4">
           <button
-            onClick={scrollToProducts}
+            onClick={() => {
+              const productSection = document.getElementById("featured-products") || document.getElementById("products-grid");
+              if (productSection) {
+                productSection.scrollIntoView({ behavior: "smooth" });
+              } else {
+                navigate("/products");
+              }
+            }}
             className="
               w-full sm:w-auto px-8 py-3.5
               rounded-full
-              text-white font-medium text-xs sm:text-sm tracking-wider uppercase
-              bg-gradient-to-r from-[#8C2F4D] via-[#6D1830] to-[#541224]
-              hover:from-[#9E3557] hover:to-[#7E1D39]
-              border border-[#D4B483]/50
-              shadow-[0_4px_25px_rgba(109,24,48,0.3)]
+              bg-gradient-to-r from-[#6D1830] to-[#8C2F4D]
+              hover:from-[#541223] hover:to-[#73243D]
+              text-[#FAF6F0]
+              font-medium text-xs sm:text-sm tracking-wider uppercase
+              shadow-lg hover:shadow-[0_8px_25px_rgba(109,24,48,0.35)]
               hover:scale-[1.03] active:scale-[0.98]
               transition-all duration-300
               flex items-center justify-center gap-2
             "
           >
+            <Sparkles size={14} className="text-[#E5C583]" />
             <span>Explore Collection</span>
-            <ArrowRight size={15} />
           </button>
 
           <Link
@@ -343,7 +357,7 @@ const Carousel = () => {
         <div className="mt-10 pt-6 border-t border-[#E8DFD3]/80 dark:border-[#2C1F32]/80">
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 text-center">
             <div className="p-2">
-              <p className="font-serif text-lg font-bold text-[#6D1830] dark:text-[#E5C583]">5,000+</p>
+              <p className="font-serif text-lg font-bold text-[#6D1830] dark:text-[#E5C583]">1 Lakh+</p>
               <p className="text-[11px] text-gray-500 dark:text-gray-400 uppercase tracking-wider mt-0.5">Patrons Draped Worldwide</p>
             </div>
             <div className="p-2">
