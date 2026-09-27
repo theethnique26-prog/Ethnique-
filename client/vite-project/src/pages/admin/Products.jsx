@@ -48,71 +48,109 @@ function Products() {
   const [excelImporting, setExcelImporting] = useState(false);
 
   // Excel Handlers
+  // Excel Handlers
   const handleDownloadExcelTemplate = () => {
     const templateData = [
       {
         name: "Banarasi Katan Silk Saree",
+        sku: "ETH-BAN-001",
         category: "Silk",
+        collection: "Bridal Heritage",
         priceINR: 12500,
         stock: 15,
         fabric: "Pure Katan Silk",
         color: "Crimson Red & Gold Zari",
         sareeLength: "5.5 Meters",
         blouse: "0.8 Meter Running",
-        collection: "Bridal Heritage",
+        image1: "https://images.unsplash.com/photo-1610030469983-98e550d6193c",
+        image2: "https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b",
+        image3: "https://images.unsplash.com/photo-1617627143750-d86bc21e42bb",
+        images: "https://images.unsplash.com/photo-1610030469983-98e550d6193c, https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b",
+        video: "https://www.instagram.com/reel/example",
         description: "Exquisite handloom Banarasi silk saree with authentic gold zari kadwa motifs.",
-        image: "https://images.unsplash.com/photo-1610030469983-98e550d6193c",
-        sku: "ETH-BAN-001",
       },
       {
         name: "Handwoven Chanderi Cotton Saree",
+        sku: "ETH-COT-002",
         category: "Cotton",
+        collection: "Summer Festive",
         priceINR: 4200,
         stock: 20,
         fabric: "Chanderi Pure Cotton",
         color: "Peacock Blue",
         sareeLength: "5.5 Meters",
         blouse: "0.8 Meter",
-        collection: "Summer Festive",
+        image1: "https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b",
+        image2: "https://images.unsplash.com/photo-1610030469983-98e550d6193c",
+        image3: "",
+        images: "https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b",
+        video: "",
         description: "Lightweight and breathable daily luxury handcrafted by master weavers.",
-        image: "https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b",
-        sku: "ETH-COT-002",
       },
       {
         name: "Maheshwari Zari Border Saree",
+        sku: "ETH-MAH-003",
         category: "Maheshwari",
+        collection: "Royal Maheshwari",
         priceINR: 6800,
         stock: 12,
         fabric: "Silk Cotton Blend",
         color: "Emerald Green",
         sareeLength: "5.5 Meters",
         blouse: "0.8 Meter",
-        collection: "Royal Maheshwari",
+        image1: "https://images.unsplash.com/photo-1617627143750-d86bc21e42bb",
+        image2: "https://images.unsplash.com/photo-1610030469983-98e550d6193c",
+        image3: "",
+        images: "https://images.unsplash.com/photo-1617627143750-d86bc21e42bb",
+        video: "",
         description: "Traditional Maheshwari weave with reversible zari border and lightweight drape.",
-        image: "https://images.unsplash.com/photo-1617627143750-d86bc21e42bb",
-        sku: "ETH-MAH-003",
       },
       {
         name: "Designer Art Silk Saree",
+        sku: "ETH-ART-004",
         category: "Art",
+        collection: "Festive Glam",
         priceINR: 2899,
         stock: 30,
         fabric: "Art Silk",
         color: "Mustard Gold",
         sareeLength: "5.5 Meters",
         blouse: "0.8 Meter",
-        collection: "Festive Glam",
+        image1: "https://images.unsplash.com/photo-1610030469983-98e550d6193c",
+        image2: "",
+        image3: "",
+        images: "https://images.unsplash.com/photo-1610030469983-98e550d6193c",
+        video: "",
         description: "Shimmering art silk with digital floral accents and contrast pallu.",
-        image: "https://images.unsplash.com/photo-1610030469983-98e550d6193c",
-        sku: "ETH-ART-004",
+      },
+    ];
+
+    const instructionsData = [
+      {
+        Topic: "How to Add Photos in Excel",
+        Details: "You can specify saree photos in separate columns: 'image1' (Main Photo), 'image2' (Pallu/Detail), 'image3' (Drape), or put comma-separated URLs in 'images'.",
+      },
+      {
+        Topic: "Supported Photo Formats",
+        Details: "Direct image links (HTTPS), Cloudinary URLs, Imgur links, or public Google Drive share links.",
+      },
+      {
+        Topic: "Using Google Drive Photos",
+        Details: "Ensure your Google Drive file permission is set to 'Anyone with the link can view'. Our system will automatically convert it into a direct web image link!",
+      },
+      {
+        Topic: "Updating Existing Sarees",
+        Details: "If an SKU already exists in your store, re-importing this sheet will automatically update its photos, price, stock, and descriptions without creating duplicates!",
       },
     ];
 
     const ws = XLSX.utils.json_to_sheet(templateData);
+    const wsInstructions = XLSX.utils.json_to_sheet(instructionsData);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Saree_Import_Template");
+    XLSX.utils.book_append_sheet(wb, wsInstructions, "Photo_Upload_Guide");
     XLSX.writeFile(wb, "Ethnique_Saree_Import_Template.xlsx");
-    toast.success("Excel template downloaded!");
+    toast.success("Excel template downloaded with Photo Guide!");
   };
 
   const handleExportCatalogToExcel = () => {
@@ -120,25 +158,36 @@ function Products() {
       toast.error("No products to export");
       return;
     }
-    const exportData = products.map((p) => ({
-      ID: p._id,
-      SKU: p.sku || "—",
-      Name: p.name,
-      Category: p.category || "—",
-      Collection: p.collection || "—",
-      Price_INR: p.priceINR,
-      Stock: p.stock ?? 0,
-      In_Stock: p.inStock ? "Yes" : "No",
-      Fabric: p.fabric || "—",
-      Color: p.color || "—",
-      Image_URL: p.image || "—",
-    }));
+    const exportData = products.map((p) => {
+      const imgList = Array.isArray(p.images) && p.images.length > 0
+        ? p.images.filter(Boolean)
+        : (p.image ? [p.image] : []);
+
+      return {
+        ID: p._id,
+        SKU: p.sku || "—",
+        Name: p.name,
+        Category: p.category || "—",
+        Collection: p.collection || "—",
+        Price_INR: p.priceINR,
+        Stock: p.stock ?? 0,
+        In_Stock: p.inStock ? "Yes" : "No",
+        Fabric: p.fabric || "—",
+        Color: p.color || "—",
+        Image_1: imgList[0] || "",
+        Image_2: imgList[1] || "",
+        Image_3: imgList[2] || "",
+        All_Images: imgList.join(", "),
+        Video_URL: p.video || "",
+        Description: p.description || "",
+      };
+    });
 
     const ws = XLSX.utils.json_to_sheet(exportData);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Catalog");
     XLSX.writeFile(wb, `Ethnique_Catalog_${new Date().toISOString().slice(0, 10)}.xlsx`);
-    toast.success("Catalog exported to Excel successfully!");
+    toast.success("Catalog exported with photos to Excel successfully!");
   };
 
   const handleExcelFileUpload = (e) => {
@@ -161,37 +210,131 @@ function Products() {
           return;
         }
 
-        const formattedProducts = rawRows.map((row, idx) => ({
-          name: row.name || row.Name || row["Saree Name"] || `Imported Saree ${idx + 1}`,
-          sku: row.sku || row.SKU || `ETH-IMP-${Math.floor(1000 + Math.random() * 9000)}`,
-          category: row.category || row.Category || "Cotton",
-          collection: row.collection || row.Collection || "Heritage Collection",
-          priceINR: Number(row.priceINR || row.price || row.Price || row["Price (INR)"]) || 1999,
-          stock: Number(row.stock || row.Stock || row.Quantity) || 10,
-          inStock: true,
-          fabric: row.fabric || row.Fabric || "Handloom",
-          color: row.color || row.Color || "Multicolor",
-          sareeLength: row.sareeLength || row["Saree Length"] || "5.5 Meters",
-          blouse: row.blouse || row.Blouse || "0.8 Meter",
-          description: row.description || row.Description || "Authentic handcrafted drape from Jayant Saree Center.",
-          image: row.image || row.Image || row["Image URL"] || "https://images.unsplash.com/photo-1610030469983-98e550d6193c",
-        }));
+        let totalPhotosCount = 0;
+
+        const formattedProducts = rawRows.map((row, idx) => {
+          // Robust multi-photo extraction
+          const rawPhotos = [];
+
+          // 1. Check numbered columns: image1..image10, Photo 1..Photo 10
+          for (let i = 1; i <= 10; i++) {
+            const val =
+              row[`image${i}`] ||
+              row[`Image${i}`] ||
+              row[`Image ${i}`] ||
+              row[`image_${i}`] ||
+              row[`photo${i}`] ||
+              row[`Photo${i}`] ||
+              row[`Photo ${i}`] ||
+              row[`Image_${i}`] ||
+              row[`Picture ${i}`];
+            if (val && typeof val === "string" && val.trim()) {
+              rawPhotos.push(val.trim());
+            }
+          }
+
+          // 2. Check compound fields
+          const compound =
+            row.images ||
+            row.Images ||
+            row.photos ||
+            row.Photos ||
+            row["Image URLs"] ||
+            row["Photo URLs"] ||
+            row.All_Images ||
+            row.all_images ||
+            row.image ||
+            row.Image ||
+            row["Image URL"] ||
+            row["Photo URL"] ||
+            row.photo ||
+            row.Photo;
+
+          if (Array.isArray(compound)) {
+            compound.forEach((img) => {
+              if (typeof img === "string" && img.trim()) rawPhotos.push(img.trim());
+            });
+          } else if (typeof compound === "string" && compound.trim()) {
+            compound.split(/[\r\n,;|]+/).forEach((img) => {
+              if (img.trim()) rawPhotos.push(img.trim());
+            });
+          }
+
+          // 3. Convert Google Drive share links and clean URLs
+          const cleanedPhotos = rawPhotos
+            .map((url) => {
+              if (!url || typeof url !== "string") return "";
+              let u = url.trim().replace(/^['"]|['"]$/g, "");
+              const gdriveMatch = u.match(
+                /(?:drive\.google\.com\/(?:file\/d\/|open\?id=)|lh3\.googleusercontent\.com\/d\/)([a-zA-Z0-9_-]+)/
+              );
+              if (gdriveMatch && gdriveMatch[1]) {
+                return `https://drive.google.com/thumbnail?id=${gdriveMatch[1]}&sz=w1600`;
+              }
+              return u;
+            })
+            .filter(Boolean);
+
+          const uniquePhotos = Array.from(new Set(cleanedPhotos));
+          const finalPhotos =
+            uniquePhotos.length > 0
+              ? uniquePhotos
+              : ["https://images.unsplash.com/photo-1610030469983-98e550d6193c"];
+
+          totalPhotosCount += finalPhotos.length;
+
+          return {
+            name: row.name || row.Name || row["Saree Name"] || `Imported Saree ${idx + 1}`,
+            sku: row.sku || row.SKU || `ETH-IMP-${Math.floor(1000 + Math.random() * 9000)}`,
+            category: row.category || row.Category || "Cotton",
+            collection: row.collection || row.Collection || "Heritage Collection",
+            priceINR:
+              Number(
+                row.priceINR ||
+                  row.price ||
+                  row.Price ||
+                  row["Price (INR)"] ||
+                  row.Price_INR
+              ) || 1999,
+            stock:
+              Number(row.stock || row.Stock || row.Quantity) >= 0
+                ? Number(row.stock || row.Stock || row.Quantity)
+                : 10,
+            inStock: true,
+            fabric: row.fabric || row.Fabric || "Handloom",
+            color: row.color || row.Color || "Multicolor",
+            sareeLength: row.sareeLength || row["Saree Length"] || "5.5 Meters",
+            blouse: row.blouse || row.Blouse || "0.8 Meter",
+            description:
+              row.description ||
+              row.Description ||
+              "Authentic handcrafted drape from Jayant Saree Center.",
+            images: finalPhotos,
+            image: finalPhotos[0],
+            video: row.video || row.Video || row["Video URL"] || row.Video_URL || "",
+          };
+        });
 
         const res = await fetch(`${API_BASE}/admin/products/bulk`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("adminToken") || localStorage.getItem("token")}`,
+            Authorization: `Bearer ${
+              localStorage.getItem("adminToken") || localStorage.getItem("token")
+            }`,
           },
           body: JSON.stringify({ products: formattedProducts }),
         });
 
         const data = await res.json();
         if (res.ok && data.success) {
-          toast.success(`Successfully imported ${data.count || formattedProducts.length} sarees from Excel!`, {
-            icon: "📊",
-            duration: 4000,
-          });
+          toast.success(
+            `Imported ${data.count || formattedProducts.length} sarees with ${totalPhotosCount} photos!`,
+            {
+              icon: "📊",
+              duration: 5000,
+            }
+          );
           fetchProducts();
         } else {
           toast.error(data.message || "Failed to import sarees from Excel");
@@ -221,6 +364,7 @@ function Products() {
     priceINR: "",
     stock: "",
     inStock: true,
+    showOnHomepage: false,
     image: "",
     video: "",
   });
@@ -257,6 +401,7 @@ function Products() {
       priceINR: "2499",
       stock: "25",
       inStock: true,
+      showOnHomepage: false,
       image: "",
       images: [],
       video: "",
@@ -286,6 +431,7 @@ function Products() {
       priceINR: product.priceINR || "",
       stock: stockVal,
       inStock: isCurrentlyInStock,
+      showOnHomepage: Boolean(product.showOnHomepage),
       image: productImages[0] || "",
       images: productImages,
       video: product.video || "",
@@ -387,10 +533,59 @@ function Products() {
     }
   };
 
+  const handleToggleHomepage = async (product) => {
+    const isCurrentlyOn = Boolean(product.showOnHomepage);
+    const homepageCount = products.filter((p) => Boolean(p.showOnHomepage)).length;
+
+    if (!isCurrentlyOn && homepageCount >= 6) {
+      toast.error("Maximum 6 sarees can be displayed on homepage. Please uncheck another saree first.", {
+        icon: "⚠️",
+      });
+      return;
+    }
+
+    const nextVal = !isCurrentlyOn;
+    // Optimistic UI update
+    setProducts((prev) =>
+      prev.map((p) => (p._id === product._id ? { ...p, showOnHomepage: nextVal } : p))
+    );
+
+    try {
+      let res;
+      try {
+        res = await adminApi.patch(`/products/${product._id}/toggle-homepage`, {
+          showOnHomepage: nextVal,
+        });
+      } catch (patchErr) {
+        // Fallback to PUT /products/:id
+        res = await adminApi.put(`/products/${product._id}`, {
+          ...product,
+          showOnHomepage: nextVal,
+        });
+      }
+
+      if (res && (res.product || res.success)) {
+        const updated = res.product || { ...product, showOnHomepage: nextVal };
+        setProducts((prev) =>
+          prev.map((p) => (p._id === product._id ? updated : p))
+        );
+        toast.success(
+          nextVal
+            ? `"${product.name}" added to Homepage Display! (${homepageCount + 1}/6)`
+            : `"${product.name}" removed from Homepage Display. (${Math.max(0, homepageCount - 1)}/6)`
+        );
+      }
+    } catch (error) {
+      console.error("Toggle homepage error:", error);
+      toast.error(error.message || "Failed to update homepage status");
+      fetchProducts();
+    }
+  };
+
   const saveProduct = async (e) => {
     e?.preventDefault();
     if (!formData.name || !formData.priceINR || !formData.sku) {
-      alert("Please fill in Product Name, SKU, and Price (INR).");
+      toast.error("Please fill in Product Name, SKU, and Price (INR).");
       return;
     }
 
@@ -405,6 +600,7 @@ function Products() {
         priceINR: Number(formData.priceINR),
         stock: formData.inStock ? (Number(formData.stock) || 0) : 0,
         inStock: Boolean(formData.inStock),
+        showOnHomepage: Boolean(formData.showOnHomepage),
         images: allImages,
         image: allImages[0] || "",
         video: formData.video || "",
@@ -418,15 +614,16 @@ function Products() {
       }
 
       if (data.success || data.product) {
+        toast.success(editingId ? "Saree updated successfully!" : "New Saree added to catalog!");
         setShowForm(false);
         setEditingId(null);
         await fetchProducts();
       } else {
-        alert(data.message || "Failed to save product");
+        toast.error(data.message || "Failed to save product");
       }
     } catch (error) {
       console.error("Save product error:", error);
-      alert("Error saving product: " + (error.message || "Network issue"));
+      toast.error(error.message || "Error saving product");
     } finally {
       setIsSubmitting(false);
     }
@@ -566,8 +763,9 @@ function Products() {
     const avgPrice = total > 0
       ? Math.round(products.reduce((sum, p) => sum + (Number(p.priceINR) || 0), 0) / total)
       : 0;
+    const homepageCount = products.filter((p) => Boolean(p.showOnHomepage)).length;
 
-    return { total, inStockCount, outOfStockCount, totalInventoryCount, lowStockCount, avgPrice };
+    return { total, inStockCount, outOfStockCount, totalInventoryCount, lowStockCount, avgPrice, homepageCount };
   }, [products]);
 
   // Filtered List
@@ -589,6 +787,7 @@ function Products() {
 
       const matchesStock =
         stockFilter === "all" ||
+        (stockFilter === "homepage" && Boolean(item.showOnHomepage)) ||
         (stockFilter === "low" && !isItemOutOfStock && stockNum <= 5) ||
         (stockFilter === "out" && isItemOutOfStock) ||
         (stockFilter === "in" && !isItemOutOfStock);
@@ -690,7 +889,7 @@ function Products() {
       </div>
 
       {/* 2. Top Metrics Banner */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 sm:gap-5">
         <div className="bg-white dark:bg-[#18101C] rounded-2xl p-5 shadow-sm border border-[#E8E2DC]/60 dark:border-[#2C1F32] flex items-center gap-4 transition-colors">
           <div className="w-12 h-12 rounded-xl bg-[#6D1830]/10 text-[#6D1830] dark:bg-[#E5C583]/15 dark:text-[#E5C583] flex items-center justify-center shrink-0">
             <Package size={22} />
@@ -698,6 +897,27 @@ function Products() {
           <div>
             <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">Total Designs</p>
             <h3 className="text-2xl font-serif font-bold text-gray-900 dark:text-[#FAF5EF]">{stats.total}</h3>
+          </div>
+        </div>
+
+        {/* Homepage Sarees Display Metric Card (Clickable Filter) */}
+        <div
+          onClick={() => setStockFilter(stockFilter === "homepage" ? "all" : "homepage")}
+          className={`cursor-pointer rounded-2xl p-5 shadow-sm border transition-all duration-200 flex items-center gap-4 ${
+            stockFilter === "homepage"
+              ? "bg-amber-500/10 border-amber-500 ring-2 ring-amber-500/30 dark:bg-amber-950/40"
+              : "bg-white dark:bg-[#18101C] border-[#E8E2DC]/60 dark:border-[#2C1F32] hover:border-amber-400"
+          }`}
+          title="Click to view only sarees displayed on homepage"
+        >
+          <div className="w-12 h-12 rounded-xl bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300 flex items-center justify-center shrink-0">
+            <Star size={22} className="fill-amber-500 text-amber-600" />
+          </div>
+          <div>
+            <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">Homepage Sarees</p>
+            <h3 className="text-2xl font-serif font-bold text-amber-800 dark:text-amber-300">
+              {stats.homepageCount} <span className="text-xs font-sans font-normal text-gray-400 dark:text-gray-500">/ 6 Max</span>
+            </h3>
           </div>
         </div>
 
@@ -786,6 +1006,7 @@ function Products() {
             className="px-3.5 py-2.5 rounded-xl border border-gray-200 dark:border-[#2C1F32] text-xs font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-[#120B15] focus:outline-none focus:border-[#6D1830] dark:focus:border-[#E5C583]"
           >
             <option value="all">All Status ({stats.total})</option>
+            <option value="homepage">🌟 On Homepage ({stats.homepageCount}/6)</option>
             <option value="in">In Stock ({stats.inStockCount})</option>
             <option value="out">Out of Stock ({stats.outOfStockCount})</option>
             <option value="low">Low Stock (≤5)</option>
@@ -857,6 +1078,7 @@ function Products() {
                   <th className="py-4 px-4">Fabric &amp; Shade</th>
                   <th className="py-4 px-4">Price</th>
                   <th className="py-4 px-4">Stock Status</th>
+                  <th className="py-4 px-4 text-center">Homepage (Max 6)</th>
                   <th className="py-4 px-5 text-right">Actions</th>
                 </tr>
               </thead>
@@ -1035,6 +1257,32 @@ function Products() {
                         </div>
                       </td>
 
+                      {/* Homepage Display Toggle (Max 6) */}
+                      <td className="py-3.5 px-4 text-center">
+                        <button
+                          type="button"
+                          onClick={() => handleToggleHomepage(product)}
+                          className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-all duration-200 shadow-2xs ${
+                            product.showOnHomepage
+                              ? "bg-amber-100 text-amber-900 border border-amber-300 dark:bg-amber-950/60 dark:text-amber-300 dark:border-amber-700/60 hover:bg-amber-200"
+                              : "bg-gray-100 text-gray-500 border border-gray-200 dark:bg-gray-800/40 dark:text-gray-400 dark:border-gray-700 hover:bg-gray-200 dark:hover:bg-gray-700"
+                          }`}
+                          title={
+                            product.showOnHomepage
+                              ? "Click to remove from homepage display"
+                              : stats.homepageCount >= 6
+                              ? "Homepage is full (6/6). Uncheck another saree first."
+                              : "Click to display on homepage"
+                          }
+                        >
+                          <Star
+                            size={13}
+                            className={product.showOnHomepage ? "fill-amber-500 text-amber-600" : "text-gray-400"}
+                          />
+                          <span>{product.showOnHomepage ? "On Homepage" : "+ Add"}</span>
+                        </button>
+                      </td>
+
                       {/* Actions */}
                       <td className="py-3.5 px-5 text-right">
                         <div className="flex items-center justify-end gap-1.5">
@@ -1116,7 +1364,7 @@ function Products() {
                     )}
 
                     {/* Stock Status Badge with Clickable Quick-Toggle */}
-                    <div className="absolute top-3 left-3">
+                    <div className="absolute top-3 left-3 flex flex-col gap-1.5 items-start">
                       <button
                         type="button"
                         onClick={(e) => {
@@ -1135,6 +1383,13 @@ function Products() {
                         <span className={`w-1.5 h-1.5 rounded-full ${isItemOutOfStock ? "bg-white" : "bg-emerald-400"}`} />
                         <span>{isItemOutOfStock ? "Out of Stock" : `${stockNum} left`}</span>
                       </button>
+
+                      {product.showOnHomepage && (
+                        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500 text-white shadow-sm flex items-center gap-1">
+                          <Star size={10} className="fill-white" />
+                          <span>Homepage</span>
+                        </span>
+                      )}
                     </div>
 
                     <div className="absolute top-3 right-3 flex flex-col gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -1253,6 +1508,26 @@ function Products() {
                       title={isItemOutOfStock ? "Mark as In Stock" : "Zero out stock"}
                     >
                       {isItemOutOfStock ? "In Stock" : "Out"}
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => handleToggleHomepage(product)}
+                      className={`px-2 py-1 rounded text-[11px] font-semibold flex items-center gap-1 transition ${
+                        product.showOnHomepage
+                          ? "bg-amber-100 text-amber-900 border border-amber-300 dark:bg-amber-950/60 dark:text-amber-300"
+                          : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                      }`}
+                      title={
+                        product.showOnHomepage
+                          ? "Remove from homepage display"
+                          : stats.homepageCount >= 6
+                          ? "Homepage limit reached (6/6). Uncheck another first."
+                          : "Show on homepage display"
+                      }
+                    >
+                      <Star size={11} className={product.showOnHomepage ? "fill-amber-500 text-amber-600" : ""} />
+                      <span>{product.showOnHomepage ? "On Home" : "+ Home"}</span>
                     </button>
                   </div>
                 </div>
@@ -1425,6 +1700,51 @@ function Products() {
                     <div className="w-12 h-6 bg-gray-300 dark:bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#6D1830]"></div>
                     <span className={`ml-3 text-xs font-bold ${formData.inStock ? "text-[#6D1830] dark:text-[#E5C583]" : "text-red-600 dark:text-red-400"}`}>
                       {formData.inStock ? "In Stock" : "Out of Stock"}
+                    </span>
+                  </label>
+                </div>
+
+                {/* Show on Homepage Toggle (Max 6) */}
+                <div className="sm:col-span-2 bg-[#FAF8F5] dark:bg-[#140C18] p-4 rounded-2xl border border-[#E8E2DC] dark:border-[#2C1F32] flex items-center justify-between transition-colors">
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <Star size={15} className="text-amber-500 fill-amber-500" />
+                      <span className="text-xs font-bold text-gray-800 dark:text-[#FAF5EF] uppercase tracking-wider block">
+                        Show on Homepage Saree Display
+                      </span>
+                      <span
+                        className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                          stats.homepageCount >= 6 && !formData.showOnHomepage
+                            ? "bg-red-100 text-red-800 dark:bg-red-950/60 dark:text-red-300"
+                            : "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300"
+                        }`}
+                      >
+                        {stats.homepageCount} of 6 Selected
+                      </span>
+                    </div>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                      Select this saree to appear among the 6 featured sarees in the luxury showcase on the storefront homepage (max 6).
+                    </p>
+                  </div>
+                  <label className="relative inline-flex items-center cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={Boolean(formData.showOnHomepage)}
+                      onChange={(e) => {
+                        const nextVal = e.target.checked;
+                        if (nextVal && !formData.showOnHomepage && stats.homepageCount >= 6) {
+                          toast.error("Maximum 6 sarees can be displayed on homepage. Please uncheck another saree first.", {
+                            icon: "⚠️",
+                          });
+                          return;
+                        }
+                        setFormData({ ...formData, showOnHomepage: nextVal });
+                      }}
+                      className="sr-only peer"
+                    />
+                    <div className="w-12 h-6 bg-gray-300 dark:bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#6D1830]"></div>
+                    <span className={`ml-3 text-xs font-bold ${formData.showOnHomepage ? "text-[#6D1830] dark:text-[#E5C583]" : "text-gray-400"}`}>
+                      {formData.showOnHomepage ? "On Homepage (Featured)" : "Off"}
                     </span>
                   </label>
                 </div>

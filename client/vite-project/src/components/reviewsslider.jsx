@@ -39,6 +39,7 @@ const DEFAULT_REVIEWS = [
 
 const ReviewsSlider = () => {
   const [reviewsList, setReviewsList] = useState(DEFAULT_REVIEWS);
+  const [homepageSettings, setHomepageSettings] = useState(null);
 
   useEffect(() => {
     const fetchReviews = async () => {
@@ -54,23 +55,39 @@ const ReviewsSlider = () => {
         console.log("Using default reviews fallback:", err);
       }
     };
+
+    const fetchHomepage = async () => {
+      try {
+        const res = await fetch(`${API_BASE}/homepage`);
+        if (res.ok) {
+          const data = await res.json();
+          setHomepageSettings(data);
+        }
+      } catch (err) {
+        console.log("Homepage settings fetch fallback:", err);
+      }
+    };
+
     fetchReviews();
+    fetchHomepage();
   }, []);
+
   return (
     <section className="py-20 bg-gradient-to-b from-transparent via-[#F4EFEA]/60 to-transparent dark:via-[#140F18]/70 overflow-hidden transition-colors duration-400">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-12 text-center">
         <div className="inline-flex items-center gap-2 text-[#8C2F4D] dark:text-[#E5C583] text-xs font-semibold tracking-[3px] uppercase mb-3">
           <Sparkles size={14} className="text-[#C8A261]" />
-          <span>Voices of Patrons</span>
+          <span>{homepageSettings?.reviewsSectionBadge || "Voices of Patrons"}</span>
           <Sparkles size={14} className="text-[#C8A261]" />
         </div>
 
         <h2 className="text-3xl sm:text-4xl lg:text-5xl font-serif text-[#2B2B2B] dark:text-[#FAF5EF]">
-          What Our Customers Say
+          {homepageSettings?.reviewsSectionTitle || "What Our Customers Say"}
         </h2>
 
         <p className="mt-3 text-sm sm:text-base text-gray-600 dark:text-gray-400 font-light max-w-lg mx-auto">
-          Cherished memories styled into every drape, shared by discerning women across the globe.
+          {homepageSettings?.reviewsSectionSubtitle ||
+            "Cherished memories styled into every drape, shared by discerning women across the globe."}
         </p>
       </div>
 

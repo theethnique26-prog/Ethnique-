@@ -278,10 +278,10 @@ router.get("/me", authMiddleware, (req, res) => {
   });
 });
 
-// SEND OTP FOR PHONE LOGIN
+// SEND OTP FOR PHONE LOGIN & REGISTRATION
 router.post("/send-otp", otpSendLimiter, async (req, res) => {
   try {
-    const { phone } = req.body || {};
+    const { phone, email, purpose } = req.body || {};
     if (!phone) {
       return res.status(400).json({
         success: false,
@@ -295,6 +295,34 @@ router.post("/send-otp", otpSendLimiter, async (req, res) => {
         success: false,
         message: "Please enter a valid 10-digit mobile number",
       });
+    }
+
+    // If purpose is 'register', ensure mobile or email is not already taken
+    if (purpose === "register") {
+      const existingUserPhone = await User.findOne({
+        $or: [
+          { phone: cleanedDigits },
+          { phone: `+91${cleanedDigits}` },
+          { phone: `+91 ${cleanedDigits}` },
+        ],
+      });
+      if (existingUserPhone) {
+        return res.status(400).json({
+          success: false,
+          message: "An account with this mobile number already exists. Please Sign In.",
+        });
+      }
+
+      if (email && email.trim()) {
+        const normalizedEmail = email.trim().toLowerCase();
+        const existingUserEmail = await User.findOne({ email: normalizedEmail });
+        if (existingUserEmail) {
+          return res.status(400).json({
+            success: false,
+            message: "An account with this email address already exists. Please Sign In.",
+          });
+        }
+      }
     }
 
     // Generate random 6-digit numeric OTP
@@ -352,12 +380,17 @@ router.post("/send-otp", otpSendLimiter, async (req, res) => {
       console.log(`=============================================================\n`);
     }
 
+    const responseMessage = smsDelivered
+      ? `Verification code sent to +91 ${cleanedDigits} via SMS`
+      : gatewayMessage
+      ? `Code generated. Fast2SMS requires website verification for SMS delivery — your OTP is logged in the server terminal: ${otp}`
+      : `Verification code sent to +91 ${cleanedDigits}`;
+
     return res.json({
       success: true,
-      message: smsDelivered
-        ? `Verification code sent to +91 ${cleanedDigits} via SMS`
-        : `Verification code sent to +91 ${cleanedDigits}`,
+      message: responseMessage,
       smsSent: smsDelivered,
+      gatewayNotice: gatewayMessage || undefined,
     });
   } catch (err) {
     console.error("SEND OTP ERROR:", err);
@@ -368,10 +401,10 @@ router.post("/send-otp", otpSendLimiter, async (req, res) => {
   }
 });
 
-// VERIFY OTP & SIGN IN (OR AUTO-REGISTER)
+// VERIFY OTP & SIGN IN (OR CREATE ACCOUNT)
 router.post("/verify-otp", otpVerifyLimiter, async (req, res) => {
   try {
-    const { phone, otp, name } = req.body || {};
+    const { phone, otp, name, email, password } = req.body || {};
     if (!phone || !otp) {
       return res.status(400).json({
         success: false,
@@ -411,18 +444,48 @@ router.post("/verify-otp", otpVerifyLimiter, async (req, res) => {
     });
 
     if (!user) {
-      // Auto-register account
-      const hashedPassword = await bcrypt.hash(`phone_${Date.now()}`, 10);
+      // Check if provided email is already used by another account
+      const normalizedEmail = email ? email.trim().toLowerCase() : "";
+      if (normalizedEmail) {
+        const existingEmail = await User.findOne({ email: normalizedEmail });
+        if (existingEmail) {
+          return res.status(400).json({
+            success: false,
+            message: "An account with this email address already exists. Please Sign In.",
+          });
+        }
+      }
+
+      // Hash provided password or create fallback
+      const rawPassword = password && password.trim().length >= 6
+        ? password.trim()
+        : `phone_${Date.now()}`;
+      const hashedPassword = await bcrypt.hash(rawPassword, 10);
+
+      const finalName = (name && name.trim()) || `Patron ${cleanedDigits.slice(-4)}`;
+      const finalEmail = normalizedEmail || `${cleanedDigits}@ethnique.customer`;
+
       user = await User.create({
-        name: (name && name.trim()) || `Patron ${cleanedDigits.slice(-4)}`,
-        email: `${cleanedDigits}@ethnique.customer`,
+        name: finalName,
+        email: finalEmail,
         phone: cleanedDigits,
         password: hashedPassword,
         role: "user",
       });
-    } else if (name && name.trim() && (user.name.startsWith("Guest ") || user.name.startsWith("Patron "))) {
-      user.name = name.trim();
-      await user.save();
+    } else {
+      // Existing user logging in via phone OTP
+      let needsSave = false;
+      if (name && name.trim() && (user.name.startsWith("Guest ") || user.name.startsWith("Patron "))) {
+        user.name = name.trim();
+        needsSave = true;
+      }
+      if (password && password.trim().length >= 6 && (!user.password || user.password.startsWith("phone_"))) {
+        user.password = await bcrypt.hash(password.trim(), 10);
+        needsSave = true;
+      }
+      if (needsSave) {
+        await user.save();
+      }
     }
 
     const token = jwt.sign(

@@ -21,7 +21,20 @@ const handleResponse = async (response) => {
     return;
   }
 
-  return response.json();
+  const contentType = response.headers.get("content-type") || "";
+
+  if (!response.ok) {
+    if (contentType.includes("application/json")) {
+      const errData = await response.json().catch(() => ({}));
+      throw new Error(errData.message || `Request failed (${response.status})`);
+    }
+    throw new Error(`Server request failed with status ${response.status}`);
+  }
+
+  if (contentType.includes("application/json")) {
+    return response.json();
+  }
+  return response.text();
 };
 
 const adminApi = {

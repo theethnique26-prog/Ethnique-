@@ -126,11 +126,11 @@ const SEED_COUPONS = [
   },
   {
     code: "ETHNIQUE2498",
-    title: "Grand Royal Celebration ₹2,498 Voucher",
-    description: "Flat ₹2,498 instant discount on designer bridal and festive drapes above ₹4,999.",
+    title: "Exclusive ₹2,498 Trial Order Voucher",
+    description: "Flat ₹2,498 instant discount on trial orders starting from ₹2,499.",
     discountType: "flat",
     discountValue: 2498,
-    minOrderAmount: 4999,
+    minOrderAmount: 2499,
     maxDiscount: null,
     requiredTier: "all",
     badge: "Special ₹2,498 OFF",
@@ -139,38 +139,20 @@ const SEED_COUPONS = [
   },
 ];
 
-// Helper to seed initial coupons if none exist
+// Helper to seed initial coupons once only if database is completely empty
 const ensureCouponsSeeded = async () => {
   try {
     const count = await Coupon.countDocuments();
     if (count === 0) {
       await Coupon.insertMany(SEED_COUPONS);
       console.log("Coupons successfully initialized in database.");
-    } else {
-      const has2498 = await Coupon.findOne({ code: "ETHNIQUE2498" });
-      if (!has2498) {
-        await Coupon.create({
-          code: "ETHNIQUE2498",
-          title: "Grand Royal Celebration ₹2,498 Voucher",
-          description: "Flat ₹2,498 instant discount on designer bridal and festive drapes above ₹4,999.",
-          discountType: "flat",
-          discountValue: 2498,
-          minOrderAmount: 4999,
-          maxDiscount: null,
-          requiredTier: "all",
-          badge: "Special ₹2,498 OFF",
-          popular: true,
-          isActive: true,
-        });
-        console.log("ETHNIQUE2498 coupon created in database.");
-      }
     }
   } catch (err) {
     console.error("Coupon seed check error:", err.message);
   }
 };
 
-// Ensure seed check is triggered
+// Seed once on module startup
 ensureCouponsSeeded();
 
 // Helper to parse optional user token without blocking unauthenticated requests
@@ -192,7 +174,6 @@ const getOptionalUser = async (req) => {
 // =====================================
 router.get("/", async (req, res) => {
   try {
-    await ensureCouponsSeeded();
     const coupons = await Coupon.find({ isActive: true }).sort({ popular: -1, createdAt: -1 });
 
     res.json({
@@ -213,7 +194,6 @@ router.get("/", async (req, res) => {
 // =====================================
 router.get("/admin", adminAuth, async (req, res) => {
   try {
-    await ensureCouponsSeeded();
     const coupons = await Coupon.find().sort({ createdAt: -1 });
 
     res.json({
@@ -234,7 +214,6 @@ router.get("/admin", adminAuth, async (req, res) => {
 // =====================================
 router.post("/validate", async (req, res) => {
   try {
-    await ensureCouponsSeeded();
     const { code, subtotal = 0 } = req.body;
 
     if (!code || typeof code !== "string") {
@@ -246,13 +225,21 @@ router.post("/validate", async (req, res) => {
     }
 
     const cleanCode = code.trim().toUpperCase();
-    const coupon = await Coupon.findOne({ code: cleanCode, isActive: true });
+    const coupon = await Coupon.findOne({ code: cleanCode });
 
     if (!coupon) {
       return res.status(404).json({
         success: false,
         valid: false,
-        message: `Coupon code '${cleanCode}' is invalid or expired.`,
+        message: `Coupon code '${cleanCode}' is invalid.`,
+      });
+    }
+
+    if (!coupon.isActive) {
+      return res.status(400).json({
+        success: false,
+        valid: false,
+        message: `Coupon '${cleanCode}' is currently deactivated or temporarily paused.`,
       });
     }
 
@@ -422,6 +409,7 @@ router.patch("/:id/toggle", adminAuth, async (req, res) => {
     res.json({
       success: true,
       coupon,
+      message: `Coupon '${coupon.code}' is now ${coupon.isActive ? "active" : "deactivated"}.`,
     });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });

@@ -11,6 +11,7 @@ import {
   Gift,
   Truck,
   RefreshCw,
+  Power,
 } from "lucide-react";
 import { API_BASE } from "../../services/apiConfig";
 import toast from "react-hot-toast";
@@ -117,7 +118,8 @@ function AdminCoupons() {
     }
   };
 
-  const handleToggle = async (id) => {
+  const handleToggle = async (id, code, currentStatus) => {
+    const willDeactivate = Boolean(currentStatus);
     try {
       const res = await fetch(`${API_BASE}/coupons/${id}/toggle`, {
         method: "PATCH",
@@ -127,7 +129,12 @@ function AdminCoupons() {
       });
       const data = await res.json();
       if (data.success) {
-        toast.success(`Coupon status updated`);
+        toast.success(
+          willDeactivate
+            ? `Coupon ${code} temporarily deactivated (paused from checkout)`
+            : `Coupon ${code} activated (now live at checkout)`,
+          { icon: willDeactivate ? "⏸️" : "✅" }
+        );
         setCoupons((prev) =>
           prev.map((c) => (c._id === id ? { ...c, isActive: !c.isActive } : c))
         );
@@ -135,7 +142,7 @@ function AdminCoupons() {
         toast.error(data.message || "Failed to update status");
       }
     } catch (err) {
-      toast.error("Error toggling coupon");
+      toast.error("Error updating coupon status");
     }
   };
 
@@ -163,11 +170,11 @@ function AdminCoupons() {
   const quickCreate2498 = () => {
     setFormData({
       code: "ETHNIQUE2498",
-      title: "Grand Royal Celebration ₹2,498 Voucher",
-      description: "Flat ₹2,498 instant discount on designer bridal and festive drapes above ₹4,999.",
+      title: "Exclusive ₹2,498 Trial Order Voucher",
+      description: "Flat ₹2,498 instant discount on trial orders starting from ₹2,499.",
       discountType: "flat",
       discountValue: 2498,
-      minOrderAmount: 4999,
+      minOrderAmount: 2499,
       maxDiscount: "",
       badge: "Special ₹2,498 OFF",
       popular: true,
@@ -305,33 +312,55 @@ function AdminCoupons() {
                     </span>
                   </td>
                   <td className="p-4">
-                    <button
-                      onClick={() => handleToggle(c._id)}
-                      className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold transition ${
+                    <span
+                      className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold border ${
                         c.isActive
-                          ? "bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400"
-                          : "bg-gray-100 dark:bg-gray-800 text-gray-500"
+                          ? "bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border-emerald-500/30"
+                          : "bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400 border-amber-500/30"
                       }`}
                     >
                       {c.isActive ? (
                         <>
-                          <CheckCircle2 size={12} /> Active
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                          Active (Live)
                         </>
                       ) : (
                         <>
-                          <XCircle size={12} /> Inactive
+                          <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                          Deactivated (Paused)
                         </>
                       )}
-                    </button>
+                    </span>
                   </td>
                   <td className="p-4 text-right">
-                    <button
-                      onClick={() => handleDelete(c._id, c.code)}
-                      title="Delete coupon"
-                      className="p-2 text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/50 rounded-lg transition"
-                    >
-                      <Trash2 size={16} />
-                    </button>
+                    <div className="flex items-center justify-end gap-2">
+                      {/* Explicit Deactivate / Activate Button */}
+                      <button
+                        onClick={() => handleToggle(c._id, c.code, c.isActive)}
+                        title={
+                          c.isActive
+                            ? "Deactivate coupon temporarily (pause without deleting)"
+                            : "Activate coupon (resume live checkout)"
+                        }
+                        className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition border shadow-xs ${
+                          c.isActive
+                            ? "bg-amber-50 hover:bg-amber-100 dark:bg-amber-950/30 dark:hover:bg-amber-950/60 text-amber-700 dark:text-amber-400 border-amber-300 dark:border-amber-700/60"
+                            : "bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/30 dark:hover:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 border-emerald-300 dark:border-emerald-700/60"
+                        }`}
+                      >
+                        <Power size={13} />
+                        <span>{c.isActive ? "Deactivate" : "Activate"}</span>
+                      </button>
+
+                      {/* Permanent Delete Button */}
+                      <button
+                        onClick={() => handleDelete(c._id, c.code)}
+                        title="Delete coupon permanently"
+                        className="p-2 text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/50 rounded-xl transition border border-transparent hover:border-rose-200 dark:hover:border-rose-900/40"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))

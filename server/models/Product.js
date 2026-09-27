@@ -55,6 +55,11 @@ const productSchema = new mongoose.Schema(
       },
     ],
 
+    image: {
+      type: String,
+      default: "",
+    },
+
     collection: String,
 
     category: {
@@ -63,6 +68,11 @@ const productSchema = new mongoose.Schema(
     },
 
     featured: {
+      type: Boolean,
+      default: false,
+    },
+
+    showOnHomepage: {
       type: Boolean,
       default: false,
     },

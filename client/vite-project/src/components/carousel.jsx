@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import "./carousel.css";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Sparkles, ArrowRight, Play, Award, CheckCircle2 } from "lucide-react";
+import { API_BASE } from "../services/apiConfig";
 
 import img1 from "../assets/model1.png";
 import img2 from "../assets/model2.png";
@@ -10,14 +11,27 @@ import img4 from "../assets/model4.png";
 import img5 from "../assets/model5.png";
 import img6 from "../assets/model6.png";
 
-const leftImages = [img1, img2];
-const centerImages = [img3, img4];
-const rightImages = [img5, img6];
-
 const Carousel = () => {
+  const navigate = useNavigate();
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [selectedDrape, setSelectedDrape] = useState("all"); // 'all', 'banarasi', 'signature', 'mulmul'
+  const [selectedDrape, setSelectedDrape] = useState("all");
   const [activeMobileCard, setActiveMobileCard] = useState(1);
+  const [homepageData, setHomepageData] = useState(null);
+
+  useEffect(() => {
+    const fetchHomepage = async () => {
+      try {
+        const res = await fetch(`${API_BASE}/homepage`);
+        if (res.ok) {
+          const data = await res.json();
+          setHomepageData(data);
+        }
+      } catch (err) {
+        console.log("Homepage fetch error fallback:", err);
+      }
+    };
+    fetchHomepage();
+  }, []);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -27,39 +41,75 @@ const Carousel = () => {
     return () => clearInterval(interval);
   }, []);
 
-  const scrollToProducts = () => {
-    document.getElementById("featured-sarees")?.scrollIntoView({ behavior: "smooth" });
+  // Dynamic Archway Images with fallbacks
+  const leftImages = [
+    homepageData?.archway1?.image1 || img1,
+    homepageData?.archway1?.image2 || img2,
+  ];
+  const centerImages = [
+    homepageData?.archway2?.image1 || img3,
+    homepageData?.archway2?.image2 || img4,
+  ];
+  const rightImages = [
+    homepageData?.archway3?.image1 || img5,
+    homepageData?.archway3?.image2 || img6,
+  ];
+
+  // Headline processing: highlight word in golden gradient
+  const rawTitle = homepageData?.heroTitle || "A Symphony of Heritage & Grace";
+  const highlightWord = homepageData?.heroHighlightWord || "Heritage";
+
+  const renderTitle = () => {
+    if (!rawTitle.toLowerCase().includes(highlightWord.toLowerCase())) {
+      return (
+        <h1 className="text-3xl sm:text-4xl lg:text-5xl font-serif text-[#2B2523] dark:text-[#F7F2EC] leading-[1.12] tracking-tight">
+          {rawTitle}
+        </h1>
+      );
+    }
+    const parts = rawTitle.split(new RegExp(`(${highlightWord})`, "gi"));
+    return (
+      <h1 className="text-3xl sm:text-4xl lg:text-5xl font-serif text-[#2B2523] dark:text-[#F7F2EC] leading-[1.12] tracking-tight">
+        {parts.map((part, i) =>
+          part.toLowerCase() === highlightWord.toLowerCase() ? (
+            <span
+              key={i}
+              className="italic font-serif text-transparent bg-clip-text bg-gradient-to-r from-[#6D1830] via-[#942644] to-[#B8860B] dark:from-[#F3D39B] dark:via-[#E5C583] dark:to-[#D4AF37]"
+            >
+              {part}
+            </span>
+          ) : (
+            <React.Fragment key={i}>{part}</React.Fragment>
+          )
+        )}
+      </h1>
+    );
   };
 
   return (
     <section className="relative overflow-hidden pt-6 pb-12 lg:pt-8 lg:pb-16 transition-colors duration-400">
-
       {/* Layered Golden Amber & Velvet Radial Lighting */}
       <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[700px] lg:w-[1000px] h-[550px] bg-[radial-gradient(ellipse,_rgba(212,180,131,0.22)_0%,_rgba(109,24,48,0.08)_45%,_transparent_75%)] dark:bg-[radial-gradient(ellipse,_rgba(229,197,131,0.18)_0%,_rgba(140,47,77,0.12)_45%,_transparent_75%)] blur-3xl pointer-events-none -z-10" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-
-        {/* --- Top Editorial Header (Compact & Regal to avoid pushing cards down) --- */}
+        {/* --- Top Editorial Header --- */}
         <div className="text-center max-w-3xl mx-auto mb-6 lg:mb-8">
-
           {/* Royal Atelier Seal Badge */}
           <div className="inline-flex items-center gap-2 px-4 py-1 rounded-full border border-[#D4B483]/60 bg-[#FAF6F0]/90 dark:bg-[#18101C]/90 backdrop-blur-md text-[#8C2F4D] dark:text-[#E5C583] text-[11px] font-semibold tracking-[3px] uppercase mb-3 shadow-[0_2px_10px_rgba(212,180,131,0.15)]">
             <span className="text-[#C8A261]">✦</span>
-            <span>By Jayant Saree Center &bull; Curated Ethnic Wear</span>
+            <span>
+              {homepageData?.heroSealBadge ||
+                "By Jayant Saree Center • Curated Ethnic Wear"}
+            </span>
             <span className="text-[#C8A261]">✦</span>
           </div>
 
           {/* Grand Haute Couture Title */}
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-serif text-[#2B2523] dark:text-[#F7F2EC] leading-[1.12] tracking-tight">
-            A Symphony of{" "}
-            <span className="italic font-serif text-transparent bg-clip-text bg-gradient-to-r from-[#6D1830] via-[#942644] to-[#B8860B] dark:from-[#F3D39B] dark:via-[#E5C583] dark:to-[#D4AF37]">
-              Heritage
-            </span>{" "}
-            & Grace
-          </h1>
+          {renderTitle()}
 
           <p className="mt-2.5 text-xs sm:text-sm text-gray-600 dark:text-gray-300 font-light max-w-xl mx-auto leading-relaxed">
-            Curated designer sarees, festive silks, and elegant cotton drapes from the trusted house of Jayant Saree Center.
+            {homepageData?.heroSubtitle ||
+              "Curated designer sarees, festive silks, and elegant cotton drapes from the trusted house of Jayant Saree Center."}
           </p>
 
           {/* Interactive Fabric & Drape Selector Tabs */}
@@ -86,17 +136,15 @@ const Carousel = () => {
               </button>
             ))}
           </div>
-
         </div>
 
         {/* --- ROYAL JHAROKHA (PALACE ARCHWAY) 3-CARDS GALLERY --- */}
         {/* Visible on Desktop & Tablet */}
         <div className="hidden md:flex justify-center items-end gap-3 md:gap-4 lg:gap-8 xl:gap-10 pb-4 pt-1">
-
-          {/* Left Archway: Clickable Banarasi Saree */}
+          {/* Left Archway */}
           <Link
-            to="/products?search=banarasi"
-            title="Explore Authentic Banarasi Sarees"
+            to={homepageData?.archway1?.link || "/products?search=banarasi"}
+            title="Explore Collection"
             className={`
               jharokha-frame jharokha-arch left-arch block cursor-pointer group/banarasi
               w-[210px] md:w-[220px] lg:w-[280px] xl:w-[320px]
@@ -119,27 +167,24 @@ const Carousel = () => {
                 />
               ))}
 
-              {/* Architectural Arch Line Overlay */}
               <div className="absolute inset-0 jharokha-arch pointer-events-none border border-white/30 dark:border-[#E5C583]/20 m-2" />
 
-              {/* Royal Badge - Banarasi Sarees */}
               <div className="absolute top-5 left-1/2 -translate-x-1/2 z-10 bg-black/65 backdrop-blur-md border border-[#D4B483]/70 text-[#FAF6F0] text-[10px] font-semibold tracking-[2px] uppercase px-3.5 py-1 rounded-full shadow-lg whitespace-nowrap group-hover/banarasi:bg-[#6D1830] group-hover/banarasi:border-[#E5C583] transition-all">
-                👑 Banarasi Saree
+                {homepageData?.archway1?.badge || "👑 Banarasi Saree"}
               </div>
 
-              {/* Bottom Subtle Gradient */}
               <div className="absolute bottom-0 inset-x-0 h-24 bg-gradient-to-t from-black/85 via-black/40 to-transparent flex flex-col justify-end p-4">
                 <p className="text-white text-xs font-serif font-medium tracking-wide">
-                  Pure Zari Weave &bull; Heritage Red
+                  {homepageData?.archway1?.title || "Pure Zari Weave • Heritage Red"}
                 </p>
               </div>
             </div>
           </Link>
 
-          {/* Center Archway: Masterpiece Signature (Clickable to Chanderi & Festive Silk) */}
+          {/* Center Archway */}
           <Link
-            to="/products?search=chanderi"
-            title="Explore Curated Chanderi & Festive Silk Sarees"
+            to={homepageData?.archway2?.link || "/products?search=chanderi"}
+            title="Explore Collection"
             className={`
               jharokha-frame jharokha-arch-center center-arch block cursor-pointer group/center
               w-[240px] md:w-[260px] lg:w-[330px] xl:w-[370px]
@@ -162,29 +207,31 @@ const Carousel = () => {
                 />
               ))}
 
-              {/* Architectural Arch Line Overlay */}
               <div className="absolute inset-0 jharokha-arch-center pointer-events-none border-2 border-[#D4B483]/40 dark:border-[#E5C583]/30 m-2.5" />
 
-              {/* Grand Center Crown Badge */}
               <div className="absolute top-6 left-1/2 -translate-x-1/2 z-10 bg-gradient-to-r from-[#6D1830]/95 to-[#8C2F4D]/95 dark:from-[#1D1222]/95 dark:to-[#311838]/95 backdrop-blur-md border border-[#D4B483] text-[#FAF6F0] text-[11px] font-bold tracking-[2.5px] uppercase px-4 py-1.5 rounded-full shadow-2xl flex items-center gap-1.5 whitespace-nowrap group-hover/center:border-[#E5C583] transition-all">
                 <Sparkles size={12} className="text-[#E5C583]" />
-                <span>The Atelier Signature</span>
+                <span>
+                  {homepageData?.archway2?.badge || "The Atelier Signature"}
+                </span>
               </div>
 
-              {/* Bottom Details */}
               <div className="absolute bottom-0 inset-x-0 h-28 bg-gradient-to-t from-black/85 via-black/35 to-transparent flex flex-col justify-end p-5">
-                <span className="text-[#E5C583] text-[10px] uppercase tracking-widest font-semibold">Exclusive Saree Edit</span>
+                <span className="text-[#E5C583] text-[10px] uppercase tracking-widest font-semibold">
+                  {homepageData?.archway2?.tagline || "Exclusive Saree Edit"}
+                </span>
                 <p className="text-white text-sm font-serif font-semibold">
-                  Curated Chanderi &amp; Festive Silk
+                  {homepageData?.archway2?.title ||
+                    "Curated Chanderi & Festive Silk"}
                 </p>
               </div>
             </div>
           </Link>
 
-          {/* Right Archway: Mulmul Cotton (Clickable to Mulmul Cotton Sarees) */}
+          {/* Right Archway */}
           <Link
-            to="/products?search=mulmul"
-            title="Explore Breathable Mulmul Cotton Sarees"
+            to={homepageData?.archway3?.link || "/products?search=mulmul"}
+            title="Explore Collection"
             className={`
               jharokha-frame jharokha-arch right-arch block cursor-pointer group/mulmul
               w-[210px] md:w-[220px] lg:w-[280px] xl:w-[320px]
@@ -207,34 +254,31 @@ const Carousel = () => {
                 />
               ))}
 
-              {/* Architectural Arch Line Overlay */}
               <div className="absolute inset-0 jharokha-arch pointer-events-none border border-white/30 dark:border-[#E5C583]/20 m-2" />
 
-              {/* Royal Badge */}
               <div className="absolute top-5 left-1/2 -translate-x-1/2 z-10 bg-black/55 backdrop-blur-md border border-[#D4B483]/50 text-[#F7F2EC] text-[10px] font-semibold tracking-[2px] uppercase px-3.5 py-1 rounded-full shadow-lg whitespace-nowrap group-hover/mulmul:bg-[#6D1830] group-hover/mulmul:border-[#E5C583] transition-all">
-                Mulmul Cotton
+                {homepageData?.archway3?.badge || "Mulmul Cotton"}
               </div>
 
-              {/* Bottom Subtle Gradient */}
               <div className="absolute bottom-0 inset-x-0 h-24 bg-gradient-to-t from-black/80 via-black/30 to-transparent flex items-end p-4">
                 <p className="text-white text-xs font-serif font-medium tracking-wide">
-                  Breathable Weave &bull; Emerald Drape
+                  {homepageData?.archway3?.title ||
+                    "Breathable Weave • Emerald Drape"}
                 </p>
               </div>
             </div>
           </Link>
-
         </div>
 
-        {/* --- MOBILE VIEW: Single Jharokha Archway with Look Switcher --- */}
+        {/* --- MOBILE VIEW: Single Jharokha Archway --- */}
         <div className="block md:hidden py-3">
           <Link
             to={
               activeMobileCard === 0
-                ? "/products?search=banarasi"
+                ? homepageData?.archway1?.link || "/products?search=banarasi"
                 : activeMobileCard === 1
-                ? "/products?search=chanderi"
-                : "/products?search=mulmul"
+                ? homepageData?.archway2?.link || "/products?search=chanderi"
+                : homepageData?.archway3?.link || "/products?search=mulmul"
             }
             className="block relative mx-auto w-[88vw] max-w-[320px] h-[400px] sm:h-[460px] jharokha-frame jharokha-arch border-2 border-[#D4B483] dark:border-[#E5C583] shadow-2xl cursor-pointer"
           >
@@ -254,12 +298,23 @@ const Carousel = () => {
               ))}
 
               <div className="absolute top-5 left-1/2 -translate-x-1/2 z-10 bg-black/60 backdrop-blur-md border border-[#D4B483] text-[#FAF6F0] text-[10px] font-semibold tracking-[2px] uppercase px-4 py-1.5 rounded-full shadow-lg whitespace-nowrap">
-                {activeMobileCard === 0 ? "👑 Banarasi Saree" : activeMobileCard === 1 ? "Signature Atelier" : "Mulmul Cotton"}
+                {activeMobileCard === 0
+                  ? homepageData?.archway1?.badge || "👑 Banarasi Saree"
+                  : activeMobileCard === 1
+                  ? homepageData?.archway2?.badge || "Signature Atelier"
+                  : homepageData?.archway3?.badge || "Mulmul Cotton"}
               </div>
 
               <div className="absolute bottom-0 inset-x-0 h-24 bg-gradient-to-t from-black/80 to-transparent flex items-end p-4">
                 <p className="text-white text-xs font-serif font-medium">
-                  {activeMobileCard === 0 ? "Pure Zari Weave &bull; Banarasi Collection" : activeMobileCard === 1 ? "Designer Festive Drape &bull; Silk Collection" : "Breathable Everyday Comfort &bull; Mulmul Collection"}
+                  {activeMobileCard === 0
+                    ? homepageData?.archway1?.title ||
+                      "Pure Zari Weave • Banarasi Collection"
+                    : activeMobileCard === 1
+                    ? homepageData?.archway2?.title ||
+                      "Designer Festive Drape • Silk Collection"
+                    : homepageData?.archway3?.title ||
+                      "Breathable Everyday Comfort • Mulmul Collection"}
                 </p>
               </div>
             </div>
@@ -309,11 +364,11 @@ const Carousel = () => {
         <div className="flex flex-col sm:flex-row items-center justify-center gap-3.5 mt-8 px-4">
           <button
             onClick={() => {
-              const productSection = document.getElementById("featured-products") || document.getElementById("products-grid");
-              if (productSection) {
-                productSection.scrollIntoView({ behavior: "smooth" });
+              const target = homepageData?.primaryButtonLink || "/products";
+              if (target.startsWith("/")) {
+                navigate(target);
               } else {
-                navigate("/products");
+                window.location.href = target;
               }
             }}
             className="
@@ -330,11 +385,11 @@ const Carousel = () => {
             "
           >
             <Sparkles size={14} className="text-[#E5C583]" />
-            <span>Explore Collection</span>
+            <span>{homepageData?.primaryButtonText || "Explore Collection"}</span>
           </button>
 
           <Link
-            to="/reels"
+            to={homepageData?.secondaryButtonLink || "/reels"}
             className="
               w-full sm:w-auto px-7 py-3.5
               rounded-full
@@ -349,7 +404,9 @@ const Carousel = () => {
             "
           >
             <Play size={13} className="fill-current" />
-            <span>Watch Draping Reels</span>
+            <span>
+              {homepageData?.secondaryButtonText || "Watch Draping Reels"}
+            </span>
           </Link>
         </div>
 
@@ -357,26 +414,40 @@ const Carousel = () => {
         <div className="mt-10 pt-6 border-t border-[#E8DFD3]/80 dark:border-[#2C1F32]/80">
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 text-center">
             <div className="p-2">
-              <p className="font-serif text-lg font-bold text-[#6D1830] dark:text-[#E5C583]">1 Lakh+</p>
-              <p className="text-[11px] text-gray-500 dark:text-gray-400 uppercase tracking-wider mt-0.5">Patrons Draped Worldwide</p>
+              <p className="font-serif text-lg font-bold text-[#6D1830] dark:text-[#E5C583]">
+                {homepageData?.stat1Value || "1 Lakh+"}
+              </p>
+              <p className="text-[11px] text-gray-500 dark:text-gray-400 uppercase tracking-wider mt-0.5">
+                {homepageData?.stat1Label || "Patrons Draped Worldwide"}
+              </p>
             </div>
             <div className="p-2">
-              <p className="font-serif text-lg font-bold text-[#6D1830] dark:text-[#E5C583]">100% Inspected</p>
-              <p className="text-[11px] text-gray-500 dark:text-gray-400 uppercase tracking-wider mt-0.5">Curated Designer Sarees</p>
+              <p className="font-serif text-lg font-bold text-[#6D1830] dark:text-[#E5C583]">
+                {homepageData?.stat2Value || "100% Inspected"}
+              </p>
+              <p className="text-[11px] text-gray-500 dark:text-gray-400 uppercase tracking-wider mt-0.5">
+                {homepageData?.stat2Label || "Curated Designer Sarees"}
+              </p>
             </div>
             <div className="p-2">
-              <p className="font-serif text-lg font-bold text-[#6D1830] dark:text-[#E5C583]">Jayant Saree Center</p>
-              <p className="text-[11px] text-gray-500 dark:text-gray-400 uppercase tracking-wider mt-0.5">Retail Trust &amp; Heritage</p>
+              <p className="font-serif text-lg font-bold text-[#6D1830] dark:text-[#E5C583]">
+                {homepageData?.stat3Value || "Jayant Saree Center"}
+              </p>
+              <p className="text-[11px] text-gray-500 dark:text-gray-400 uppercase tracking-wider mt-0.5">
+                {homepageData?.stat3Label || "Retail Trust & Heritage"}
+              </p>
             </div>
             <div className="p-2">
-              <p className="font-serif text-lg font-bold text-[#6D1830] dark:text-[#E5C583]">Complimentary</p>
-              <p className="text-[11px] text-gray-500 dark:text-gray-400 uppercase tracking-wider mt-0.5">Pan-India Express Shipping</p>
+              <p className="font-serif text-lg font-bold text-[#6D1830] dark:text-[#E5C583]">
+                {homepageData?.stat4Value || "Complimentary"}
+              </p>
+              <p className="text-[11px] text-gray-500 dark:text-gray-400 uppercase tracking-wider mt-0.5">
+                {homepageData?.stat4Label || "Pan-India Express Shipping"}
+              </p>
             </div>
           </div>
         </div>
-
       </div>
-
     </section>
   );
 };

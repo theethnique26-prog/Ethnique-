@@ -66,7 +66,11 @@ function SareeSection() {
     addToWishlist(product);
   };
 
-  const filteredProducts = products.filter((p) => {
+  // Sarees explicitly selected by admin for Homepage Display (max 6)
+  const homepageSelected = products.filter((p) => p.showOnHomepage);
+  const sareePool = homepageSelected.length > 0 ? homepageSelected : products;
+
+  const filteredProducts = sareePool.filter((p) => {
     if (activeCategory === "all") return true;
     const name = (p.name || "").toLowerCase();
     const category = (p.category || "").toLowerCase();
@@ -85,15 +89,16 @@ function SareeSection() {
           <div>
             <div className="flex items-center gap-2 text-[#8C2F4D] dark:text-[#E5C583] text-xs font-semibold tracking-[3px] uppercase mb-2">
               <Sparkles size={14} className="text-[#C8A261]" />
-              <span>Curated Atelier</span>
+              <span>{featuredSection?.sareesSectionBadge || "Curated Atelier"}</span>
             </div>
 
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-serif text-[#2B2523] dark:text-[#F7F2EC]">
-              New Arrivals
+              {featuredSection?.sareesSectionTitle || "New Arrivals"}
             </h2>
 
             <p className="text-gray-600 dark:text-gray-400 mt-2 text-sm sm:text-base font-light max-w-xl">
-              Handpicked elegance crafted for everyday comfort and sacred celebratory moments.
+              {featuredSection?.sareesSectionSubtitle ||
+                "Handpicked elegance crafted for everyday comfort and sacred celebratory moments."}
             </p>
           </div>
 
@@ -130,7 +135,7 @@ function SareeSection() {
                 hover:underline transition-all
               "
             >
-              <span>Explore All</span>
+              <span>{featuredSection?.viewAllButtonText || "Explore All"}</span>
               <ArrowRight size={15} />
             </Link>
           </div>
@@ -214,7 +219,7 @@ function SareeSection() {
           </div>
 
           {/* Saree Product Cards with Arched Tops */}
-          {(filteredProducts.length > 0 ? filteredProducts : products).slice(0, 6).map((product) => {
+          {(filteredProducts.length > 0 ? filteredProducts : sareePool).slice(0, 6).map((product) => {
             const inWishlist = isProductInWishlist(product._id);
             const isAdded = addedAnimId === product._id;
             const isOutOfStock = product.inStock === false || (product.stock !== undefined && Number(product.stock) <= 0);

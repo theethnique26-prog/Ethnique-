@@ -276,21 +276,108 @@ router.get("/products", adminAuth, async (req, res) => {
   }
 });
 
+// Helper to normalize product and photos from Excel or manual forms
+const normalizeProductPayload = (item, idx = 0) => {
+  const p = { ...item };
+  const rawList = [];
+
+  // 1. Multi-column fields (image1..image10, photo1..photo10, etc.)
+  for (let i = 1; i <= 10; i++) {
+    const val =
+      p[`image${i}`] ||
+      p[`Image${i}`] ||
+      p[`Image ${i}`] ||
+      p[`photo${i}`] ||
+      p[`Photo${i}`] ||
+      p[`Photo ${i}`];
+    if (val && typeof val === "string" && val.trim()) {
+      rawList.push(val.trim());
+    }
+  }
+
+  // 2. Compound fields (images, Photos, image, etc.)
+  const compound =
+    p.images ||
+    p.Images ||
+    p.photos ||
+    p.Photos ||
+    p["Image URLs"] ||
+    p["Photo URLs"] ||
+    p.image ||
+    p.Image ||
+    p["Image URL"] ||
+    p["Photo URL"];
+
+  if (Array.isArray(compound)) {
+    compound.forEach((img) => {
+      if (typeof img === "string" && img.trim()) rawList.push(img.trim());
+    });
+  } else if (typeof compound === "string" && compound.trim()) {
+    compound.split(/[\r\n,;|]+/).forEach((img) => {
+      if (img.trim()) rawList.push(img.trim());
+    });
+  }
+
+  // 3. Clean and convert URLs (including Google Drive view links to direct view)
+  const cleaned = rawList
+    .map((url) => {
+      if (!url || typeof url !== "string") return "";
+      let u = url.trim().replace(/^['"]|['"]$/g, "");
+      const gdriveMatch = u.match(
+        /(?:drive\.google\.com\/(?:file\/d\/|open\?id=)|lh3\.googleusercontent\.com\/d\/)([a-zA-Z0-9_-]+)/
+      );
+      if (gdriveMatch && gdriveMatch[1]) {
+        return `https://drive.google.com/thumbnail?id=${gdriveMatch[1]}&sz=w1600`;
+      }
+      return u;
+    })
+    .filter(Boolean);
+
+  const uniqueImages = Array.from(new Set(cleaned));
+  const finalImages =
+    uniqueImages.length > 0
+      ? uniqueImages
+      : ["https://images.unsplash.com/photo-1610030469983-98e550d6193c"];
+
+  p.images = finalImages;
+  p.image = finalImages[0] || "";
+  p.priceINR = Number(p.priceINR) || 1999;
+  p.stock = Number(p.stock) >= 0 ? Number(p.stock) : 10;
+  p.inStock = p.inStock !== false && p.stock > 0;
+  if (p.showOnHomepage !== undefined) {
+    p.showOnHomepage = Boolean(p.showOnHomepage);
+  }
+  if (!p.sku || !String(p.sku).trim()) {
+    p.sku = `ETH-IMP-${Date.now().toString().slice(-4)}-${idx + 1}`;
+  } else {
+    p.sku = String(p.sku).trim();
+  }
+  return p;
+};
+
 router.post("/products", adminAuth, async (req, res) => {
   try {
-    console.log("BODY RECEIVED:");
-    console.log(req.body);
+    const normalized = normalizeProductPayload(req.body);
 
-    const product = await Product.create(req.body);
+    if (normalized.showOnHomepage) {
+      const currentCount = await Product.countDocuments({ showOnHomepage: true });
+      if (currentCount >= 6) {
+        return res.status(400).json({
+          success: false,
+          message:
+            "Maximum 6 sarees can be displayed on homepage. Please uncheck another saree first.",
+        });
+      }
+    }
+
+    const product = await Product.create(normalized);
 
     res.json({
       success: true,
       product,
     });
   } catch (error) {
-    console.log("POST PRODUCT ERROR:");
-    console.log(error);
-
+    console.log("POST PRODUCT ERROR:", error);
     res.status(500).json({
       success: false,
       message: error.message,
@@ -308,12 +395,25 @@ router.post("/products/bulk", adminAuth, async (req, res) => {
       });
     }
 
-    const created = await Product.insertMany(products);
-    res.status(201).json({
+    const normalized = products.map((item, idx) => normalizeProductPayload(item, idx));
+
+    const bulkOps = normalized.map((p) => ({
+      updateOne: {
+        filter: { sku: p.sku },
+        update: { $set: p },
+        upsert: true,
+      },
+    }));
+
+    const result = await Product.bulkWrite(bulkOps);
+    const totalAffected = (result.upsertedCount || 0) + (result.modifiedCount || 0);
+
+    res.status(200).json({
       success: true,
-      count: created.length,
-      products: created,
-      message: `Successfully imported ${created.length} products!`,
+      count: totalAffected || normalized.length,
+      upserted: result.upsertedCount || 0,
+      modified: result.modifiedCount || 0,
+      message: `Successfully processed ${normalized.length} sarees (${result.upsertedCount || 0} new added, ${result.modifiedCount || 0} updated with photos & details)!`,
     });
   } catch (error) {
     console.error("BULK PRODUCT IMPORT ERROR:", error);
@@ -322,46 +422,96 @@ router.post("/products/bulk", adminAuth, async (req, res) => {
 });
 
 router.delete("/products/:id", adminAuth, async (req, res) => {
-    try {
-      await Product.findByIdAndDelete(
-        req.params.id
-      );
+  try {
+    await Product.findByIdAndDelete(req.params.id);
 
-      res.json({
-        success: true,
-        message:
-          "Product deleted successfully",
-      });
-    } catch (error) {
-      res.status(500).json({
-        success: false,
-        message: error.message,
-      });
-    }
+    res.json({
+      success: true,
+      message: "Product deleted successfully",
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
   }
-);
+});
 
 router.put("/products/:id", adminAuth, async (req, res) => {
-    try {
-      const product =
-        await Product.findByIdAndUpdate(
-          req.params.id,
-          req.body,
-          { new: true }
-        );
+  try {
+    const normalized = normalizeProductPayload(req.body);
 
-      res.json({
-        success: true,
-        product,
+    if (normalized.showOnHomepage) {
+      const currentCount = await Product.countDocuments({
+        showOnHomepage: true,
+        _id: { $ne: req.params.id },
       });
-    } catch (error) {
-      res.status(500).json({
-        success: false,
-        message: error.message,
-      });
+      if (currentCount >= 6) {
+        return res.status(400).json({
+          success: false,
+          message:
+            "Maximum 6 sarees can be displayed on homepage. Please uncheck another saree first.",
+        });
+      }
     }
+
+    const product = await Product.findByIdAndUpdate(req.params.id, normalized, { new: true });
+
+    res.json({
+      success: true,
+      product,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
   }
-);
+});
+
+// Toggle Show on Homepage display (Max 6 sarees)
+router.patch("/products/:id/toggle-homepage", adminAuth, async (req, res) => {
+  try {
+    const product = await Product.findById(req.params.id);
+    if (!product) {
+      return res.status(404).json({ success: false, message: "Product not found" });
+    }
+
+    const nextStatus = !product.showOnHomepage;
+
+    if (nextStatus) {
+      const currentFeaturedCount = await Product.countDocuments({
+        showOnHomepage: true,
+        _id: { $ne: product._id },
+      });
+      if (currentFeaturedCount >= 6) {
+        return res.status(400).json({
+          success: false,
+          message:
+            "Maximum 6 sarees can be displayed on the homepage. Please unselect another saree first.",
+          currentCount: currentFeaturedCount,
+        });
+      }
+    }
+
+    product.showOnHomepage = nextStatus;
+    await product.save();
+
+    const totalCount = await Product.countDocuments({ showOnHomepage: true });
+
+    res.json({
+      success: true,
+      product,
+      showOnHomepage: product.showOnHomepage,
+      totalCount,
+      message: product.showOnHomepage
+        ? `Added '${product.name}' to Homepage display (${totalCount}/6 selected).`
+        : `Removed '${product.name}' from Homepage display (${totalCount}/6 selected).`,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
 
 // Update product stock and inStock status (supports both PATCH and PUT)
 const handleToggleStockRequest = async (req, res) => {
