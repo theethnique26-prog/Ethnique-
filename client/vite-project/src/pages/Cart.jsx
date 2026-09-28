@@ -13,6 +13,7 @@ import {
   Gift,
   Crown,
   Scissors,
+  Check,
 } from "lucide-react";
 import toast from "react-hot-toast";
 

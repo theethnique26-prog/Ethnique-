@@ -53,72 +53,141 @@ const Footer = () => {
             </p>
           </div>
 
-          <div className="relative">
-            {/* Connected Golden Line for Desktop */}
-            <div className="hidden md:block absolute top-7 left-[8%] right-[8%] h-[2px] bg-gradient-to-r from-[#D4B483]/30 via-[#C8A261] to-[#D4B483]/30" />
+          <div className="space-y-12 sm:space-y-16">
+            {/* Row 1: 1964 - 2004 */}
+            <div className="relative">
+              {/* Connected Golden Line for Desktop */}
+              <div className="hidden md:block absolute top-7 left-[8%] right-[8%] h-[2px] bg-gradient-to-r from-[#D4B483]/30 via-[#C8A261] to-[#D4B483]/30" />
 
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-8 sm:gap-10 relative">
-
-              {/* Step 1 */}
-              <div className="text-center group transition-all duration-400">
-                <div className="relative w-14 h-14 mx-auto rounded-full bg-gradient-to-tr from-[#6D1830] to-[#8C2F4D] dark:from-[#2A1C2E] dark:to-[#45274A] border-4 border-white dark:border-[#130E17] shadow-lg flex items-center justify-center text-[#E5C583] font-serif font-bold text-base mb-5 group-hover:scale-110 transition-transform duration-300">
-                  <span className="relative z-10">2020</span>
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-8 sm:gap-10 relative">
+                {/* Step 1: 1964 */}
+                <div className="text-center group transition-all duration-400">
+                  <div className="relative w-14 h-14 mx-auto rounded-full bg-gradient-to-tr from-[#6D1830] to-[#8C2F4D] dark:from-[#2A1C2E] dark:to-[#45274A] border-4 border-white dark:border-[#130E17] shadow-lg flex items-center justify-center text-[#E5C583] font-serif font-bold text-base mb-5 group-hover:scale-110 transition-transform duration-300">
+                    <span className="relative z-10">1964</span>
+                  </div>
+                  <div className="p-5 rounded-2xl bg-white/70 dark:bg-[#1A141F]/70 border border-[#E8E2DC]/80 dark:border-[#2C2030] shadow-sm group-hover:shadow-md group-hover:border-[#D4B483] transition-all">
+                    <h3 className="font-serif text-lg font-bold text-[#2B2B2B] dark:text-[#FAF5EF]">
+                      The Cycle Journey
+                    </h3>
+                    <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mt-2 font-light leading-relaxed">
+                      It started on cycle selling bedsheets and sarees from village to village.
+                    </p>
+                  </div>
                 </div>
-                <div className="p-5 rounded-2xl bg-white/70 dark:bg-[#1A141F]/70 border border-[#E8E2DC]/80 dark:border-[#2C2030] shadow-sm group-hover:shadow-md group-hover:border-[#D4B483] transition-all">
-                  <h3 className="font-serif text-lg font-bold text-[#2B2B2B] dark:text-[#FAF5EF]">
-                    The Retail Flagship
-                  </h3>
-                  <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mt-2 font-light leading-relaxed">
-                    Jayant Saree Center established its retail landmark, trusted by thousands of families for bridal & festive drapes.
-                  </p>
+
+                {/* Step 2: 1974 */}
+                <div className="text-center group transition-all duration-400">
+                  <div className="relative w-14 h-14 mx-auto rounded-full bg-gradient-to-tr from-[#6D1830] to-[#8C2F4D] dark:from-[#2A1C2E] dark:to-[#45274A] border-4 border-white dark:border-[#130E17] shadow-lg flex items-center justify-center text-[#E5C583] font-serif font-bold text-base mb-5 group-hover:scale-110 transition-transform duration-300">
+                    <span className="relative z-10">1974</span>
+                  </div>
+                  <div className="p-5 rounded-2xl bg-white/70 dark:bg-[#1A141F]/70 border border-[#E8E2DC]/80 dark:border-[#2C2030] shadow-sm group-hover:shadow-md group-hover:border-[#D4B483] transition-all">
+                    <h3 className="font-serif text-lg font-bold text-[#2B2B2B] dark:text-[#FAF5EF]">
+                      300 Sq. Ft. Shop
+                    </h3>
+                    <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mt-2 font-light leading-relaxed">
+                      Commenced its journey in a modest 300 square feet shop 1974.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Step 3: 2000 */}
+                <div className="text-center group transition-all duration-400">
+                  <div className="relative w-14 h-14 mx-auto rounded-full bg-gradient-to-tr from-[#6D1830] to-[#8C2F4D] dark:from-[#2A1C2E] dark:to-[#45274A] border-4 border-white dark:border-[#130E17] shadow-lg flex items-center justify-center text-[#E5C583] font-serif font-bold text-base mb-5 group-hover:scale-110 transition-transform duration-300">
+                    <span className="relative z-10">2000</span>
+                  </div>
+                  <div className="p-5 rounded-2xl bg-white/70 dark:bg-[#1A141F]/70 border border-[#E8E2DC]/80 dark:border-[#2C2030] shadow-sm group-hover:shadow-md group-hover:border-[#D4B483] transition-all">
+                    <h3 className="font-serif text-lg font-bold text-[#2B2B2B] dark:text-[#FAF5EF]">
+                      4,000 Sq. Ft. Growth
+                    </h3>
+                    <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mt-2 font-light leading-relaxed">
+                      Saw growth, extending its space to encompass 4000 square feet.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Step 4: 2004 */}
+                <div className="text-center group transition-all duration-400">
+                  <div className="relative w-14 h-14 mx-auto rounded-full bg-gradient-to-tr from-[#6D1830] to-[#8C2F4D] dark:from-[#2A1C2E] dark:to-[#45274A] border-4 border-white dark:border-[#130E17] shadow-lg flex items-center justify-center text-[#E5C583] font-serif font-bold text-base mb-5 group-hover:scale-110 transition-transform duration-300">
+                    <span className="relative z-10">2004</span>
+                  </div>
+                  <div className="p-5 rounded-2xl bg-white/70 dark:bg-[#1A141F]/70 border border-[#E8E2DC]/80 dark:border-[#2C2030] shadow-sm group-hover:shadow-md group-hover:border-[#D4B483] transition-all">
+                    <h3 className="font-serif text-lg font-bold text-[#2B2B2B] dark:text-[#FAF5EF]">
+                      Clothing Departments
+                    </h3>
+                    <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mt-2 font-light leading-relaxed">
+                      We ventured into multiple clothing departments. 2004.
+                    </p>
+                  </div>
                 </div>
               </div>
+            </div>
 
-              {/* Step 2 */}
-              <div className="text-center group transition-all duration-400">
-                <div className="relative w-14 h-14 mx-auto rounded-full bg-gradient-to-tr from-[#6D1830] to-[#8C2F4D] dark:from-[#2A1C2E] dark:to-[#45274A] border-4 border-white dark:border-[#130E17] shadow-lg flex items-center justify-center text-[#E5C583] font-serif font-bold text-base mb-5 group-hover:scale-110 transition-transform duration-300">
-                  <span className="relative z-10">2022</span>
+            {/* Row 2: 2014 - 2026 */}
+            <div className="relative">
+              {/* Connected Golden Line for Desktop */}
+              <div className="hidden md:block absolute top-7 left-[8%] right-[8%] h-[2px] bg-gradient-to-r from-[#D4B483]/30 via-[#C8A261] to-[#D4B483]/30" />
+
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-8 sm:gap-10 relative">
+                {/* Step 5: 2014 */}
+                <div className="text-center group transition-all duration-400">
+                  <div className="relative w-14 h-14 mx-auto rounded-full bg-gradient-to-tr from-[#6D1830] to-[#8C2F4D] dark:from-[#2A1C2E] dark:to-[#45274A] border-4 border-white dark:border-[#130E17] shadow-lg flex items-center justify-center text-[#E5C583] font-serif font-bold text-base mb-5 group-hover:scale-110 transition-transform duration-300">
+                    <span className="relative z-10">2014</span>
+                  </div>
+                  <div className="p-5 rounded-2xl bg-white/70 dark:bg-[#1A141F]/70 border border-[#E8E2DC]/80 dark:border-[#2C2030] shadow-sm group-hover:shadow-md group-hover:border-[#D4B483] transition-all">
+                    <h3 className="font-serif text-lg font-bold text-[#2B2B2B] dark:text-[#FAF5EF]">
+                      Retail Expansion
+                    </h3>
+                    <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mt-2 font-light leading-relaxed">
+                      Expanding modern multistory flagship retail presence.
+                    </p>
+                  </div>
                 </div>
-                <div className="p-5 rounded-2xl bg-white/70 dark:bg-[#1A141F]/70 border border-[#E8E2DC]/80 dark:border-[#2C2030] shadow-sm group-hover:shadow-md group-hover:border-[#D4B483] transition-all">
-                  <h3 className="font-serif text-lg font-bold text-[#2B2B2B] dark:text-[#FAF5EF]">
-                    Artisanal Weaves
-                  </h3>
-                  <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mt-2 font-light leading-relaxed">
-                    Expanded into exclusive handloom curations, authentic Banarasi silks, and pure Maheshwari drapes.
-                  </p>
+
+                {/* Step 6: 2023 */}
+                <div className="text-center group transition-all duration-400">
+                  <div className="relative w-14 h-14 mx-auto rounded-full bg-gradient-to-tr from-[#6D1830] to-[#8C2F4D] dark:from-[#2A1C2E] dark:to-[#45274A] border-4 border-white dark:border-[#130E17] shadow-lg flex items-center justify-center text-[#E5C583] font-serif font-bold text-base mb-5 group-hover:scale-110 transition-transform duration-300">
+                    <span className="relative z-10">2023</span>
+                  </div>
+                  <div className="p-5 rounded-2xl bg-white/70 dark:bg-[#1A141F]/70 border border-[#E8E2DC]/80 dark:border-[#2C2030] shadow-sm group-hover:shadow-md group-hover:border-[#D4B483] transition-all">
+                    <h3 className="font-serif text-lg font-bold text-[#2B2B2B] dark:text-[#FAF5EF]">
+                      Grand Showroom
+                    </h3>
+                    <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mt-2 font-light leading-relaxed">
+                      Architectural grandeur & modern bridal destination showroom.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Step 7: 2024 */}
+                <div className="text-center group transition-all duration-400">
+                  <div className="relative w-14 h-14 mx-auto rounded-full bg-gradient-to-tr from-[#6D1830] to-[#8C2F4D] dark:from-[#2A1C2E] dark:to-[#45274A] border-4 border-white dark:border-[#130E17] shadow-lg flex items-center justify-center text-[#E5C583] font-serif font-bold text-base mb-5 group-hover:scale-110 transition-transform duration-300">
+                    <span className="relative z-10">2024</span>
+                  </div>
+                  <div className="p-5 rounded-2xl bg-white/70 dark:bg-[#1A141F]/70 border border-[#E8E2DC]/80 dark:border-[#2C2030] shadow-sm group-hover:shadow-md group-hover:border-[#D4B483] transition-all">
+                    <h3 className="font-serif text-lg font-bold text-[#2B2B2B] dark:text-[#FAF5EF]">
+                      50 Golden Years
+                    </h3>
+                    <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mt-2 font-light leading-relaxed">
+                      Celebrating its 50th year with a legacy of goodwill and satisfied customers.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Step 8: 2026 */}
+                <div className="text-center group transition-all duration-400">
+                  <div className="relative w-14 h-14 mx-auto rounded-full bg-gradient-to-tr from-[#B8860B] to-[#D4AF37] dark:from-[#E5C583] dark:to-[#C8A261] border-4 border-white dark:border-[#130E17] shadow-xl flex items-center justify-center text-[#1E1220] font-serif font-bold text-base mb-5 group-hover:scale-110 transition-transform duration-300">
+                    <span className="relative z-10">2026</span>
+                  </div>
+                  <div className="p-5 rounded-2xl bg-white/70 dark:bg-[#1A141F]/70 border border-[#D4B483] dark:border-[#E5C583]/50 shadow-md group-hover:shadow-xl transition-all">
+                    <h3 className="font-serif text-lg font-bold text-[#2B2B2B] dark:text-[#FAF5EF]">
+                      Went Digital
+                    </h3>
+                    <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mt-2 font-light leading-relaxed">
+                      Went digital with Ethnique By Jayant, bringing our curated sarees directly to digital shoppers.
+                    </p>
+                  </div>
                 </div>
               </div>
-
-              {/* Step 3 */}
-              <div className="text-center group transition-all duration-400">
-                <div className="relative w-14 h-14 mx-auto rounded-full bg-gradient-to-tr from-[#6D1830] to-[#8C2F4D] dark:from-[#2A1C2E] dark:to-[#45274A] border-4 border-white dark:border-[#130E17] shadow-lg flex items-center justify-center text-[#E5C583] font-serif font-bold text-base mb-5 group-hover:scale-110 transition-transform duration-300">
-                  <span className="relative z-10">2024</span>
-                </div>
-                <div className="p-5 rounded-2xl bg-white/70 dark:bg-[#1A141F]/70 border border-[#E8E2DC]/80 dark:border-[#2C2030] shadow-sm group-hover:shadow-md group-hover:border-[#D4B483] transition-all">
-                  <h3 className="font-serif text-lg font-bold text-[#2B2B2B] dark:text-[#FAF5EF]">
-                    Ethnique Online
-                  </h3>
-                  <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mt-2 font-light leading-relaxed">
-                    Launched Ethnique By Jayant, bringing our physical boutique's celebrated sarees directly to digital shoppers.
-                  </p>
-                </div>
-              </div>
-
-              {/* Step 4 */}
-              <div className="text-center group transition-all duration-400">
-                <div className="relative w-14 h-14 mx-auto rounded-full bg-gradient-to-tr from-[#B8860B] to-[#D4AF37] dark:from-[#E5C583] dark:to-[#C8A261] border-4 border-white dark:border-[#130E17] shadow-xl flex items-center justify-center text-[#1E1220] font-serif font-bold text-base mb-5 group-hover:scale-110 transition-transform duration-300">
-                  <span className="relative z-10">Today</span>
-                </div>
-                <div className="p-5 rounded-2xl bg-white/70 dark:bg-[#1A141F]/70 border border-[#D4B483] dark:border-[#E5C583]/50 shadow-md group-hover:shadow-xl transition-all">
-                  <h3 className="font-serif text-lg font-bold text-[#2B2B2B] dark:text-[#FAF5EF]">
-                    Pan-India Community
-                  </h3>
-                  <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mt-2 font-light leading-relaxed">
-                    Delivering curated designer ethnic sarees to women nationwide with insured standard delivery and concierge care.
-                  </p>
-                </div>
-              </div>
-
             </div>
           </div>
         </div>

@@ -54,6 +54,9 @@ function Checkout() {
   // Club Points Redemption state
   const [redeemClanPoints, setRedeemClanPoints] = useState(false);
   const [pincodeLoading, setPincodeLoading] = useState(false);
+  const [pincodeLocalities, setPincodeLocalities] = useState([]);
+  const [detectedLocationMeta, setDetectedLocationMeta] = useState(null);
+  const [delhiveryInfo, setDelhiveryInfo] = useState(null);
 
   const [formData, setFormData] = useState({
     fullName: user?.name || "",
@@ -167,21 +170,77 @@ function Checkout() {
   const lookupPincode = async (pin) => {
     if (!/^\d{6}$/.test(pin)) return;
     setPincodeLoading(true);
+    setPincodeLocalities([]);
+    setDelhiveryInfo(null);
+    setDetectedLocationMeta(null);
+
     try {
+      // 1. Query Indian Postal Directory for Taluka / Block and Post Offices
       const res = await fetch(`https://api.postalpincode.in/pincode/${pin}`);
       if (res.ok) {
         const data = await res.json();
         if (data?.[0]?.Status === "Success" && data[0]?.PostOffice?.length > 0) {
-          const po = data[0].PostOffice[0];
-          const detectedCity = po.District || po.Circle || po.Name || "";
-          const detectedState = po.State || "";
-          setFormData((prev) => ({
-            ...prev,
-            city: detectedCity,
-            state: detectedState,
-          }));
-          toast.success(`Location detected: ${detectedCity}, ${detectedState}`);
+          const poList = data[0].PostOffice;
+
+          // Smart Postal & Logistics Hierarchy:
+          // 1. Block is the Taluka / Tehsil (e.g. "Chiplun")
+          // 2. Sub Post Office (SO) or Head Post Office (HO) is the main town/hub (e.g. "Kherdi")
+          // 3. District is the administrative district (e.g. "Ratnagiri")
+          const block = poList.find((p) => p.Block && p.Block !== "NA")?.Block;
+          const subOffice = poList.find(
+            (p) => p.BranchType === "Sub Post Office" || p.BranchType === "Head Post Office"
+          )?.Name;
+          const district = poList[0].District || "";
+          const state = poList[0].State || "";
+
+          // The routing hub/taluka city for courier logistics (Chiplun)
+          const detectedCity = block || subOffice || district || poList[0].Name || "";
+
+          // All unique localities/villages under this PIN
+          const localities = Array.from(new Set(poList.map((p) => p.Name).filter(Boolean))).sort();
+          setPincodeLocalities(localities);
+
+          setDetectedLocationMeta({
+            block,
+            subOffice,
+            district,
+            state,
+            detectedCity,
+          });
+
+          setFormData((prev) => {
+            // If primary subOffice (e.g. Kherdi) differs from city (Chiplun) and addressLine2 is empty, prefill addressLine2
+            const autoLine2 = (subOffice && subOffice.toLowerCase() !== detectedCity.toLowerCase() && !prev.addressLine2)
+              ? subOffice
+              : prev.addressLine2;
+
+            return {
+              ...prev,
+              city: detectedCity,
+              state: state,
+              addressLine2: autoLine2,
+            };
+          });
+
+          const locationLabel = subOffice && subOffice !== detectedCity
+            ? `${subOffice}, ${detectedCity} (${district} Dist)`
+            : `${detectedCity}, ${district} Dist`;
+
+          toast.success(`Location detected: ${locationLabel}`, { icon: "📍" });
         }
+      }
+
+      // 2. Query Live Delhivery Logistics Serviceability
+      try {
+        const delRes = await fetch(`${API_BASE}/delhivery/serviceability/${pin}`);
+        if (delRes.ok) {
+          const delData = await delRes.json();
+          if (delData.success && delData.data) {
+            setDelhiveryInfo(delData.data);
+          }
+        }
+      } catch (delErr) {
+        console.log("Delhivery check error:", delErr);
       }
     } catch (err) {
       console.warn("Pincode lookup error:", err);
@@ -515,15 +574,46 @@ function Checkout() {
                 </div>
 
                 <div>
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="block text-xs font-medium text-gray-700 dark:text-gray-300">
+                      Postal Code / PIN *
+                    </label>
+                    {pincodeLoading && (
+                      <span className="text-[11px] text-[#8B1E3F] dark:text-[#E5C583] flex items-center gap-1 font-medium">
+                        <Loader2 size={12} className="animate-spin" /> Detecting Area & Carrier...
+                      </span>
+                    )}
+                  </div>
+                  <input
+                    type="text"
+                    name="pincode"
+                    maxLength={6}
+                    value={formData.pincode}
+                    onChange={handleInputChange}
+                    placeholder="Enter 6-digit PIN code"
+                    className="w-full border border-gray-200 dark:border-[#38283E] bg-white dark:bg-[#201426] text-gray-900 dark:text-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#8B1E3F]"
+                  />
+                  <p className="text-[11px] text-gray-400 mt-1">
+                    {detectedLocationMeta ? (
+                      <span className="text-emerald-600 dark:text-emerald-400 font-medium">
+                        ✓ Taluka/City: {detectedLocationMeta.detectedCity} • Dist: {detectedLocationMeta.district}
+                      </span>
+                    ) : (
+                      "City & State will auto-fill on 6-digit PIN"
+                    )}
+                  </p>
+                </div>
+
+                <div>
                   <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    City *
+                    City / Taluka *
                   </label>
                   <input
                     type="text"
                     name="city"
                     value={formData.city}
                     onChange={handleInputChange}
-                    placeholder="City"
+                    placeholder="City / Taluka (e.g. Chiplun)"
                     className="w-full border border-gray-200 dark:border-[#38283E] bg-white dark:bg-[#201426] text-gray-900 dark:text-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#8B1E3F]"
                   />
                 </div>
@@ -543,29 +633,6 @@ function Checkout() {
                 </div>
 
                 <div>
-                  <div className="flex items-center justify-between mb-1">
-                    <label className="block text-xs font-medium text-gray-700 dark:text-gray-300">
-                      Postal Code / PIN *
-                    </label>
-                    {pincodeLoading && (
-                      <span className="text-[11px] text-[#8B1E3F] dark:text-[#E5C583] flex items-center gap-1 font-medium">
-                        <Loader2 size={12} className="animate-spin" /> Detecting...
-                      </span>
-                    )}
-                  </div>
-                  <input
-                    type="text"
-                    name="pincode"
-                    maxLength={6}
-                    value={formData.pincode}
-                    onChange={handleInputChange}
-                    placeholder="Enter 6-digit PIN code"
-                    className="w-full border border-gray-200 dark:border-[#38283E] bg-white dark:bg-[#201426] text-gray-900 dark:text-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#8B1E3F]"
-                  />
-                  <p className="text-[11px] text-gray-400 mt-1">City & State will auto-fill on 6-digit PIN</p>
-                </div>
-
-                <div>
                   <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
                     Country
                   </label>
@@ -577,6 +644,56 @@ function Checkout() {
                     className="w-full bg-gray-50 dark:bg-[#1a111e] border border-gray-200 dark:border-[#38283E] rounded-xl px-4 py-3 text-sm text-gray-500 dark:text-gray-400"
                   />
                 </div>
+
+                {/* Specific Locality / Village Picker for this Pincode */}
+                {pincodeLocalities.length > 0 && (
+                  <div className="md:col-span-2 p-3 bg-gray-50 dark:bg-[#1f1425] rounded-2xl border border-gray-100 dark:border-[#38283E]">
+                    <div className="text-[11px] text-gray-500 dark:text-gray-400 font-medium mb-1.5 flex items-center justify-between">
+                      <span>Post Offices / Localities under PIN {formData.pincode}:</span>
+                      <span className="text-[10px] text-gray-400">Click to add to address</span>
+                    </div>
+                    <div className="flex flex-wrap gap-1.5 max-h-24 overflow-y-auto pr-1">
+                      {pincodeLocalities.map((loc) => {
+                        const isSelected = formData.addressLine2?.toLowerCase().includes(loc.toLowerCase());
+                        return (
+                          <button
+                            key={loc}
+                            type="button"
+                            onClick={() => {
+                              setFormData((prev) => ({
+                                ...prev,
+                                addressLine2: loc,
+                              }));
+                              toast.success(`Selected area: ${loc}`);
+                            }}
+                            className={`px-2.5 py-1 rounded-lg text-[11px] font-medium transition cursor-pointer ${
+                              isSelected
+                                ? "bg-[#8B1E3F] text-white"
+                                : "bg-white dark:bg-[#2A1D2F] border border-gray-200 dark:border-[#43304B] text-gray-700 dark:text-gray-300 hover:border-[#8B1E3F]"
+                            }`}
+                          >
+                            {isSelected ? `✓ ${loc}` : `+ ${loc}`}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                {/* Delhivery Express Logistics Serviceability Banner */}
+                {delhiveryInfo && (
+                  <div className="md:col-span-2 p-3.5 rounded-2xl bg-emerald-50/90 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/50 flex items-center justify-between flex-wrap gap-2 text-xs text-emerald-800 dark:text-emerald-300">
+                    <div className="flex items-center gap-2">
+                      <ShieldCheck size={16} className="text-emerald-600 flex-shrink-0" />
+                      <span>
+                        <strong>Delhivery Express Courier Serviceable</strong>: Hub: <strong>{delhiveryInfo.hub || "Chiplun DC"}</strong> • TAT: {delhiveryInfo.tat || "2-3 Days"}
+                      </span>
+                    </div>
+                    <span className="text-[11px] font-semibold bg-emerald-100 dark:bg-emerald-900/60 px-2.5 py-1 rounded-full text-emerald-700 dark:text-emerald-300">
+                      {delhiveryInfo.cod ? "Prepaid & COD Available" : "Prepaid Only"}
+                    </span>
+                  </div>
+                )}
               </div>
             </div>
 

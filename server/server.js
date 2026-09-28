@@ -106,6 +106,7 @@ app.use("/api/coupons", require("./routes/couponRoutes"));
 app.use("/api/loyalty", require("./routes/loyaltyRoutes"));
 app.use("/api/reviews", require("./routes/reviewRoutes"));
 app.use("/api/appointments", require("./routes/appointmentRoutes"));
+app.use("/api/delhivery", require("./routes/delhiveryRoutes"));
 
 
 

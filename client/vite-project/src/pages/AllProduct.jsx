@@ -21,6 +21,7 @@ import { API_BASE } from "../services/apiConfig.js";
 import { WishlistContext } from "../context/Wishlistcontext";
 import { CartContext } from "../context/CartContext";
 import { CountryContext } from "../context/CoutryContext";
+import QuickViewModal from "../components/QuickViewModal";
 import toast from "react-hot-toast";
 
 function AllProducts() {
@@ -490,7 +491,6 @@ function AllProducts() {
                       e.preventDefault();
                       e.stopPropagation();
                       setQuickViewProduct(product);
-                      setQuickViewImageIdx(0);
                     }}
                     className="
                       absolute bottom-4 left-1/2 -translate-x-1/2
@@ -595,166 +595,13 @@ function AllProducts() {
         </div>
       )}
 
-      {/* Quick View Modal with Multi-Image Gallery */}
-      {quickViewProduct && (() => {
-        const qvImages = (Array.isArray(quickViewProduct.images) && quickViewProduct.images.length > 0)
-          ? quickViewProduct.images
-          : [quickViewProduct.image || "https://images.unsplash.com/photo-1610030469983-98e550d6193c"];
-
-        return (
-          <div
-            className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4"
-            onClick={() => setQuickViewProduct(null)}
-          >
-            <div
-              className="
-                relative bg-white dark:bg-[#18101C]
-                max-w-3xl w-full rounded-3xl overflow-hidden
-                border border-[#D4B483] shadow-2xl
-                grid grid-cols-1 md:grid-cols-2
-                animate-fadeIn
-              "
-              onClick={(e) => e.stopPropagation()}
-            >
-              {/* Left Column: Interactive Image Gallery */}
-              <div className="relative flex flex-col bg-[#FAF6F0] dark:bg-[#1D1322]">
-                <div className="relative h-[320px] md:h-[400px] w-full overflow-hidden group">
-                  <img
-                    src={qvImages[quickViewImageIdx] || qvImages[0]}
-                    alt={`${quickViewProduct.name} - view ${quickViewImageIdx + 1}`}
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                  />
-
-                  {/* Image Counter Badge */}
-                  {qvImages.length > 1 && (
-                    <div className="absolute top-3 left-3 px-2.5 py-1 rounded-full bg-black/60 backdrop-blur-md text-white text-[10px] font-semibold tracking-wider">
-                      {quickViewImageIdx + 1} / {qvImages.length}
-                    </div>
-                  )}
-
-                  {/* Next / Previous Arrow Controls */}
-                  {qvImages.length > 1 && (
-                    <>
-                      <button
-                        type="button"
-                        aria-label="Previous Image"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setQuickViewImageIdx((prev) => (prev > 0 ? prev - 1 : qvImages.length - 1));
-                        }}
-                        className="absolute left-2.5 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/50 hover:bg-black/80 text-white backdrop-blur-md transition-all cursor-pointer shadow-md"
-                      >
-                        <ChevronLeft size={16} />
-                      </button>
-
-                      <button
-                        type="button"
-                        aria-label="Next Image"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setQuickViewImageIdx((prev) => (prev < qvImages.length - 1 ? prev + 1 : 0));
-                        }}
-                        className="absolute right-2.5 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/50 hover:bg-black/80 text-white backdrop-blur-md transition-all cursor-pointer shadow-md"
-                      >
-                        <ChevronRight size={16} />
-                      </button>
-                    </>
-                  )}
-                </div>
-
-                {/* Thumbnails Row */}
-                {qvImages.length > 1 && (
-                  <div className="flex items-center gap-2 p-3 bg-black/10 dark:bg-black/40 overflow-x-auto border-t border-black/5">
-                    {qvImages.map((img, idx) => (
-                      <button
-                        key={idx}
-                        type="button"
-                        onClick={() => setQuickViewImageIdx(idx)}
-                        className={`
-                          w-12 h-14 rounded-lg overflow-hidden border-2 transition-all flex-shrink-0 cursor-pointer
-                          ${
-                            quickViewImageIdx === idx
-                              ? "border-[#8C2F4D] dark:border-[#E5C583] scale-105 shadow-sm"
-                              : "border-transparent opacity-60 hover:opacity-100"
-                          }
-                        `}
-                      >
-                        <img src={img} alt={`Thumbnail ${idx + 1}`} className="w-full h-full object-cover" />
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              {/* Right Column: Saree Details & Action */}
-              <div className="p-6 md:p-8 flex flex-col justify-between">
-                <div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-[11px] tracking-[2px] uppercase text-[#8C2F4D] dark:text-[#E5C583] font-semibold">
-                      Designer Drape
-                    </span>
-                    {(quickViewProduct.inStock === false || (quickViewProduct.stock !== undefined && Number(quickViewProduct.stock) <= 0)) && (
-                      <span className="px-2.5 py-0.5 rounded-full bg-red-100 dark:bg-red-950/80 text-red-600 dark:text-red-400 text-[10px] font-bold uppercase tracking-wider">
-                        Sold Out
-                      </span>
-                    )}
-                  </div>
-                  <h3 className="font-serif text-2xl text-[#2B2523] dark:text-[#F7F2EC] mt-2 font-semibold">
-                    {quickViewProduct.name}
-                  </h3>
-                  <p className="text-2xl font-bold font-serif text-[#6D1830] dark:text-[#E5C583] mt-3">
-                    {formatPrice ? formatPrice(quickViewProduct.priceINR) : `₹${quickViewProduct.priceINR}`}
-                  </p>
-                  <p className="text-sm text-gray-600 dark:text-gray-300 mt-4 leading-relaxed font-light">
-                    {quickViewProduct.description || quickViewProduct.highlight || "Curated designer saree from Jayant Saree Center, finished with elegant motifs and comfortable all-day drape."}
-                  </p>
-
-                  <div className="mt-4 pt-3 border-t border-gray-100 dark:border-[#2C1F32] flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
-                    <span>Fabric: <strong className="text-gray-800 dark:text-gray-200">{quickViewProduct.fabric || "Pure Silk Blend"}</strong></span>
-                    <span>&bull;</span>
-                    <span>Color: <strong className="text-gray-800 dark:text-gray-200">{quickViewProduct.color || "Heritage"}</strong></span>
-                  </div>
-                </div>
-
-                <div className="mt-6 flex gap-3">
-                  {quickViewProduct.inStock === false || (quickViewProduct.stock !== undefined && Number(quickViewProduct.stock) <= 0) ? (
-                    <button
-                      disabled
-                      className="flex-1 bg-gray-200 dark:bg-[#201525] text-gray-400 dark:text-gray-500 py-3 rounded-full text-xs font-semibold tracking-wider uppercase cursor-not-allowed flex items-center justify-center gap-2"
-                    >
-                      <span>Currently Out of Stock</span>
-                    </button>
-                  ) : (
-                    <button
-                      onClick={(e) => {
-                        handleAddToCart(e, quickViewProduct);
-                        setQuickViewProduct(null);
-                      }}
-                      className="flex-1 bg-[#6D1830] hover:bg-[#8C2F4D] text-white py-3 rounded-full text-xs font-semibold tracking-wider uppercase transition shadow-md flex items-center justify-center gap-2 cursor-pointer"
-                    >
-                      <ShoppingCart size={15} />
-                      <span>Add To Bag</span>
-                    </button>
-                  )}
-                  <Link
-                    to={`/product/${quickViewProduct._id}`}
-                    onClick={() => setQuickViewProduct(null)}
-                    className="px-4 py-3 rounded-full border border-[#D4B483] text-[#8C2F4D] dark:text-[#E5C583] text-xs font-semibold hover:bg-[#FAF6F0] dark:hover:bg-[#201426] transition text-center"
-                  >
-                    View Details
-                  </Link>
-                  <button
-                    onClick={() => setQuickViewProduct(null)}
-                    className="px-4 py-3 rounded-full border border-gray-300 dark:border-gray-700 text-xs font-semibold hover:bg-gray-100 dark:hover:bg-[#201426] transition cursor-pointer"
-                  >
-                    Close
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        );
-      })()}
+      {/* Quick View Modal with Multi-Image Gallery & Creative Zoom */}
+      {quickViewProduct && (
+        <QuickViewModal
+          product={quickViewProduct}
+          onClose={() => setQuickViewProduct(null)}
+        />
+      )}
 
     </div>
   );

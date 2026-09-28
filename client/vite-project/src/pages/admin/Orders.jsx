@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import orderApi from "../../services/orderApi";
+import { API_BASE } from "../../services/apiConfig";
+import { Truck, Printer, ExternalLink, ShieldCheck, Loader2 } from "lucide-react";
 
 function Orders() {
 
@@ -8,6 +10,7 @@ function Orders() {
   const [search, setSearch] = useState("");
   const [selectedOrder, setSelectedOrder] = useState(null);
 const [loadingOrder, setLoadingOrder] = useState(false); 
+const [shippingLoading, setShippingLoading] = useState(false);
 
 const ORDER_STATUSES = [
   "Pending",
@@ -17,6 +20,25 @@ const ORDER_STATUSES = [
   "Delivered",
   "Cancelled",
 ];
+
+const handleShipDelhivery = async (orderId) => {
+  if (!window.confirm("Generate Delhivery AWB and manifest this order for courier pickup?")) return;
+  setShippingLoading(true);
+  try {
+    const res = await orderApi.shipWithDelhivery(orderId);
+    if (res.success) {
+      alert(`Success! Delhivery Waybill AWB generated: ${res.waybill}`);
+      loadOrders();
+      const data = await orderApi.getOrder(orderId);
+      setSelectedOrder(data.order);
+    }
+  } catch (err) {
+    console.error(err);
+    alert(err.message || "Failed to manifest order with Delhivery");
+  } finally {
+    setShippingLoading(false);
+  }
+};
 
 const handleView = async (id) => {
   try {
@@ -177,7 +199,12 @@ const handleDelete = async (id) => {
                 </td>
 
                 <td className="p-4">
-                  {order.orderStatus}
+                  <div className="font-medium">{order.orderStatus}</div>
+                  {order.waybill && (
+                    <div className="text-[10px] text-emerald-600 dark:text-emerald-400 font-mono font-semibold flex items-center gap-1 mt-0.5">
+                      <Truck size={10} /> {order.waybill}
+                    </div>
+                  )}
                 </td>
 
                 <td className="p-4">
@@ -350,6 +377,95 @@ const handleDelete = async (id) => {
 
               </select>
 
+            </div>
+
+            {/* Delhivery Express Logistics & Shipping Panel */}
+            <div className="mt-6 p-5 rounded-2xl bg-[#8B1E3F]/5 border border-[#8B1E3F]/20 dark:border-[#E5C583]/20">
+              <div className="flex items-center justify-between flex-wrap gap-2 mb-3">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-xl bg-[#8B1E3F] text-white flex items-center justify-center">
+                    <Truck size={16} />
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-sm text-gray-900 dark:text-white">
+                      Delhivery Surface Express Courier
+                    </h4>
+                    <p className="text-[11px] text-gray-500 dark:text-gray-400">
+                      Destination: {selectedOrder.shippingAddress?.city || "Chiplun"}, PIN {selectedOrder.shippingAddress?.pincode}
+                    </p>
+                  </div>
+                </div>
+
+                {selectedOrder.waybill ? (
+                  <span className="px-3 py-1 rounded-full text-xs font-semibold bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 flex items-center gap-1.5 border border-emerald-200 dark:border-emerald-800">
+                    <ShieldCheck size={14} />
+                    <span>AWB: {selectedOrder.waybill}</span>
+                  </span>
+                ) : (
+                  <span className="text-xs text-amber-600 dark:text-amber-400 font-medium">
+                    Ready for Courier Booking
+                  </span>
+                )}
+              </div>
+
+              {selectedOrder.waybill ? (
+                <div className="space-y-3 pt-2 border-t border-gray-200/60 dark:border-gray-800/60">
+                  <div className="flex flex-wrap items-center justify-between text-xs gap-2">
+                    <span className="text-gray-600 dark:text-gray-400">
+                      Courier Status: <strong className="text-gray-900 dark:text-white">{selectedOrder.courierStatus || "Manifested"}</strong>
+                    </span>
+                    <span className="text-gray-600 dark:text-gray-400">
+                      Carrier: <strong>Delhivery Surface B2C</strong>
+                    </span>
+                  </div>
+
+                  <div className="flex flex-wrap items-center gap-2 pt-1">
+                    <a
+                      href={`${API_BASE}/delhivery/label/${selectedOrder.waybill}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-gray-900 hover:bg-black text-white text-xs font-semibold transition shadow-sm"
+                    >
+                      <Printer size={14} />
+                      <span>Print Shipping Label (4x6)</span>
+                    </a>
+
+                    <a
+                      href={`https://www.delhivery.com/track/package/${selectedOrder.waybill}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-gray-300 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-800 dark:text-gray-200 text-xs font-semibold transition"
+                    >
+                      <ExternalLink size={13} />
+                      <span>Track on Delhivery</span>
+                    </a>
+                  </div>
+                </div>
+              ) : (
+                <div className="pt-2">
+                  <button
+                    type="button"
+                    disabled={shippingLoading}
+                    onClick={() => handleShipDelhivery(selectedOrder._id)}
+                    className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-[#8B1E3F] hover:bg-[#721833] text-white text-xs font-semibold uppercase tracking-wider transition shadow-sm cursor-pointer disabled:opacity-50"
+                  >
+                    {shippingLoading ? (
+                      <>
+                        <Loader2 size={14} className="animate-spin" />
+                        <span>Generating Delhivery AWB...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Truck size={14} />
+                        <span>Ship via Delhivery Express (Generate AWB & Label)</span>
+                      </>
+                    )}
+                  </button>
+                  <p className="text-[11px] text-gray-400 mt-1.5">
+                    Generates official barcode shipping label, schedules pickup at Chiplun warehouse, and changes order status to Shipped.
+                  </p>
+                </div>
+              )}
             </div>
 
             {selectedOrder.shippingAddress?.phone && (

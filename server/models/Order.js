@@ -125,6 +125,31 @@ const orderSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
+
+    // Logistics & Delhivery Integration
+    shippingProvider: {
+      type: String,
+      default: "Delhivery",
+    },
+    waybill: {
+      type: String,
+      default: "",
+    },
+    courierStatus: {
+      type: String,
+      default: "Unassigned",
+    },
+    shippingLabelUrl: {
+      type: String,
+      default: "",
+    },
+    delhiveryPickupDate: {
+      type: Date,
+    },
+    delhiveryHistory: {
+      type: Array,
+      default: [],
+    },
   },
   {
     timestamps: true,

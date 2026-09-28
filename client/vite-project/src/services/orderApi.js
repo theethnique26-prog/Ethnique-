@@ -71,6 +71,27 @@ const orderApi = {
 
     return handleResponse(response);
   },
+
+  // =====================================
+  // DELHIVERY LOGISTICS INTEGRATION
+  // =====================================
+  async shipWithDelhivery(orderId) {
+    const response = await fetch(`${API_BASE}/delhivery/ship/${orderId}`, {
+      method: "POST",
+      headers: getHeaders(),
+    });
+    return handleResponse(response);
+  },
+
+  async checkDelhiveryServiceability(pincode) {
+    const response = await fetch(`${API_BASE}/delhivery/serviceability/${pincode}`);
+    return handleResponse(response);
+  },
+
+  async trackDelhivery(waybill) {
+    const response = await fetch(`${API_BASE}/delhivery/track/${waybill}`);
+    return handleResponse(response);
+  },
 };
 
 export default orderApi;

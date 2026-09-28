@@ -5,6 +5,7 @@ import { WishlistContext } from "../context/Wishlistcontext";
 import { CartContext } from "../context/CartContext";
 import { CountryContext } from "../context/CoutryContext";
 import { API_BASE } from "../services/apiConfig.js";
+import QuickViewModal from "./QuickViewModal";
 
 function SareeSection() {
   const { formatPrice } = useContext(CountryContext);
@@ -392,82 +393,12 @@ function SareeSection() {
 
       </div>
 
-      {/* Quick View Modal */}
+      {/* Quick View Modal with Multi-Image Gallery & Creative Zoom */}
       {quickViewProduct && (
-        <div
-          className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4"
-          onClick={() => setQuickViewProduct(null)}
-        >
-          <div
-            className="
-              relative bg-white dark:bg-[#18101C]
-              max-w-2xl w-full rounded-3xl overflow-hidden
-              border border-[#D4B483] shadow-2xl
-              grid grid-cols-1 md:grid-cols-2
-              animate-fadeIn
-            "
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="h-[320px] md:h-[420px] bg-[#FAF6F0] dark:bg-[#1D1322]">
-              <img
-                src={quickViewProduct.images?.[0]}
-                alt={quickViewProduct.name}
-                className="w-full h-full object-cover"
-              />
-            </div>
-            <div className="p-6 md:p-8 flex flex-col justify-between">
-              <div>
-                <div className="flex items-center justify-between">
-                  <span className="text-[11px] tracking-[2px] uppercase text-[#8C2F4D] dark:text-[#E5C583] font-semibold">
-                    Designer Drape
-                  </span>
-                  {(quickViewProduct.inStock === false || (quickViewProduct.stock !== undefined && Number(quickViewProduct.stock) <= 0)) && (
-                    <span className="px-2.5 py-0.5 rounded-full bg-red-100 dark:bg-red-950/80 text-red-600 dark:text-red-400 text-[10px] font-bold uppercase tracking-wider">
-                      Sold Out
-                    </span>
-                  )}
-                </div>
-                <h3 className="font-serif text-2xl text-[#2B2523] dark:text-[#F7F2EC] mt-2">
-                  {quickViewProduct.name}
-                </h3>
-                <p className="text-2xl font-bold font-serif text-[#6D1830] dark:text-[#E5C583] mt-3">
-                  {formatPrice ? formatPrice(quickViewProduct.priceINR) : `₹${quickViewProduct.priceINR}`}
-                </p>
-                <p className="text-sm text-gray-600 dark:text-gray-300 mt-4 leading-relaxed">
-                  {quickViewProduct.description || quickViewProduct.highlight || "Curated designer saree, finished with elegant motifs and comfortable all-day drape."}
-                </p>
-              </div>
-
-              <div className="mt-6 flex gap-3">
-                {quickViewProduct.inStock === false || (quickViewProduct.stock !== undefined && Number(quickViewProduct.stock) <= 0) ? (
-                  <button
-                    disabled
-                    className="flex-1 bg-gray-200 dark:bg-[#201525] text-gray-400 dark:text-gray-500 py-3 rounded-full text-xs font-semibold tracking-wider uppercase cursor-not-allowed flex items-center justify-center gap-2"
-                  >
-                    <span>Currently Out of Stock</span>
-                  </button>
-                ) : (
-                  <button
-                    onClick={(e) => {
-                      handleAddToCart(e, quickViewProduct);
-                      setQuickViewProduct(null);
-                    }}
-                    className="flex-1 bg-[#6D1830] hover:bg-[#8C2F4D] text-white py-3 rounded-full text-xs font-semibold tracking-wider uppercase transition shadow-md flex items-center justify-center gap-2"
-                  >
-                    <ShoppingCart size={15} />
-                    <span>Add To Bag</span>
-                  </button>
-                )}
-                <button
-                  onClick={() => setQuickViewProduct(null)}
-                  className="px-4 py-3 rounded-full border border-gray-300 dark:border-gray-700 text-xs font-semibold hover:bg-gray-100 dark:hover:bg-[#201426] transition"
-                >
-                  Close
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
+        <QuickViewModal
+          product={quickViewProduct}
+          onClose={() => setQuickViewProduct(null)}
+        />
       )}
     </section>
   );
